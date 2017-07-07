@@ -13,5 +13,14 @@ namespace BrightMaster
         public float Z;
         public float x;
         public float y;
+
+        public PixelInfo(float XX, float YY, float ZZ)
+        {
+            X = XX;
+            Y = YY;
+            Z = ZZ;
+            x = X / (X + Y + Z);
+            y = Y / (X + Y + Z);
+        }
     }
 }

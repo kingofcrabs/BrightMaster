@@ -37,6 +37,38 @@ void GothroughImage(Mat& src)
 	return;
 }
 
+void FindRect(std::string sFile, vector<pair<int,int>>& pts)
+{
+	auto img = cv::imread(sFile, 0);
+	Mat thresholdImg;
+	std::vector< std::vector<cv::Point> > allContours;
+	cv::adaptiveThreshold(img, thresholdImg, 255, CV_ADAPTIVE_THRESH_MEAN_C, CV_THRESH_BINARY, 7, 5);
+	int width = img.size().width;
+	int height = img.size().height;
+	//assume rect length > with + height /2;
+	int valid = (width + height) / 2;
+	int min = 0;
+	int index = -1;
+	for (size_t i = 0; i<allContours.size(); i++)
+	{
+		int contourSize = allContours[i].size();
+		if (contourSize <= valid)
+			continue;
+		if (contourSize > min)
+		{
+			min = contourSize;
+			index = i;
+		}
+	}
+	if (index == -1)
+		return;
+	pts.clear();
+	for (int i = 0; i < allContours[index].size(); i++)
+	{
+		pts.push_back(make_pair(allContours[index][i].x, allContours[index][i].y));
+	}
+}
+
 void  EngineImpl::FindContours(string sFile,
 	std::vector<std::vector<cv::Point>
 	>& contours,

@@ -95,12 +95,11 @@ namespace BrightMaster
                 List<PixelInfo> lineInfos = new List<PixelInfo>();
                 for (int x = 0; x < img.width; x++)
                 {
-                    PixelInfo pixelInfo = new PixelInfo();
-                    pixelInfo.Y = y_ptr[y * img.width + x];
-                    pixelInfo.X = x_ptr[y * img.width + x];
-                    pixelInfo.Z = z_ptr[y * img.width + x];
-                    pixelInfo.x = pixelInfo.X / (pixelInfo.X + pixelInfo.Y + pixelInfo.Z);
-                    pixelInfo.y = pixelInfo.Y / (pixelInfo.X + pixelInfo.Y + pixelInfo.Z);
+                    float Y = y_ptr[y * img.width + x];
+                    float X = x_ptr[y * img.width + x];
+                    float Z = z_ptr[y * img.width + x];
+                    PixelInfo pixelInfo = new PixelInfo(X,Y,Z);
+                   
                     lineInfos.Add(pixelInfo);
                 }
                 allPixelInfos.Add(lineInfos);

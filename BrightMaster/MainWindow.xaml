@@ -4,15 +4,36 @@
         xmlns:local="clr-namespace:BrightMaster"
         Title="MainWindow" Height="600" Width="800">
     <Window.Resources>
-        <RoutedUICommand x:Key="StartAcquire" Text="Do acquisition." />
+        <RoutedUICommand x:Key="StartAcquire" Text="采集数据." />
+        <RoutedUICommand x:Key="FakeColor" Text="伪彩." />
+        <Style x:Key="ToggleButtonStyle1" TargetType="{x:Type ToggleButton}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type ToggleButton}">
+                        <Border HorizontalAlignment="Center" VerticalAlignment="Center" x:Name="border" Padding="5,5,5,5" CornerRadius="5,5,5,5" Background="#FFBFACAC" BorderBrush="#FF000000" BorderThickness="1,1,1,1" SnapsToDevicePixels="True">
+                            <ContentPresenter x:Name="contentPresenter"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="true">
+                                <Setter Property="Background" TargetName="border" Value="#FF39C310"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
     </Window.Resources>
     <Window.InputBindings>
         <KeyBinding Modifiers="Ctrl" Key="G" Command="{StaticResource StartAcquire}"/>
+        <KeyBinding Modifiers="Ctrl" Key="F" Command="{StaticResource FakeColor}"/>
     </Window.InputBindings>
     <Window.CommandBindings>
         <CommandBinding Command="{StaticResource StartAcquire}"
                     CanExecute="Acquire_CanExecute"
                     Executed="Acquire_Executed"/>
+        <CommandBinding Command="{StaticResource FakeColor}"
+                    CanExecute="FakeColor_CanExecute"
+                    Executed="FakeColor_Executed"/>
     </Window.CommandBindings>
     <Grid>
         <Grid.ColumnDefinitions>
@@ -23,7 +44,7 @@
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="30"/>
-            <RowDefinition Height="40"/>
+            <RowDefinition Height="60"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="*"/>
             <RowDefinition Height="100"/>
@@ -38,17 +59,62 @@
         </Menu>
 
         <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.ColumnSpan="3">
-            <Button Name="btnStartAcquire" Command="{StaticResource StartAcquire}"  ToolTip="打开定义文件.">
+            <ComboBox Width="150" Name="cmbLayouts"></ComboBox>
+            <Button Name="btnStartAcquire" Command="{StaticResource StartAcquire}"  ToolTip="开始采集.">
                 <StackPanel Orientation="Vertical" >
-                    <Image Source="/Images/start.png" Height="32"/>
+                    <Image Source="/Images/start.png" Height="50"/>
                 </StackPanel>
             </Button>
+            <ToggleButton Style="{StaticResource ToggleButtonStyle1}" Command="{StaticResource FakeColor}"  Name="btnFakeColor" Width="60">
+                <Image ToolTip="伪彩" Height="50" Width="50" Source="/Images/fakeColor.jpg"/>
+            </ToggleButton>
+        
         </StackPanel>
 
         <ScrollViewer x:Name="scrollViewer" Grid.Row="2"   VerticalScrollBarVisibility="Visible"
                    HorizontalScrollBarVisibility="Visible" VerticalAlignment="Top" >
             <local:MyCanvas x:Name="myCanvas" Width="800" Height="600" >
             </local:MyCanvas>
+        </ScrollViewer>
+        <ScrollViewer x:Name="scrollViewerResult" Grid.Row="2" Grid.Column="1" VerticalScrollBarVisibility="Auto"
+                   HorizontalScrollBarVisibility="Auto" VerticalAlignment="Top" >
+            <ListView Name="lstviewResult"  FontFamily="SimSun">
+                <ListView.Resources>
+                    <DataTemplate x:Key="XItem">
+                        <TextBlock Name="tx" Text="{Binding X}" />
+                        <DataTemplate.Triggers>
+                            <DataTrigger Binding="{Binding XValid}" Value="True">
+                                <Setter TargetName="tx" Property="Background" Value="Red" />
+                            </DataTrigger>
+                        </DataTemplate.Triggers>
+                    </DataTemplate>
+
+                    <DataTemplate x:Key="YItem">
+                        <TextBlock Name="ty" Text="{Binding Y}" />
+                        <DataTemplate.Triggers>
+                            <DataTrigger Binding="{Binding YValid}" Value="True">
+                                <Setter TargetName="ty" Property="Background" Value="Red" />
+                            </DataTrigger>
+                        </DataTemplate.Triggers>
+                    </DataTemplate>
+
+                    <DataTemplate x:Key="ZItem">
+                        <TextBlock Name="tz" Text="{Binding Z}" />
+                        <DataTemplate.Triggers>
+                            <DataTrigger Binding="{Binding ZValid}" Value="True">
+                                <Setter TargetName="tz" Property="Background" Value="Red" />
+                            </DataTrigger>
+                        </DataTemplate.Triggers>
+                    </DataTemplate>
+                </ListView.Resources>
+                <ListView.View>
+                    <GridView x:Name="gridView1">
+                        <GridViewColumn Header="X" Width="30" CellTemplate="{StaticResource XItem}"  DisplayMemberBinding="{Binding Path = X}"></GridViewColumn>
+                        <GridViewColumn Header="Y" Width="60" CellTemplate="{StaticResource YItem}" DisplayMemberBinding="{Binding Path = Y}"></GridViewColumn>
+                        <GridViewColumn Header="Z"  Width="60" CellTemplate="{StaticResource ZItem}" DisplayMemberBinding="{Binding Path = Z}"></GridViewColumn>
+                    </GridView>
+                </ListView.View>
+            </ListView>
         </ScrollViewer>
 
     </Grid>

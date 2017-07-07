@@ -78,7 +78,7 @@ namespace EngineDll
 		~IEngine();
 		cv::Rect2f Convert2Rect2f(MRect^ rc);
 		void Convert2PseudoColor(System::String^ sOrgFile, System::String^ sDestFile);
-		AnalysisResult^ Analysis(System::String^ sFile, array<MRect^>^ rects);
+		List<MPoint^>^ IEngine::FindRect(System::String^ sFile);
 		//int AdaptiveThreshold(array<uchar>^ src, int width, int height, List<uchar>^% threshold);
 		int SearchLights(array<uchar>^ src, int width, int height, List<List<MPoint^>^>^% contours);
 		//void FindContours(array<uchar>^ arr, int width, int height, int cnt2Find);

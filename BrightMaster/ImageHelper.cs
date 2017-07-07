@@ -21,12 +21,21 @@ namespace BrightMaster
             IEngine engineDll = new IEngine();
             DirectoryInfo DirectoryInfo = new DirectoryInfo(fileName);
             string parentDirectory = DirectoryInfo.Parent.FullName;
-            string colorImgPath = parentDirectory + "\\color.png";
+            string colorImgPath = parentDirectory + "\\color.jpg";
             engineDll.Convert2PseudoColor(fileName, colorImgPath);
             Bitmap bmp = new Bitmap(colorImgPath);
             return bmp.ToBitmapImage();
         }
+        public static void SaveBitmapImageIntoFile(BitmapImage bitmapImage, string filePath)
+        {
+            BitmapEncoder encoder = new JpegBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(bitmapImage));
 
+            using (var fileStream = new System.IO.FileStream(filePath, System.IO.FileMode.Create))
+            {
+                encoder.Save(fileStream);
+            }
+        }
         static public BitmapImage CreateImage(List<List<byte>> vals)
         {
             int height = vals.Count;

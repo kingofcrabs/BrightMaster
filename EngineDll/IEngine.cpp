@@ -32,18 +32,17 @@ namespace EngineDll
 		return cv::Rect2f(ptStart, ptEnd);
 	}
 
-	AnalysisResult^ IEngine::Analysis(System::String^ sFile, array<MRect^>^ rects)
+	List<MPoint^>^ IEngine::FindRect(System::String^ sFile)
 	{
 		std::string nativeFileName = msclr::interop::marshal_as< std::string >(sFile);
-		std::vector<cv::Rect2f> nativeRects;
-		for (int i = 0; i < rects->Length; i++)
+		std::vector<std::pair<int,int>> pts;
+		m_EngineImpl->FindRect(nativeFileName, pts);
+		List<MPoint^>^ managedPts = gcnew List<MPoint^>(pts.size());
+		for (int i = 0; i < pts.size(); i++)
 		{
-			cv::Rect2f nativeRect = Convert2Rect2f(rects[i]);
-			nativeRects.push_back(nativeRect);
+			managedPts->Add(gcnew MPoint(pts[i].first, pts[i].second));
 		}
-			
-		double gVal = m_EngineImpl->CalculateGlare(nativeFileName, nativeRects);
-		return gcnew AnalysisResult(gVal);
+		return managedPts;
 	}
 
 	void IEngine::Convert2PseudoColor(System::String^ sOrgFile, System::String^ sDestFile)

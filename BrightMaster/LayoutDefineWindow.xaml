@@ -1,0 +1,97 @@
+﻿<Window x:Class="BrightMaster.LayoutDefineWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:BrightMaster"
+        Title="Define Layout" Height="500" Width="700">
+    <Grid>
+       
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="5*"/>
+            <ColumnDefinition Width="3.5*"/>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="100"/>
+
+
+        </Grid.RowDefinitions>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="30"/>
+                <RowDefinition Height="*"/>
+
+
+            </Grid.RowDefinitions>
+            <Label>示意图：</Label>
+            <local:MyCanvas x:Name="canvas" Grid.Row="1" Background="LightBlue">
+
+            </local:MyCanvas>
+        </Grid>
+        <StackPanel Grid.Column="1">
+            <Label>测试定义：</Label>
+            <StackPanel>
+                <Label>左上角位置：</Label>
+                <StackPanel Orientation="Horizontal">
+                    <Label>X:</Label>
+                    <TextBox Text="{Binding Path=TopLeftX}" Width="50"></TextBox>
+                    <Label>Y:</Label>
+                    <TextBox  Margin="3,0,0,0" Text="{Binding Path=TopLeftY}" Width="50"></TextBox>
+                </StackPanel>
+            </StackPanel>
+            <StackPanel>
+                <Label>右下上角位置：</Label>
+                <StackPanel Orientation="Horizontal" >
+                    <Label>X:</Label>
+                    <TextBox Text="{Binding Path=BottomRightX}" Width="50"></TextBox>
+                    <Label Margin="3,0,0,0">Y:</Label>
+                    <TextBox  Text="{Binding Path=BottomRightY}" Width="50"></TextBox>
+                </StackPanel>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,10,0,5">
+                <Label>X方向数量:</Label>
+                <TextBox  Width="50" Text="{Binding Path=xCount}" Margin="22,0,0,0"></TextBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,5,0,5">
+                <Label>Y方向数量:</Label>
+                <TextBox  Width="50" Text="{Binding Path=yCount}" Margin="22,0,0,0"></TextBox>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" Margin="0,5,0,5">
+                <Label>半径:</Label>
+                <TextBox  Width="50" Text="{Binding Path=radius}" Margin="57,0,0,0"></TextBox>
+            </StackPanel>
+
+            <StackPanel Orientation="Horizontal" Margin="0,5,0,5">
+                <Label>长度:</Label>
+                <TextBox  Width="50" Text="{Binding Path=width}" Margin="57,0,0,0"></TextBox>
+                <Label>宽度:</Label>
+                <TextBox  Width="50" Text="{Binding Path=height}" Margin="27,0,0,0"></TextBox>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                <Label>layouts：</Label>
+                <ComboBox Name="cmbLayouts" Margin="30,0,0,0"></ComboBox>
+                <Button Name="btnSave" Margin="2,0,0,0" Click="btnSave_Click">保存</Button>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                <Label>路径：</Label>
+                <TextBox Name="txtSavePath" Width="150"></TextBox>
+                <Button Name="btnNew" Margin="2,0,0,0" Click="btnNew_Click">新建</Button>
+            </StackPanel>
+        </StackPanel>
+        <Grid Grid.Row="1" Grid.ColumnSpan="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+                <ColumnDefinition Width="120"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <StackPanel >
+                <Label>信息：</Label>
+                <TextBox Name="txtInfo" Margin="0,0,0,0" Height="70"></TextBox>
+            </StackPanel>
+            <StackPanel Grid.Column="1">
+                <Button Name="btnRefresh" Content="刷新" Margin="10,25,0,0" Height="35" Click="btnRefresh_Click"></Button>
+                <Button Name="btnOk" Content="确定" Margin="10,5,0,0" Height="35" Click="btnOk_Click"></Button>
+            </StackPanel>
+        </Grid>
+       
+    </Grid>
+</Window>

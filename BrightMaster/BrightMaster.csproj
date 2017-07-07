@@ -19,7 +19,7 @@
     <DebugSymbols>true</DebugSymbols>
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
-    <OutputPath>..\bin\x64\</OutputPath>
+    <OutputPath>..\bin\x86\</OutputPath>
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
@@ -61,12 +61,20 @@
     <Compile Include="Brightness.cs" />
     <Compile Include="ColorCanvas.cs" />
     <Compile Include="ColorMap.cs" />
+    <Compile Include="GlobalVars.cs" />
     <Compile Include="ImageHelper.cs" />
     <Compile Include="Layout.cs" />
+    <Compile Include="LayoutDefineWindow.xaml.cs">
+      <DependentUpon>LayoutDefineWindow.xaml</DependentUpon>
+    </Compile>
     <Compile Include="MyCanvas.cs" />
     <Compile Include="PtInfo.cs" />
     <Compile Include="UAContorller.cs" />
     <Compile Include="Utility.cs" />
+    <Page Include="LayoutDefineWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
@@ -115,6 +123,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\start.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\fakeColor.jpg" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

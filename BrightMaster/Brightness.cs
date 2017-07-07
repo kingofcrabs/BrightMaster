@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,7 +13,7 @@ namespace BrightMaster
         public List<List<byte>> grayVals = new List<List<byte>>();
         public List<List<float>> orgVals = new List<List<float>>();
         public byte[] grayValsInArray;
-        public string pngFile;
+        public string jpgFilePath;
         public int[] GrayLevelCounts = new int[256];
         public int Width { get; set; }
         public int Height { get; set; }
@@ -30,6 +31,25 @@ namespace BrightMaster
                 orgVals.Add(vals);
             }
             grayVals = Convert2Gray(orgVals);
+            jpgFilePath = FolderHelper.GetImageFolder() + "latest.jpg";
+            SaveImage();
+        }
+
+        private void SaveImage()
+        {
+            Bitmap bmp = new Bitmap(grayVals.Count,grayVals[0].Count);
+            LockBitmap lockBmp = new LockBitmap(bmp);
+            lockBmp.LockBits();
+            for (int y = 0; y < lockBmp.Height; y++)
+            {
+                List<double> vals = new List<double>();
+                for (int x = 0; x < lockBmp.Width; x++)
+                {
+                    byte grayVal = grayVals[y][x];
+                    lockBmp.SetPixel(x,y,Color.FromArgb(grayVal,grayVal,grayVal));
+                }
+            }
+            bmp.Save(jpgFilePath);
         }
 
         private List<List<byte>> Convert2Gray(List<List<float>> orgVals)

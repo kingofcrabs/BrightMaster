@@ -17,7 +17,7 @@ public:
 	
 	double CalculateGlare(std::string sFile,std::vector<Rect2f> rc);
 	void Convert2PesudoColor(std::string srcFile, std::string destFile);
-	
+	void FindRect(std::string sFile, std::vector<std::pair<int, int>>& pts);
 	int AdaptiveThreshold(uchar*, int width, int height,std::vector<uchar>& vector);
 	int SearchLights(uchar* pdata, int width, int height, int min, int max, std::vector<std::vector<cv::Point>>& contours);
 	std::vector<std::vector<Point>> contours;

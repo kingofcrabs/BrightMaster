@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
 using System.Xml.Serialization;
@@ -65,5 +66,44 @@ namespace BrightMaster
             layout = xs.Deserialize(stream) as Layout;
             stream.Close();
         }
+
+      
+
     }
+
+    class FolderHelper
+    {
+        static public string GetLayoutFolder()
+        {
+            
+            string layoutFolder = GetExeParentFolder() + "Layouts\\";
+            if (!Directory.Exists(layoutFolder))
+                Directory.CreateDirectory(layoutFolder);
+            return layoutFolder;
+        }
+
+        static public string GetImageFolder()
+        {
+            string acquiredImagesFolder = GetExeParentFolder() + "AcquiredImages\\";
+            if (!Directory.Exists(acquiredImagesFolder))
+                Directory.CreateDirectory(acquiredImagesFolder);
+            return acquiredImagesFolder;
+        }
+
+
+        static public string GetExeFolder()
+        {
+            string s = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            return s + "\\";
+        }
+
+        static public string GetExeParentFolder()
+        {
+            string s = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            int index = s.LastIndexOf("\\");
+            return s.Substring(0, index) + "\\";
+        }
+    }
+
+
 }
