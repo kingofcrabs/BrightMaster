@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EngineDll;
+using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -36,8 +37,6 @@ namespace BrightMaster
 
         void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            LayoutDefineWindow layoutDefWindow = new LayoutDefineWindow();
-            layoutDefWindow.ShowDialog();
             EnumLayouts();
 #if DEBUG
 #else
@@ -57,7 +56,7 @@ namespace BrightMaster
 
         private void FakeColor_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
-            e.CanExecute = brightness.grayVals.Count != 0;
+            e.CanExecute = brightness != null &&  brightness.grayVals.Count != 0;
         }
 
         private void FakeColor_Executed(object sender, ExecutedRoutedEventArgs e)
@@ -76,7 +75,24 @@ namespace BrightMaster
 
         private void Acquire_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
-            e.CanExecute = true;
+            bool bok = true;
+            if(cmbLayouts.SelectedItem == null)
+            {
+                bok = false;
+            }
+            else
+            {
+                string file = FolderHelper.GetLayoutFolder() + cmbLayouts.SelectedItem.ToString() + ".xml";
+                if(!File.Exists(file))
+                    bok = false;
+                else
+                {
+                    GlobalVars.Instance.Layout = SerializeHelper.Load<Layout>(file);
+                    myCanvas.Layout = GlobalVars.Instance.Layout;
+                }
+            }
+
+            e.CanExecute = bok;
         }
 
         private void Acquire_Executed(object sender, ExecutedRoutedEventArgs e)
@@ -86,22 +102,31 @@ namespace BrightMaster
             List<float> yVals = new List<float>();
             List<float> zVals = new List<float>();
             List<List<PixelInfo>> allPixels = GenerateTestData(); //uaController.Acquire();
+            IEngine iEngine = new IEngine();
+            
             brightness = new Brightness(allPixels);
             BitmapImage bmpImage = ImageHelper.CreateImage(brightness.grayVals);
             string sImgFile = FolderHelper.GetExeFolder() + "test.jpg";
             ImageHelper.SaveBitmapImageIntoFile(bmpImage, sImgFile);
-            myCanvas.SetBkGroundImage(bmpImage);
+            var pts = iEngine.FindRect(sImgFile);
+            myCanvas.SetBkGroundImage(bmpImage,pts);
         }
 
         private List<List<PixelInfo>> GenerateTestData()
         {
             List<List<PixelInfo>> allPixelInfos = new List<List<PixelInfo>>();
-            for(int y = 0; y < 10; y++)
+            for(int y = 0; y < 400; y++)
             {
                 List<PixelInfo> linePixelInfos = new List<PixelInfo>();
-                for(int x = 0; x < 10; x++)
+                for(int x = 0; x < 400; x++)
                 {
-                    linePixelInfos.Add(new PixelInfo(x, y, 3));
+                    if (x < 50 || y < 50 || x > 250 || y > 250)
+                    {
+                        linePixelInfos.Add(new PixelInfo(0, 0, 0));
+                    }
+                    else
+                        linePixelInfos.Add(new PixelInfo(150, 150, 150));
+                    
                 }
                 allPixelInfos.Add(linePixelInfos);
             }

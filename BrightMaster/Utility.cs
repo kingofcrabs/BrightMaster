@@ -27,7 +27,7 @@ namespace BrightMaster
             xs.Serialize(stream, setting);
             stream.Close();
         }
-        static public Object Load<T>(string sFile) where T : class
+        static public T Load<T>(string sFile) where T : class
         {
             Object obj = new object();
             if (!File.Exists(sFile))
@@ -37,7 +37,7 @@ namespace BrightMaster
             XmlSerializer xs = new XmlSerializer(typeof(T));
             obj = xs.Deserialize(stream) as T;
             stream.Close();
-            return obj;
+            return (T)obj;
         }
 
         static public void SaveSettings(Layout layout, string sFile)

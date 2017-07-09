@@ -37,7 +37,7 @@
     </Window.CommandBindings>
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="2*"/>
+            <ColumnDefinition Width="4*"/>
             <ColumnDefinition Width="3*"/>
 
 
@@ -45,9 +45,9 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="30"/>
             <RowDefinition Height="60"/>
+            <RowDefinition Height="4*"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="100"/>
+            <RowDefinition Height="50"/>
         </Grid.RowDefinitions>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="文件">
@@ -71,11 +71,10 @@
         
         </StackPanel>
 
-        <ScrollViewer x:Name="scrollViewer" Grid.Row="2"   VerticalScrollBarVisibility="Visible"
-                   HorizontalScrollBarVisibility="Visible" VerticalAlignment="Top" >
-            <local:MyCanvas x:Name="myCanvas" Width="800" Height="600" >
+       
+            <local:MyCanvas x:Name="myCanvas" Grid.Row="2" Background="Yellow" >
             </local:MyCanvas>
-        </ScrollViewer>
+        
         <ScrollViewer x:Name="scrollViewerResult" Grid.Row="2" Grid.Column="1" VerticalScrollBarVisibility="Auto"
                    HorizontalScrollBarVisibility="Auto" VerticalAlignment="Top" >
             <ListView Name="lstviewResult"  FontFamily="SimSun">
