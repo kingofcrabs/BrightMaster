@@ -6,6 +6,7 @@
     <Window.Resources>
         <RoutedUICommand x:Key="StartAcquire" Text="采集数据." />
         <RoutedUICommand x:Key="FakeColor" Text="伪彩." />
+        <RoutedUICommand x:Key="LayoutDef" Text="布局定义." />
         <Style x:Key="ToggleButtonStyle1" TargetType="{x:Type ToggleButton}">
             <Setter Property="Template">
                 <Setter.Value>
@@ -26,6 +27,7 @@
     <Window.InputBindings>
         <KeyBinding Modifiers="Ctrl" Key="G" Command="{StaticResource StartAcquire}"/>
         <KeyBinding Modifiers="Ctrl" Key="F" Command="{StaticResource FakeColor}"/>
+        <KeyBinding Modifiers="Ctrl" Key="L" Command="{StaticResource LayoutDef}"/>
     </Window.InputBindings>
     <Window.CommandBindings>
         <CommandBinding Command="{StaticResource StartAcquire}"
@@ -34,6 +36,9 @@
         <CommandBinding Command="{StaticResource FakeColor}"
                     CanExecute="FakeColor_CanExecute"
                     Executed="FakeColor_Executed"/>
+        <CommandBinding Command="{StaticResource LayoutDef}"
+                    CanExecute="LayoutDef_CanExecute"
+                    Executed="LayoutDef_Executed"/>
     </Window.CommandBindings>
     <Grid>
         <Grid.ColumnDefinitions>
@@ -67,6 +72,9 @@
             </Button>
             <ToggleButton Style="{StaticResource ToggleButtonStyle1}" Command="{StaticResource FakeColor}"  Name="btnFakeColor" Width="60">
                 <Image ToolTip="伪彩" Height="50" Width="50" Source="/Images/fakeColor.jpg"/>
+            </ToggleButton>
+            <ToggleButton Style="{StaticResource ToggleButtonStyle1}" Command="{StaticResource LayoutDef}"  Name="btnLayoutDef" Width="60">
+                <Image ToolTip="版图" Height="50" Width="50" Source="/Images/points.png"/>
             </ToggleButton>
         
         </StackPanel>

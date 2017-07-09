@@ -73,7 +73,8 @@ namespace BrightMaster
 
         public void SetBkGroundImage(System.Windows.Media.Imaging.BitmapImage bmpImage, List<MPoint> pts = null)
         {
-            this.pts = pts;
+            if(pts != null)
+                this.pts = pts;
             width = bmpImage.Width;
             height = bmpImage.Height;
             CalcuUsable(out usableWidth, out usableHeight);
@@ -92,17 +93,26 @@ namespace BrightMaster
 
         private System.Windows.Rect GetBoundingRectInUICoordinate(List<MPoint> pts)
         {
-            //if (pts.Count != 4)
-            //    throw new Exception("Invalid bounding UI");
-            double left = pts.Min(pt => pt.x) + 4;
-            double top = pts.Min(pt => pt.y) + 4;
-            double right = pts.Max(pt => pt.x) - 3;
-            double bottom = pts.Max(pt => pt.y) -3;
-
-            int leftUICoord = (int)(usableWidth * left / width);
-            int topUICoord  = (int)(usableHeight * top / height);
-            int rightUICoord = (int)(usableWidth * right / width);
-            int bottomUICoord = (int)(usableHeight * bottom / height);
+            double left, top, right, bottom;
+            int leftUICoord, topUICoord, rightUICoord, bottomUICoord;
+            if(pts == null)
+            {
+                leftUICoord = 0;
+                topUICoord = 0;
+                bottomUICoord = (int)this.ActualHeight;
+                rightUICoord = (int)this.ActualWidth;
+            }
+            else
+            {
+                left = pts.Min(pt => pt.x) + 4;
+                top = pts.Min(pt => pt.y) + 4;
+                right = pts.Max(pt => pt.x) - 3;
+                bottom = pts.Max(pt => pt.y) - 3;
+                leftUICoord = (int)(usableWidth * left / width);
+                topUICoord = (int)(usableHeight * top / height);
+                rightUICoord = (int)(usableWidth * right / width);
+                bottomUICoord = (int)(usableHeight * bottom / height);
+            }
             return new System.Windows.Rect(leftUICoord, topUICoord, rightUICoord - leftUICoord, bottomUICoord - topUICoord);
         }
 
@@ -121,53 +131,45 @@ namespace BrightMaster
             if (layout == null)
                 return;
 
-         
-           
-   
-            if (pts != null)
+            var boundingRectUICoord = GetBoundingRectInUICoordinate(pts);
+            System.Windows.Media.Brush redBrush = System.Windows.Media.Brushes.Red;
+            drawingContext.DrawRectangle(null, new System.Windows.Media.Pen(redBrush, 1), boundingRectUICoord);
+            if(layout != null)
             {
-                var boundingRectUICoord = GetBoundingRectInUICoordinate(pts);
-                System.Windows.Media.Brush redBrush = System.Windows.Media.Brushes.Red;
-                drawingContext.DrawRectangle(null, new System.Windows.Media.Pen(redBrush, 1), boundingRectUICoord);
-                if(layout != null)
+                float xStart = (float)(boundingRectUICoord.X +  layout.topLeft.X / layout.Width *  boundingRectUICoord.Width);
+                float yStart = (float)(boundingRectUICoord.Y + layout.topLeft.Y / layout.Height * boundingRectUICoord.Height);
+                float xEnd = (float)(boundingRectUICoord.X + layout.bottomRight.X / layout.Width * boundingRectUICoord.Width);
+                float yEnd = (float)(boundingRectUICoord.Y + layout.bottomRight.Y / layout.Height * boundingRectUICoord.Height);
+                float radius =(float)(layout.Radius / layout.Width * boundingRectUICoord.Width);
+                PointF sz = new PointF(radius,radius);
+                PointF ptStart = new PointF(xStart, yStart);
+                PointF ptEnd = new PointF(xEnd, yEnd);
+                if (layout.XCount == 1 || layout.YCount == 1)
                 {
-                    float xStart = (float)(boundingRectUICoord.X +  layout.topLeft.X / layout.width *  boundingRectUICoord.Width);
-                    float yStart = (float)(boundingRectUICoord.Y + layout.topLeft.Y / layout.height * boundingRectUICoord.Height);
-                    float xEnd = (float)(boundingRectUICoord.X + layout.bottomRight.X / layout.width * boundingRectUICoord.Width);
-                    float yEnd = (float)(boundingRectUICoord.Y + layout.bottomRight.Y / layout.height * boundingRectUICoord.Height);
-                    float radius =(float)(layout.radius / layout.width * boundingRectUICoord.Width);
-                    PointF sz = new PointF(radius,radius);
-                    PointF ptStart = new PointF(xStart, yStart);
-                    PointF ptEnd = new PointF(xEnd, yEnd);
-                    if (layout.xCount == 1 || layout.yCount == 1)
+                    DrawCircle(ptStart, sz, drawingContext);
+                }
+                else
+                {
+                    for (int x = 0; x < layout.XCount; x++)
                     {
-                        DrawCircle(ptStart, sz, drawingContext);
-                    }
-                    else
-                    {
-                        for (int x = 0; x < layout.xCount; x++)
+                        for (int y = 0; y < layout.YCount; y++)
                         {
-                            for (int y = 0; y < layout.yCount; y++)
-                            {
-                                float xx = (ptEnd.X - ptStart.X) * x / (layout.xCount - 1) + ptStart.X;
-                                float yy = (ptEnd.Y - ptStart.Y) * y / (layout.yCount - 1) + ptStart.Y;
-                                DrawCircle(new PointF(xx, yy), sz, drawingContext);
-                            }
+                            float xx = (ptEnd.X - ptStart.X) * x / (layout.XCount - 1) + ptStart.X;
+                            float yy = (ptEnd.Y - ptStart.Y) * y / (layout.YCount - 1) + ptStart.Y;
+                            DrawCircle(new PointF(xx, yy), sz, drawingContext);
                         }
                     }
                 }
             }
-            
-        
 
-            double xxx = Mouse.GetPosition(this).X;
-            double yyy = Mouse.GetPosition(this).Y;
-            drawingContext.DrawText(new FormattedText(string.Format("x:{0} y:{1}", xxx, yyy),
-                       CultureInfo.GetCultureInfo("en-us"),
-                       0,
-                       new Typeface("Verdana"),
-                       15, System.Windows.Media.Brushes.DarkBlue),
-                       new System.Windows.Point(ActualWidth - 150, ActualHeight - 100));
+            //double xxx = Mouse.GetPosition(this).X;
+            //double yyy = Mouse.GetPosition(this).Y;
+            //drawingContext.DrawText(new FormattedText(string.Format("x:{0} y:{1}", xxx, yyy),
+            //           CultureInfo.GetCultureInfo("en-us"),
+            //           0,
+            //           new Typeface("Verdana"),
+            //           15, System.Windows.Media.Brushes.DarkBlue),
+            //           new System.Windows.Point(ActualWidth - 150, ActualHeight - 100));
 
         }
 
@@ -179,8 +181,8 @@ namespace BrightMaster
 
         private PointF Convert2UI(PointF pt)
         {
-            double x = pt.X * this.usableWidth / layout.width;
-            double y = pt.Y * this.usableHeight / layout.height;
+            double x = pt.X * this.usableWidth / layout.Width;
+            double y = pt.Y * this.usableHeight / layout.Height;
             return new PointF((float)x, (float)y);
         }
 

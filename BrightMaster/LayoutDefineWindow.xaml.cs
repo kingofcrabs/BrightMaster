@@ -60,6 +60,7 @@ namespace BrightMaster
 
         private void Refresh()
         {
+            this.DataContext = GlobalVars.Instance.Layout;
             canvas.Layout = GlobalVars.Instance.Layout;
         }
 

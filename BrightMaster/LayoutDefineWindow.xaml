@@ -49,23 +49,23 @@
             </StackPanel>
             <StackPanel Orientation="Horizontal" Margin="0,10,0,5">
                 <Label>X方向数量:</Label>
-                <TextBox  Width="50" Text="{Binding Path=xCount}" Margin="22,0,0,0"></TextBox>
+                <TextBox  Width="50" Text="{Binding Path=XCount}" Margin="22,0,0,0"></TextBox>
             </StackPanel>
             <StackPanel Orientation="Horizontal" Margin="0,5,0,5">
                 <Label>Y方向数量:</Label>
-                <TextBox  Width="50" Text="{Binding Path=yCount}" Margin="22,0,0,0"></TextBox>
+                <TextBox  Width="50" Text="{Binding Path=YCount}" Margin="22,0,0,0"></TextBox>
             </StackPanel>
 
             <StackPanel Orientation="Horizontal" Margin="0,5,0,5">
                 <Label>半径:</Label>
-                <TextBox  Width="50" Text="{Binding Path=radius}" Margin="57,0,0,0"></TextBox>
+                <TextBox  Width="50" Text="{Binding Path=Radius}" Margin="57,0,0,0"></TextBox>
             </StackPanel>
 
             <StackPanel Orientation="Horizontal" Margin="0,5,0,5">
                 <Label>长度:</Label>
-                <TextBox  Width="50" Text="{Binding Path=width}" Margin="57,0,0,0"></TextBox>
+                <TextBox  Width="50" Text="{Binding Path=Width}" Margin="57,0,0,0"></TextBox>
                 <Label>宽度:</Label>
-                <TextBox  Width="50" Text="{Binding Path=height}" Margin="27,0,0,0"></TextBox>
+                <TextBox  Width="50" Text="{Binding Path=Height}" Margin="27,0,0,0"></TextBox>
             </StackPanel>
             <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
                 <Label>layouts：</Label>

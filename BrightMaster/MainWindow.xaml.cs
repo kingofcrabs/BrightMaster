@@ -73,6 +73,17 @@ namespace BrightMaster
             myCanvas.SetBkGroundImage(bmpImage);            
         }
 
+        private void LayoutDef_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = true;
+        }
+
+        private void LayoutDef_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            LayoutDefineWindow layoutDefWin = new LayoutDefineWindow();
+            layoutDefWin.ShowDialog();
+        }
+
         private void Acquire_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
             bool bok = true;
@@ -106,7 +117,7 @@ namespace BrightMaster
             
             brightness = new Brightness(allPixels);
             BitmapImage bmpImage = ImageHelper.CreateImage(brightness.grayVals);
-            string sImgFile = FolderHelper.GetExeFolder() + "test.jpg";
+            string sImgFile = FolderHelper.GetImageFolder() + "latest.jpg";
             ImageHelper.SaveBitmapImageIntoFile(bmpImage, sImgFile);
             var pts = iEngine.FindRect(sImgFile);
             myCanvas.SetBkGroundImage(bmpImage,pts);
@@ -133,6 +144,9 @@ namespace BrightMaster
             return allPixelInfos;
             
         }
+
+      
+     
 
         
    
