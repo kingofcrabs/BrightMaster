@@ -1,0 +1,20 @@
+<?xml version="1.0"?>
+<Layout xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <topLeft>
+    <X>11</X>
+    <Y>11</Y>
+  </topLeft>
+  <bottomRight>
+    <X>200</X>
+    <Y>200</Y>
+  </bottomRight>
+  <width>100</width>
+  <height>100</height>
+  <xCount>3</xCount>
+  <yCount>3</yCount>
+  <radius>3</radius>
+  <TopLeftX>11</TopLeftX>
+  <TopLeftY>11</TopLeftY>
+  <BottomRightX>200</BottomRightX>
+  <BottomRightY>200</BottomRightY>
+</Layout>
