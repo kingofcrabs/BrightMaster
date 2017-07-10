@@ -43,6 +43,7 @@ namespace BrightMaster
             var b = new Bitmap(width, height, PixelFormat.Format24bppRgb);
             LockBitmap lockBitmap = new LockBitmap(b);
             lockBitmap.LockBits();
+            
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)

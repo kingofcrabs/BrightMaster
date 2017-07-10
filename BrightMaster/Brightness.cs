@@ -4,6 +4,7 @@ using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows;
 
 namespace BrightMaster
 {
@@ -34,6 +35,50 @@ namespace BrightMaster
             jpgFilePath = FolderHelper.GetImageFolder() + "latest.jpg";
             SaveImage();
         }
+
+
+
+        List<float> GetResults(Rect boundingRect)
+        {
+            var layout = GlobalVars.Instance.Layout;
+            List<float> results = new List<float>();
+            float xStart = (float)(boundingRect.X + layout.topLeft.X / layout.Width * boundingRect.Width);
+            float yStart = (float)(boundingRect.Y + layout.topLeft.Y / layout.Height * boundingRect.Height);
+            float xEnd = (float)(boundingRect.X + layout.bottomRight.X / layout.Width * boundingRect.Width);
+            float yEnd = (float)(boundingRect.Y + layout.bottomRight.Y / layout.Height * boundingRect.Height);
+            float radius = (float)(layout.Radius / layout.Width * boundingRect.Width);
+            PointF ptStart = new PointF(xStart, yStart);
+            PointF ptEnd = new PointF(xEnd, yEnd);
+            for (int x = 0; x < layout.XCount; x++)
+            {
+                for (int y = 0; y < layout.YCount; y++)
+                {
+                    float xx = (ptEnd.X - ptStart.X) * x / (layout.XCount - 1) + ptStart.X;
+                    float yy = (ptEnd.Y - ptStart.Y) * y / (layout.YCount - 1) + ptStart.Y;
+                    results.Add(GetAvgVals(xx,yy,radius));
+                }
+            }
+            return results;
+            //layout.TopLeftX
+        }
+
+        private float GetAvgVals(float xx, float yy, float radius)
+        {
+            List<float> vals = new List<float>();
+            int xStart = (int)(xx - radius);
+            int yStart = (int)(yy - radius);
+            int xEnd = (int)(xx + radius);
+            int yEnd = (int)(yy + radius);
+            for(int x = xStart; x < xEnd; x++)
+            {
+                for(int y = yStart; y< yEnd; y++)
+                {
+                    vals.Add(orgVals[y][x]);
+                }
+            }
+            return vals.Average();
+        }
+
 
         private void SaveImage()
         {

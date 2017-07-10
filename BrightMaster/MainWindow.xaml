@@ -73,9 +73,9 @@
             <ToggleButton Style="{StaticResource ToggleButtonStyle1}" Command="{StaticResource FakeColor}"  Name="btnFakeColor" Width="60">
                 <Image ToolTip="伪彩" Height="50" Width="50" Source="/Images/fakeColor.jpg"/>
             </ToggleButton>
-            <ToggleButton Style="{StaticResource ToggleButtonStyle1}" Command="{StaticResource LayoutDef}"  Name="btnLayoutDef" Width="60">
-                <Image ToolTip="版图" Height="50" Width="50" Source="/Images/points.png"/>
-            </ToggleButton>
+            <Button  Command="{StaticResource LayoutDef}"  Name="btnLayoutDef" Width="60">
+                <Image ToolTip="版图" Height="50" Width="50" Source="/Images/point.png"/>
+            </Button>
         
         </StackPanel>
 
