@@ -145,6 +145,17 @@ namespace BrightMaster
             
         }
 
+        private void LiveFocus_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = true;
+        }
+
+        private void LiveFocus_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            LivewFocusView livewFocusView = new LivewFocusView();
+            livewFocusView.ShowDialog();
+        }
+
       
      
 

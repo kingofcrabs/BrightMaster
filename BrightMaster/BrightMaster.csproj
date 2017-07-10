@@ -38,6 +38,7 @@
     <Reference Include="System" />
     <Reference Include="System.Data" />
     <Reference Include="System.Drawing" />
+    <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
     <Reference Include="Microsoft.CSharp" />
     <Reference Include="System.Core" />
@@ -67,6 +68,12 @@
     <Compile Include="Layout.cs" />
     <Compile Include="LayoutDefineWindow.xaml.cs">
       <DependentUpon>LayoutDefineWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="LiveFocusView.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="LiveFocusView.Designer.cs">
+      <DependentUpon>LiveFocusView.cs</DependentUpon>
     </Compile>
     <Compile Include="MyCanvas.cs" />
     <Compile Include="PtInfo.cs" />
@@ -103,6 +110,9 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
+    <EmbeddedResource Include="LiveFocusView.resx">
+      <DependentUpon>LiveFocusView.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
       <LastGenOutput>Resources.Designer.cs</LastGenOutput>
@@ -130,6 +140,12 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\point.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\vedio.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\camera.jpg" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

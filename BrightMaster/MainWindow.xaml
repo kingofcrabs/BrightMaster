@@ -7,6 +7,7 @@
         <RoutedUICommand x:Key="StartAcquire" Text="采集数据." />
         <RoutedUICommand x:Key="FakeColor" Text="伪彩." />
         <RoutedUICommand x:Key="LayoutDef" Text="布局定义." />
+        <RoutedUICommand x:Key="LiveFocus" Text="对焦预览." />
         <Style x:Key="ToggleButtonStyle1" TargetType="{x:Type ToggleButton}">
             <Setter Property="Template">
                 <Setter.Value>
@@ -28,6 +29,7 @@
         <KeyBinding Modifiers="Ctrl" Key="G" Command="{StaticResource StartAcquire}"/>
         <KeyBinding Modifiers="Ctrl" Key="F" Command="{StaticResource FakeColor}"/>
         <KeyBinding Modifiers="Ctrl" Key="L" Command="{StaticResource LayoutDef}"/>
+        <KeyBinding Modifiers="Ctrl" Key="F" Command="{StaticResource LiveFocus}"/>
     </Window.InputBindings>
     <Window.CommandBindings>
         <CommandBinding Command="{StaticResource StartAcquire}"
@@ -39,6 +41,9 @@
         <CommandBinding Command="{StaticResource LayoutDef}"
                     CanExecute="LayoutDef_CanExecute"
                     Executed="LayoutDef_Executed"/>
+        <CommandBinding Command="{StaticResource LiveFocus}"
+                    CanExecute="LiveFocus_CanExecute"
+                    Executed="LiveFocus_Executed"/>
     </Window.CommandBindings>
     <Grid>
         <Grid.ColumnDefinitions>
@@ -76,7 +81,9 @@
             <Button  Command="{StaticResource LayoutDef}"  Name="btnLayoutDef" Width="60">
                 <Image ToolTip="版图" Height="50" Width="50" Source="/Images/point.png"/>
             </Button>
-        
+            <Button  Command="{StaticResource LiveFocus}"  Name="btnLiveFocus" Width="60">
+                <Image ToolTip="预览" Height="50" Width="50" Source="/Images/camera.jpg"/>
+            </Button>
         </StackPanel>
 
        
