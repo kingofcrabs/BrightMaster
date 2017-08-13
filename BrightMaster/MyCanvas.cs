@@ -125,9 +125,10 @@ namespace BrightMaster
 
         protected override void OnRender(System.Windows.Media.DrawingContext drawingContext)
         {
-            base.OnRender(drawingContext);
             if (IsInDesignMode())
                 return;
+            base.OnRender(drawingContext);
+           
             if (layout == null)
                 return;
 
@@ -136,41 +137,11 @@ namespace BrightMaster
             drawingContext.DrawRectangle(null, new System.Windows.Media.Pen(redBrush, 1), boundingRectUICoord);
             if(layout != null)
             {
-                float xStart = (float)(boundingRectUICoord.X +  layout.topLeft.X / layout.Width *  boundingRectUICoord.Width);
-                float yStart = (float)(boundingRectUICoord.Y + layout.topLeft.Y / layout.Height * boundingRectUICoord.Height);
-                float xEnd = (float)(boundingRectUICoord.X + layout.bottomRight.X / layout.Width * boundingRectUICoord.Width);
-                float yEnd = (float)(boundingRectUICoord.Y + layout.bottomRight.Y / layout.Height * boundingRectUICoord.Height);
-                float radius =(float)(layout.Radius / layout.Width * boundingRectUICoord.Width);
-                PointF sz = new PointF(radius,radius);
-                PointF ptStart = new PointF(xStart, yStart);
-                PointF ptEnd = new PointF(xEnd, yEnd);
-                if (layout.XCount == 1 || layout.YCount == 1)
-                {
-                    DrawCircle(ptStart, sz, drawingContext);
-                }
-                else
-                {
-                    for (int x = 0; x < layout.XCount; x++)
-                    {
-                        for (int y = 0; y < layout.YCount; y++)
-                        {
-                            float xx = (ptEnd.X - ptStart.X) * x / (layout.XCount - 1) + ptStart.X;
-                            float yy = (ptEnd.Y - ptStart.Y) * y / (layout.YCount - 1) + ptStart.Y;
-                            DrawCircle(new PointF(xx, yy), sz, drawingContext);
-                        }
-                    }
-                }
+                var circles = GlobalVars.Instance.Layout.GetCircles(boundingRectUICoord);
+                 
+                foreach(var circle in circles)
+                    DrawCircle(circle.Position, circle.Size, drawingContext);
             }
-
-            //double xxx = Mouse.GetPosition(this).X;
-            //double yyy = Mouse.GetPosition(this).Y;
-            //drawingContext.DrawText(new FormattedText(string.Format("x:{0} y:{1}", xxx, yyy),
-            //           CultureInfo.GetCultureInfo("en-us"),
-            //           0,
-            //           new Typeface("Verdana"),
-            //           15, System.Windows.Media.Brushes.DarkBlue),
-            //           new System.Windows.Point(ActualWidth - 150, ActualHeight - 100));
-
         }
 
         private void DrawCircle(PointF pt, PointF sz, DrawingContext drawingContext)
@@ -178,14 +149,6 @@ namespace BrightMaster
             drawingContext.DrawEllipse(null, new System.Windows.Media.Pen(System.Windows.Media.Brushes.Red,1),
                 new System.Windows.Point(pt.X, pt.Y), sz.X, sz.Y);
         }
-
-        private PointF Convert2UI(PointF pt)
-        {
-            double x = pt.X * this.usableWidth / layout.Width;
-            double y = pt.Y * this.usableHeight / layout.Height;
-            return new PointF((float)x, (float)y);
-        }
-
         
     }
 }

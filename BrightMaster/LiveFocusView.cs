@@ -13,26 +13,63 @@ namespace BrightMaster
 {
     public partial class LivewFocusView : Form
     {
-        private const string parameter_directory_ = "..\\..\\param";
+        
 
         private bool grab_images_;
         private BackgroundWorker grab_thread_;
 
-        private Ua.Core uaCore_ = null;
-        private IntPtr system_ptr_;
-        private IntPtr device_ptr_;
-        private Ua.Device device_;
-        private IntPtr recipe_ptr_;
-        private Ua.Recipe recipe_;
-        private Ua.DeviceProperty device_property_;
-        private IntPtr capture_data_ptr_;
-        private Ua.CaptureData capture_data_;
+        private Ua.Core uaCore = null;
+  
+        private Ua.Device device;
+        private Ua.DeviceProperty device_property;
+        private IntPtr capture_data_ptr;
+        Ua.CaptureData capture_data;
 
         private Bitmap bitmap_;
 
         public LivewFocusView()
         {
             InitializeComponent();
+            this.Load += LivewFocusView_Load;
+            this.FormClosing += LivewFocusView_FormClosing;
+        }
+
+        
+
+        void LivewFocusView_Load(object sender, EventArgs e)
+        {
+                Ua.Constants.Binning2Size.UaSize size = Ua.Constants.Binning2Size.UA_10[0];
+                bitmap_ = new Bitmap(size.width, size.height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+
+
+                device = GlobalVars.Instance.UAController.Device;
+                device_property = GlobalVars.Instance.UAController.DeviceProperty;
+                uaCore = GlobalVars.Instance.UAController.UACore;
+                capture_data_ptr = uaCore.uaCreateCaptureData(device.type);
+                capture_data = Ua.Utility.PtrToUaCaptureData(capture_data_ptr);
+
+                // set capture mode parameter
+                device_property.capture_mode = Ua.CaptureMode.UA_CAPTURE_FOCUS;
+                // Focus Rect
+                Ua.UaRect roi;
+                roi.width = capture_data.width / 4;
+                roi.height = capture_data.height / 4;
+                roi.x = capture_data.width / 2 - roi.width / 2;
+                roi.y = capture_data.height / 2 - roi.height / 2;
+                device_property.focus_roi = roi;
+                
+                // set device Property
+                int ret = uaCore.uaSetDeviceProperty(ref device, ref device_property);
+                Ua.UaError err = uaCore.uaGetError();
+                if (err != Ua.UaError.UA_NO_ERROR)
+                {
+                    throw new Exception(uaCore.uaGetErrorString(err));
+                }
+                ret = uaCore.uaStartCapture(ref device);
+                err = uaCore.uaGetError();
+                StartGrabLoop();
+
+          
         }
 
         private void UpdateUI(object sender, ProgressChangedEventArgs e)
@@ -41,131 +78,27 @@ namespace BrightMaster
             pictureBox1.Invalidate();
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+
+
+        private void LivewFocusView_FormClosing(object sender, FormClosingEventArgs e)
         {
+           
             try
             {
-                uaCore_ = new Ua.Core();
-
-                system_ptr_ = uaCore_.uaInitialize(parameter_directory_);
-
-                Ua.System ua_system = Ua.Utility.PtrToUaSystem(system_ptr_);
-                Ua.Configuration[] configuration = { ua_system.ua_10, ua_system.ua_200, ua_system.ua_200A };
-
-                device_ptr_ = IntPtr.Zero;
-
-                for (int i = 0; i < configuration.Length; i++)
-                {
-                    for (int j = 0; j < configuration[i].num_connected; j++)
-                    {
-                        device_ptr_ = uaCore_.uaOpenDevice(configuration[i].connected_product_ids[j]);
-
-                        if (device_ptr_ != IntPtr.Zero)
-                        {
-                            break;
-                        }
-                    }
-                }
-
-                if (device_ptr_ != IntPtr.Zero)
-                {
-                    device_ = Ua.Utility.PtrToUaDevice(device_ptr_);
-
-                    if (uaCore_.uaIsUA200A(device_.type) == Ua.Constants.UA_TRUE)
-                    {
-                        Ua.Constants.Binning2Size.UaSize size = Ua.Constants.Binning2Size.UA_200A[0];
-
-                        bitmap_ = new Bitmap(size.width, size.height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
-                    }
-                    else if (uaCore_.uaIsUA200(device_.type) == Ua.Constants.UA_TRUE)
-                    {
-                        Ua.Constants.Binning2Size.UaSize size = Ua.Constants.Binning2Size.UA_200[0];
-
-                        bitmap_ = new Bitmap(size.width, size.height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
-                    }
-                    else
-                    {
-                        Ua.Constants.Binning2Size.UaSize size = Ua.Constants.Binning2Size.UA_10[0];
-
-                        bitmap_ = new Bitmap(size.width, size.height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
-                    }
-
-                    recipe_ptr_ = uaCore_.uaCreateRecipe(device_.type);
-
-                    recipe_ = Ua.Utility.PtrToUaRecipe(recipe_ptr_);
-
-                    device_property_ = Ua.Utility.PtrToUaDeviceProperty(recipe_.property_ptr);
-
-                    uaCore_.uaGetDeviceProperty(ref device_, ref device_property_);
-
-                    capture_data_ptr_ = uaCore_.uaCreateCaptureData(device_.type);
-
-                    capture_data_ = Ua.Utility.PtrToUaCaptureData(capture_data_ptr_);
-
-                    // set capture mode parameter
-                    device_property_.capture_mode = Ua.CaptureMode.UA_CAPTURE_FOCUS;
-
-                    // Focus Rect
-                    Ua.UaRect roi;
-                    roi.width = capture_data_.width / 4;
-                    roi.height = capture_data_.height / 4;
-                    roi.x = capture_data_.width / 2 - roi.width / 2;
-                    roi.y = capture_data_.height / 2 - roi.height / 2;
-
-                    device_property_.focus_roi = roi;
-
-                    // set device Property
-                    int ret = uaCore_.uaSetDeviceProperty(ref device_, ref device_property_);
-
-                    Ua.UaError err = uaCore_.uaGetError();
-
-                    ret = uaCore_.uaStartCapture(ref device_);
-
-                    err = uaCore_.uaGetError();
-
-                    StartGrabLoop();
-                }
+                grab_thread_.CancelAsync();
             }
-            catch (System.DllNotFoundException ex)
+            catch (Exception)
             {
-                Console.WriteLine(ex.Message);
             }
-            catch (Ua.DllVersionException ex)
-            {
-                Console.WriteLine(ex.Message);
-            }
-        }
-
-        private void Form1_FormClosing(object sender, FormClosingEventArgs e)
-        {
-            if (device_ptr_ != IntPtr.Zero)
-            {
-                try
-                {
-                    grab_thread_.CancelAsync();
-                }
-                catch (Exception)
-                {
-                }
-                System.Threading.Thread.Sleep(100);
-            }
-
+            System.Threading.Thread.Sleep(100);
+           
             try
             {
                 lock (this)
                 {
-                    if (uaCore_ != null)
-                    {
-                        if (device_ptr_ != IntPtr.Zero)
-                        {
-                            uaCore_.uaStopCapture(ref device_);
-                            uaCore_.uaDestroyCaptureData(capture_data_ptr_);
-                            uaCore_.uaDestroyRecipe(recipe_ptr_);
-                            uaCore_.uaCloseDevice(device_ptr_);
-                            device_ptr_ = IntPtr.Zero;
-                        }
-                        uaCore_.uaFinalize(system_ptr_);
-                    }
+                    uaCore.uaStopCapture(ref device);
+                    if(capture_data_ptr != IntPtr.Zero)
+                        uaCore.uaDestroyCaptureData(capture_data_ptr);
                 }
             }
             catch (Exception)
@@ -191,7 +124,7 @@ namespace BrightMaster
             Pen pRectPen = new Pen(Color.FromArgb(255, Color.White), 4);
             Pen pFocusPen = new Pen(Color.FromArgb(255, Color.Red), 4);
 
-            Ua.UaRect roi = device_property_.focus_roi;
+            Ua.UaRect roi = device_property.focus_roi;
 
             while (grab_images_)
             {
@@ -207,34 +140,39 @@ namespace BrightMaster
                     lock (this)
                     {
 
+                        uaCore.uaCaptureImage(
+                            ref device, Ua.CaptureFilterType.UA_CAPTURE_FILTER_XYZ, 1, ref capture_data);
 
-                        if (device_ptr_ == IntPtr.Zero)
+                        BitmapPlus bmpP = new BitmapPlus(bitmap_);
+                        bmpP.BeginAccess();
+                        unsafe
                         {
-                            break;
-                        }
+                            // If I can use unsafe. This code is more fast
+                            ushort* x_ptr = (ushort*)capture_data.X_ptr;
+                            ushort* y_ptr = (ushort*)capture_data.Y_ptr;
+                            ushort* z_ptr = (ushort*)capture_data.Z_ptr;
 
+                            // If I can not use unsafe.
+                            //ushort[] x_ptr = Ua.Utility.PtrToUshort(capture_data_.X_ptr, capture_data_.size);
+                            //ushort[] y_ptr = Ua.Utility.PtrToUshort(capture_data_.Y_ptr, capture_data_.size);
+                            //ushort[] z_ptr = Ua.Utility.PtrToUshort(capture_data_.Z_ptr, capture_data_.size);
 
-                        uaCore_.uaCaptureImage(
-                            ref device_, Ua.CaptureFilterType.UA_CAPTURE_FILTER_XYZ, 1, ref capture_data_);
-
-                        ushort[] x_ptr = Ua.Utility.PtrToUshort(capture_data_.X_ptr, capture_data_.size);
-                        ushort[] y_ptr = Ua.Utility.PtrToUshort(capture_data_.Y_ptr, capture_data_.size);
-                        ushort[] z_ptr = Ua.Utility.PtrToUshort(capture_data_.Z_ptr, capture_data_.size);
-
-                        for (int y = 0; y < capture_data_.height; y++)
-                        //   for (int y = roi.y; y < roi.y + roi.height; y++)
-                        {
-                            for (int x = 0; x < capture_data_.width; x++)
-                            //      for (int x = roi.x; x < roi.x + roi.width; x++)
+                            for (int y = 0; y < capture_data.height; y++)
                             {
-                                int r = x_ptr[y * capture_data_.width + x] / 256;
-                                int g = y_ptr[y * capture_data_.width + x] / 256;
-                                int b = z_ptr[y * capture_data_.width + x] / 256;
-                                bitmap_.SetPixel(x, y, Color.FromArgb(r, g, b));
+                                for (int x = 0; x < capture_data.width; x++)
+                                {
+                                    int r = x_ptr[y * capture_data.width + x] / 256;
+                                    int g = y_ptr[y * capture_data.width + x] / 256;
+                                    int b = z_ptr[y * capture_data.width + x] / 256;
+                                    bmpP.SetPixel(x, y, Color.FromArgb(r, g, b));
+                                }
                             }
                         }
+                        bmpP.EndAccess();
 
-                        Graphics bitmap_graphics = Graphics.FromImage(bitmap_);
+
+
+                        Graphics bitmap_graphics = Graphics.FromImage(bmpP.Bitmap);
 
                         bitmap_graphics.DrawRectangle(pRectPen,
                             roi.x, roi.y, roi.width, roi.height);
@@ -244,7 +182,7 @@ namespace BrightMaster
                         float fValue = 0;
 
                         // get focus value
-                        if (uaCore_.uaGetFocusValue(ref capture_data_, ref fValue, ref posx, ref posy) !=
+                        if (uaCore.uaGetFocusValue(ref capture_data, ref fValue, ref posx, ref posy) !=
                           Ua.Constants.UA_FAILURE)
                         {
                             // Draw focus value  

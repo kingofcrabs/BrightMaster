@@ -25,23 +25,70 @@ namespace BrightMaster
     /// </summary>
     public partial class MainWindow : Window
     {
-        //UAContorller uaController = null;
+        UAContorller uaController = null;
         Brightness brightness = null;
         ObservableCollection<PixelInfo> pixelInfos = new ObservableCollection<PixelInfo>();
         ObservableCollection<string> layoutFiles = new ObservableCollection<string>();
+        double zoomRatio = 1;
+
         public MainWindow()
         {
             InitializeComponent();
             this.Loaded += MainWindow_Loaded;
+            this.Closing += MainWindow_Closing;
+            this.PreviewMouseWheel +=MainWindow_PreviewMouseWheel;
         }
 
+        private void MainWindow_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        {
+            if(e.Delta > 0)
+            {
+                zoomRatio *= 1.2;
+            }
+            else
+            {
+                zoomRatio /= 1.2;
+            }
+            Zoom();
+        }
+
+        void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
+        {
+            GlobalVars.Instance.UAController.UnInitialize();
+        }
+
+        async Task Initialize()
+        {
+            await GlobalVars.Instance.UAController.Initialize();
+        }
         void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
+            SetInfo("初始化，请等待！",false);
+            this.IsEnabled = false;
+            try
+            {
+                GlobalVars.Instance.UAController.Initialize();
+            }
+            catch(Exception ex)
+            {
+                SetInfo(ex.Message, true);
+            }
+            
             EnumLayouts();
-#if DEBUG
-#else
-           //uaController = new UAContorller();
-#endif
+            uaController = new UAContorller();
+            this.IsEnabled = true;
+        }
+
+        private void Zoom()
+        {
+            ScaleTransform scaler = new ScaleTransform(zoomRatio, zoomRatio);
+            containerGrid.LayoutTransform = scaler;
+        }
+
+        private void SetInfo(string str, bool error)
+        {
+            txtInfo.Text = str;
+            txtInfo.Foreground = error ? Brushes.Red : Brushes.Black;
         }
 
         private void EnumLayouts()
@@ -108,11 +155,11 @@ namespace BrightMaster
 
         private void Acquire_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            //uaController.Acquire();
-            List<float> xVals = new List<float>();
-            List<float> yVals = new List<float>();
-            List<float> zVals = new List<float>();
-            List<List<PixelInfo>> allPixels = GenerateTestData(); //uaController.Acquire();
+            List<List<PixelInfo>> allPixels = GlobalVars.Instance.UAController.Acquire();
+            //List<float> xVals = new List<float>();
+            //List<float> yVals = new List<float>();
+            //List<float> zVals = new List<float>();
+            //List<List<PixelInfo>> allPixels = GenerateTestData(); //uaController.Acquire();
             IEngine iEngine = new IEngine();
             
             brightness = new Brightness(allPixels);
@@ -121,11 +168,27 @@ namespace BrightMaster
             ImageHelper.SaveBitmapImageIntoFile(bmpImage, sImgFile);
             var pts = iEngine.FindRect(sImgFile);
             myCanvas.SetBkGroundImage(bmpImage,pts);
+            Rect rc = GetRect(pts);
+            var results = brightness.GetResults(rc);
+            lstviewResult.ItemsSource = results;
+
+        }
+
+        private Rect GetRect(List<MPoint> pts)
+        {
+            double left, right, top, bottom;
+            left = pts.Min(pt => pt.x) + 4;
+            top = pts.Min(pt => pt.y) + 4;
+            right = pts.Max(pt => pt.x) - 3;
+            bottom = pts.Max(pt => pt.y) - 3;
+            return new Rect(left, top, right - left, bottom - top);
         }
 
         private List<List<PixelInfo>> GenerateTestData()
         {
             List<List<PixelInfo>> allPixelInfos = new List<List<PixelInfo>>();
+            Random rnd = new Random(23771);
+            int ID = 1;
             for(int y = 0; y < 400; y++)
             {
                 List<PixelInfo> linePixelInfos = new List<PixelInfo>();
@@ -133,10 +196,14 @@ namespace BrightMaster
                 {
                     if (x < 50 || y < 50 || x > 250 || y > 250)
                     {
-                        linePixelInfos.Add(new PixelInfo(0, 0, 0));
+                        linePixelInfos.Add(new PixelInfo(ID++,0, 0, 0));
                     }
                     else
-                        linePixelInfos.Add(new PixelInfo(150, 150, 150));
+                    {
+                        float tVal = 800 + rnd.Next(1,200);
+                        linePixelInfos.Add(new PixelInfo(ID++,tVal, tVal, tVal));
+                    }
+                        
                     
                 }
                 allPixelInfos.Add(linePixelInfos);
@@ -155,13 +222,6 @@ namespace BrightMaster
             LivewFocusView livewFocusView = new LivewFocusView();
             livewFocusView.ShowDialog();
         }
-
-      
-     
-
-        
-   
-        
 
         //private void CommandHelp_Executed(object sender, ExecutedRoutedEventArgs e)
         //{

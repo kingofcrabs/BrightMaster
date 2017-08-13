@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EngineDll;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -37,34 +38,23 @@ namespace BrightMaster
         }
 
 
+     
 
-        List<float> GetResults(Rect boundingRect)
+        public List<PixelInfo> GetResults(Rect boundingRect)
         {
-            var layout = GlobalVars.Instance.Layout;
-            List<float> results = new List<float>();
-            float xStart = (float)(boundingRect.X + layout.topLeft.X / layout.Width * boundingRect.Width);
-            float yStart = (float)(boundingRect.Y + layout.topLeft.Y / layout.Height * boundingRect.Height);
-            float xEnd = (float)(boundingRect.X + layout.bottomRight.X / layout.Width * boundingRect.Width);
-            float yEnd = (float)(boundingRect.Y + layout.bottomRight.Y / layout.Height * boundingRect.Height);
-            float radius = (float)(layout.Radius / layout.Width * boundingRect.Width);
-            PointF ptStart = new PointF(xStart, yStart);
-            PointF ptEnd = new PointF(xEnd, yEnd);
-            for (int x = 0; x < layout.XCount; x++)
+            List<PixelInfo> results = new List<PixelInfo>();
+            var circles = GlobalVars.Instance.Layout.GetCircles(boundingRect);
+            int id = 1;
+            foreach(var circle in circles)
             {
-                for (int y = 0; y < layout.YCount; y++)
-                {
-                    float xx = (ptEnd.X - ptStart.X) * x / (layout.XCount - 1) + ptStart.X;
-                    float yy = (ptEnd.Y - ptStart.Y) * y / (layout.YCount - 1) + ptStart.Y;
-                    results.Add(GetAvgVals(xx,yy,radius));
-                }
+                results.Add(GetAvgVals(circle.x, circle.y, circle.radius,id++));
             }
             return results;
-            //layout.TopLeftX
         }
 
-        private float GetAvgVals(float xx, float yy, float radius)
+        private PixelInfo GetAvgVals(float xx, float yy, float radius, int ID)
         {
-            List<float> vals = new List<float>();
+            List<PixelInfo> vals = new List<PixelInfo>();
             int xStart = (int)(xx - radius);
             int yStart = (int)(yy - radius);
             int xEnd = (int)(xx + radius);
@@ -73,16 +63,20 @@ namespace BrightMaster
             {
                 for(int y = yStart; y< yEnd; y++)
                 {
-                    vals.Add(orgVals[y][x]);
+                    vals.Add(_allPixels[y][x]);
                 }
             }
-            return vals.Average();
-        }
 
+            float X,Y,Z;
+            X = vals.Average(val => val.X);
+            Y = vals.Average(val => val.Y);
+            Z = vals.Average(val => val.Z);
+            return new PixelInfo(ID,X, Y, Z);
+        }
 
         private void SaveImage()
         {
-            Bitmap bmp = new Bitmap(grayVals.Count,grayVals[0].Count);
+            Bitmap bmp = new Bitmap(grayVals[0].Count, grayVals.Count);
             LockBitmap lockBmp = new LockBitmap(bmp);
             lockBmp.LockBits();
             for (int y = 0; y < lockBmp.Height; y++)

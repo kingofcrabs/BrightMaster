@@ -17,10 +17,17 @@ namespace BrightMaster
         Ua.Recipe recipe;
         Ua.DeviceProperty device_property;
         bool initialized = false;
-        public void Initialize()
+
+        IntPtr capture_data_ptr;
+        Ua.CaptureData capture_data;
+        public async void Initialize()
         {
+            Task.Run()
+            if (initialized)
+                return ;
+
             uaCore = new Ua.Core();
-            system_ptr = uaCore.uaInitialize("..\\param");
+            system_ptr = uaCore.uaInitialize(GlobalVars.Instance.ParamPath);
             Ua.System ua_system = Ua.Utility.PtrToUaSystem(system_ptr);
             Ua.Configuration[] configuration = { ua_system.ua_10 };
             for (int i = 0; i < configuration.Length; i++)
@@ -50,14 +57,6 @@ namespace BrightMaster
             {
                 cond = Ua.OptimizationCondition.UA_OPTIMIZE_COND_GAIN_FIX_ND_FIX;
             }
-            else if (uaCore.uaIsUA200(device.type) == Ua.Constants.UA_TRUE)
-            {
-                cond = Ua.OptimizationCondition.UA_OPTIMIZE_COND_GAIN_OPTIMUM_ND_OPTIMUM;
-            }
-            else if (uaCore.uaIsUA200A(device.type) == Ua.Constants.UA_TRUE)
-            {
-                cond = Ua.OptimizationCondition.UA_OPTIMIZE_COND_GAIN_FIX_ND_FIX;
-            }
 
             // Console.WriteLine("uaOptimizeDeviceProperty");
             uaCore.uaOptimizeDeviceProperty(
@@ -65,6 +64,7 @@ namespace BrightMaster
 
             // Console.WriteLine("uaSetDeviceProperty");
             uaCore.uaSetDeviceProperty(ref device, ref device_property);
+        
             initialized = true;
         }
 
@@ -90,6 +90,7 @@ namespace BrightMaster
             float[] z_ptr = Ua.Utility.PtrToFloat(img.Z_ptr, img.size);
                 //System.IO.StreamWriter writer = new System.IO.StreamWriter("..\\out.csv", false);
             List<List<PixelInfo>> allPixelInfos = new List<List<PixelInfo>>();
+            int ID = 1;
             for (int y = 0; y < img.height; y++)
             {
                 List<PixelInfo> lineInfos = new List<PixelInfo>();
@@ -98,8 +99,7 @@ namespace BrightMaster
                     float Y = y_ptr[y * img.width + x];
                     float X = x_ptr[y * img.width + x];
                     float Z = z_ptr[y * img.width + x];
-                    PixelInfo pixelInfo = new PixelInfo(X,Y,Z);
-                   
+                    PixelInfo pixelInfo = new PixelInfo(ID++,X, Y, Z);
                     lineInfos.Add(pixelInfo);
                 }
                 allPixelInfos.Add(lineInfos);
@@ -116,49 +116,77 @@ namespace BrightMaster
 
             if (device_ptr == IntPtr.Zero)
                 throw new Exception("Not initialized!");
-            try
+
+            device_property.capture_mode = Ua.CaptureMode.UA_CAPTURE_MANUAL;
+            capture_data_ptr = uaCore.uaCreateCaptureData(device.type);
+            capture_data = Ua.Utility.PtrToUaCaptureData(capture_data_ptr);
+            int average_count = 0;
+            uaCore.uaGetOptimumAverageCount(
+                ref device, 0, device_property.exposure_time[1], ref average_count);
+
+            // Console.WriteLine("uaStartCapture");
+            uaCore.uaStartCapture(ref device);
+
+            // Console.WriteLine("uaCaptureImage");
+            uaCore.uaCaptureImage(
+                ref device, Ua.CaptureFilterType.UA_CAPTURE_FILTER_XYZ, average_count, ref capture_data);
+
+            // Console.WriteLine("uaStopCapture");
+            uaCore.uaStopCapture(ref device);
+
+
+            IntPtr xyz_image_ptr = uaCore.uaCreateXYZImage(device.type, Ua.DataType.UA_DATA_TRISTIMULUS_XYZ);
+
+            Ua.XYZImage xyz_image = Ua.Utility.PtrToUaXYZImage(xyz_image_ptr);
+
+            uaCore.uaToXYZImage(ref device, ref capture_data, ref xyz_image);
+
+            //WriteToCSV(ref xyz_image);
+            var allPixels = GetData(xyz_image);
+            uaCore.uaSaveMeasurementData("..\\", null, ref xyz_image, ref recipe);
+            uaCore.uaDestroyXYZImage(xyz_image_ptr);
+            uaCore.uaDestroyCaptureData(capture_data_ptr);
+            return allPixels;
+           
+        }
+
+        public Device  Device
+        {
+            get
             {
-                IntPtr capture_data_ptr = uaCore.uaCreateCaptureData(device.type);
-                Ua.CaptureData capture_data = Ua.Utility.PtrToUaCaptureData(capture_data_ptr);
-
-                int average_count = 0;
-                uaCore.uaGetOptimumAverageCount(
-                    ref device, 0, device_property.exposure_time[1], ref average_count);
-
-                // Console.WriteLine("uaStartCapture");
-                uaCore.uaStartCapture(ref device);
-
-                // Console.WriteLine("uaCaptureImage");
-                uaCore.uaCaptureImage(
-                    ref device, Ua.CaptureFilterType.UA_CAPTURE_FILTER_XYZ, average_count, ref capture_data);
-
-                // Console.WriteLine("uaStopCapture");
-                uaCore.uaStopCapture(ref device);
-
-
-                IntPtr xyz_image_ptr = uaCore.uaCreateXYZImage(device.type, Ua.DataType.UA_DATA_TRISTIMULUS_XYZ);
-
-                Ua.XYZImage xyz_image = Ua.Utility.PtrToUaXYZImage(xyz_image_ptr);
-
-                uaCore.uaToXYZImage(ref device, ref capture_data, ref xyz_image);
-
-                //WriteToCSV(ref xyz_image);
-                var allPixels = GetData(xyz_image);
-                uaCore.uaSaveMeasurementData("..\\", null, ref xyz_image, ref recipe);
-                uaCore.uaDestroyXYZImage(xyz_image_ptr);
-                uaCore.uaDestroyCaptureData(capture_data_ptr);
-                return allPixels;
-                
-            }
-            catch (System.DllNotFoundException ex)
-            {
-                throw new Exception("dll not found!");
-            }
-            catch (Ua.DllVersionException ex)
-            {
-                throw new Exception("dll version too low!");
+                return device;
             }
         }
-        
+        public DeviceProperty DeviceProperty
+        {
+            get
+            {
+                return device_property;
+            }
+        }
+
+        public bool Initialized
+        {
+            get
+            {
+                return initialized;
+            }
+        }
+
+        public Core UACore
+        {
+            get
+            {
+                return uaCore;
+            }
+        }
+
+        public CaptureData CaptureData
+        {
+            get
+            {
+                return capture_data;
+            }
+        }
     }
 }

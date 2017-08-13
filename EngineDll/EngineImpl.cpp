@@ -69,10 +69,12 @@ void EngineImpl::FindRect(std::string sFile, vector<pair<int, int>>& pts)
 	if (index == -1)
 		return;
 	pts.clear();
+	
 	for (int i = 0; i < allContours[index].size(); i++)
 	{
 		pts.push_back(make_pair(allContours[index][i].x, allContours[index][i].y));
 	}
+	
 }
 
 void  EngineImpl::FindContours(string sFile,

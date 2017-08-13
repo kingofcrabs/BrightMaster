@@ -77,6 +77,10 @@
                 <TextBox Name="txtSavePath" Width="150"></TextBox>
                 <Button Name="btnNew" Margin="2,0,0,0" Click="btnNew_Click">新建</Button>
             </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Label>点分布规律：</Label>
+                <CheckBox IsChecked="{Binding Path= IsSquare}"  VerticalAlignment="Center">n*n</CheckBox>
+            </StackPanel>
         </StackPanel>
         <Grid Grid.Row="1" Grid.ColumnSpan="2">
             <Grid.ColumnDefinitions>

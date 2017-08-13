@@ -29,7 +29,7 @@
         private void InitializeComponent()
         {
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
-            this.textBox1 = new System.Windows.Forms.TextBox();
+            this.txtHint = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.btnOk = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
@@ -43,13 +43,13 @@
             this.pictureBox1.TabIndex = 0;
             this.pictureBox1.TabStop = false;
             // 
-            // textBox1
+            // txtHint
             // 
-            this.textBox1.Location = new System.Drawing.Point(1, 547);
-            this.textBox1.Multiline = true;
-            this.textBox1.Name = "textBox1";
-            this.textBox1.Size = new System.Drawing.Size(634, 82);
-            this.textBox1.TabIndex = 1;
+            this.txtHint.Location = new System.Drawing.Point(1, 547);
+            this.txtHint.Multiline = true;
+            this.txtHint.Name = "txtHint";
+            this.txtHint.Size = new System.Drawing.Size(634, 82);
+            this.txtHint.TabIndex = 1;
             // 
             // label1
             // 
@@ -77,7 +77,7 @@
             this.ClientSize = new System.Drawing.Size(634, 661);
             this.Controls.Add(this.btnOk);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.textBox1);
+            this.Controls.Add(this.txtHint);
             this.Controls.Add(this.pictureBox1);
             this.Name = "LivewFocusView";
             this.Text = "LivewFocusView";
@@ -90,7 +90,7 @@
         #endregion
 
         private System.Windows.Forms.PictureBox pictureBox1;
-        private System.Windows.Forms.TextBox textBox1;
+        private System.Windows.Forms.TextBox txtHint;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.Button btnOk;
 

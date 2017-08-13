@@ -8,19 +8,81 @@ namespace BrightMaster
 {
     class PixelInfo
     {
-        public float X;
-        public float Y;
-        public float Z;
-        public float x;
-        public float y;
-
-        public PixelInfo(float XX, float YY, float ZZ)
+        private float _X,_Y,_Z,_x,_y;
+        public float X { get
+            {
+                return _X;
+            }
+            
+            set
+            {
+                _X = value;
+            }
+        }
+        public float Y
         {
-            X = XX;
-            Y = YY;
-            Z = ZZ;
-            x = X / (X + Y + Z);
-            y = Y / (X + Y + Z);
+            get
+            {
+                return _Y;
+            }
+            set
+            {
+                _Y = value;
+            }
+        }
+        public float Z
+        {
+            get
+            {
+                return _Z;
+            }
+            set
+            {
+                _Z = value;
+            }
+        }
+
+        public float x
+        {
+            get
+            {
+                return _x;
+            }
+            set
+            {
+                _x = value;
+            }
+        }
+        public float y
+        {
+            get
+            {
+                return _y;
+            }
+            set
+            {
+                _y = value;
+            }
+        }
+
+        private int id;
+        public int ID
+        {
+            get
+            {
+                return id;
+            }
+        }
+
+
+        public PixelInfo(int id,float XX, float YY, float ZZ)
+        {
+            this.id = id;
+            _X = XX;
+            _Y = YY;
+            _Z = ZZ;
+            _x = _X / (_X + _Y + _Z);
+            _y = _Y / (_X + _Y + _Z);
         }
     }
 }

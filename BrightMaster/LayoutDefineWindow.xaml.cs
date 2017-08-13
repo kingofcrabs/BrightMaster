@@ -66,27 +66,14 @@ namespace BrightMaster
 
         private void btnOk_Click(object sender, RoutedEventArgs e)
         {
-               
+            this.Close();   
         }
-
  
         private void SetHint(string sText, bool isError = false)
         {
             txtInfo.Text = sText;
             txtInfo.Foreground = isError ? System.Windows.Media.Brushes.Red : System.Windows.Media.Brushes.Black;
         }
-
-        //private void btnLoad_Click(object sender, RoutedEventArgs e)
-        //{
-        //    if (cmbLayouts.SelectedIndex == -1)
-        //    {
-        //        SetHint("请选择一个layout！", true);
-        //        return;
-        //    }
-        //    string sName = cmbLayouts.SelectedItem.ToString();
-        //    LoadLayout(sName);
-           
-        //}
 
         private void LoadLayout(string sName)
         {

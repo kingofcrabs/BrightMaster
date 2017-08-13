@@ -13,6 +13,24 @@ namespace BrightMaster
         public Layout Layout;
 
 
+        public string ParamPath
+        {
+            get
+            {
+                return @"D:\Projects\BrightMaster\trunk\param";
+            }
+        }
+
+        private static UAContorller uaController = new UAContorller();
+
+        public UAContorller UAController 
+        { 
+            get
+            {
+                return uaController;
+            }
+        }
+
         static public GlobalVars Instance
         {
             get

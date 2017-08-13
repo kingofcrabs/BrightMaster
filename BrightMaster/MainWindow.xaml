@@ -56,8 +56,7 @@
             <RowDefinition Height="30"/>
             <RowDefinition Height="60"/>
             <RowDefinition Height="4*"/>
-            <RowDefinition Height="*"/>
-            <RowDefinition Height="50"/>
+            <RowDefinition Height="100"/>
         </Grid.RowDefinitions>
         <Menu DockPanel.Dock="Top">
             <MenuItem Header="文件">
@@ -85,10 +84,11 @@
                 <Image ToolTip="预览" Height="50" Width="50" Source="/Images/camera.jpg"/>
             </Button>
         </StackPanel>
-
-       
-            <local:MyCanvas x:Name="myCanvas" Grid.Row="2" Background="Yellow" >
+        <Grid Name="containerGrid" Grid.Row="2">
+            <local:MyCanvas x:Name="myCanvas"  Background="LightBlue" >
             </local:MyCanvas>
+        </Grid>
+        
         
         <ScrollViewer x:Name="scrollViewerResult" Grid.Row="2" Grid.Column="1" VerticalScrollBarVisibility="Auto"
                    HorizontalScrollBarVisibility="Auto" VerticalAlignment="Top" >
@@ -120,16 +120,21 @@
                             </DataTrigger>
                         </DataTemplate.Triggers>
                     </DataTemplate>
+                    
                 </ListView.Resources>
                 <ListView.View>
                     <GridView x:Name="gridView1">
-                        <GridViewColumn Header="X" Width="30" CellTemplate="{StaticResource XItem}"  DisplayMemberBinding="{Binding Path = X}"></GridViewColumn>
-                        <GridViewColumn Header="Y" Width="60" CellTemplate="{StaticResource YItem}" DisplayMemberBinding="{Binding Path = Y}"></GridViewColumn>
-                        <GridViewColumn Header="Z"  Width="60" CellTemplate="{StaticResource ZItem}" DisplayMemberBinding="{Binding Path = Z}"></GridViewColumn>
+                        <GridViewColumn Header="ID" Width="40"  DisplayMemberBinding="{Binding Path = ID}"></GridViewColumn>
+                        <GridViewColumn Header="X" Width="80" CellTemplate="{StaticResource XItem}"  DisplayMemberBinding="{Binding Path = X}"></GridViewColumn>
+                        <GridViewColumn Header="Y" Width="80" CellTemplate="{StaticResource YItem}" DisplayMemberBinding="{Binding Path = Y}"></GridViewColumn>
+                        <GridViewColumn Header="Z"  Width="80" CellTemplate="{StaticResource ZItem}" DisplayMemberBinding="{Binding Path = Z}"></GridViewColumn>
                     </GridView>
                 </ListView.View>
             </ListView>
         </ScrollViewer>
-
+        <StackPanel Grid.Row="3">  
+            <Label>提示：</Label>
+            <TextBox TextWrapping="Wrap"  Name="txtInfo" Height="70"></TextBox>
+        </StackPanel>
     </Grid>
 </Window>
