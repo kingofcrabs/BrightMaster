@@ -22,9 +22,8 @@ namespace BrightMaster
   
         private Ua.Device device;
         private Ua.DeviceProperty device_property;
-        private IntPtr capture_data_ptr;
         Ua.CaptureData capture_data;
-
+        IntPtr capture_data_ptr;
         private Bitmap bitmap_;
 
         public LivewFocusView()
@@ -34,40 +33,38 @@ namespace BrightMaster
             this.FormClosing += LivewFocusView_FormClosing;
         }
 
-        
+        void StartLiveview()
+        {
+            //GlobalVars.Instance.UAController.Initialize();
+            GlobalVars.Instance.UAController.SetLiveviewMode();
+
+            //get all variables
+            device = GlobalVars.Instance.UAController.Device;
+            //device_property = GlobalVars.Instance.UAController.DeviceProperty;
+            uaCore = GlobalVars.Instance.UAController.UACore;
+            capture_data = GlobalVars.Instance.UAController.CaptureData;
+
+            //create bitmap
+            Ua.Constants.Binning2Size.UaSize size = Ua.Constants.Binning2Size.UA_10[0];
+            bitmap_ = new Bitmap(size.width, size.height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+
+            //start
+            uaCore.uaStartCapture(ref device);
+            StartGrabLoop();
+        }
+
+
 
         void LivewFocusView_Load(object sender, EventArgs e)
         {
-                Ua.Constants.Binning2Size.UaSize size = Ua.Constants.Binning2Size.UA_10[0];
-                bitmap_ = new Bitmap(size.width, size.height, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
-
-
-                device = GlobalVars.Instance.UAController.Device;
-                device_property = GlobalVars.Instance.UAController.DeviceProperty;
-                uaCore = GlobalVars.Instance.UAController.UACore;
-                capture_data_ptr = uaCore.uaCreateCaptureData(device.type);
-                capture_data = Ua.Utility.PtrToUaCaptureData(capture_data_ptr);
-
-                // set capture mode parameter
-                device_property.capture_mode = Ua.CaptureMode.UA_CAPTURE_FOCUS;
-                // Focus Rect
-                Ua.UaRect roi;
-                roi.width = capture_data.width / 4;
-                roi.height = capture_data.height / 4;
-                roi.x = capture_data.width / 2 - roi.width / 2;
-                roi.y = capture_data.height / 2 - roi.height / 2;
-                device_property.focus_roi = roi;
-                
-                // set device Property
-                int ret = uaCore.uaSetDeviceProperty(ref device, ref device_property);
-                Ua.UaError err = uaCore.uaGetError();
-                if (err != Ua.UaError.UA_NO_ERROR)
-                {
-                    throw new Exception(uaCore.uaGetErrorString(err));
-                }
-                ret = uaCore.uaStartCapture(ref device);
-                err = uaCore.uaGetError();
-                StartGrabLoop();
+            try
+            {
+                StartLiveview();
+            }    
+            catch(Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
 
           
         }
@@ -96,9 +93,8 @@ namespace BrightMaster
             {
                 lock (this)
                 {
-                    uaCore.uaStopCapture(ref device);
-                    if(capture_data_ptr != IntPtr.Zero)
-                        uaCore.uaDestroyCaptureData(capture_data_ptr);
+                    GlobalVars.Instance.UAController.ClearFocus();
+                    //GlobalVars.Instance.UAController.UnInitialize();
                 }
             }
             catch (Exception)

@@ -21,7 +21,7 @@ namespace BrightMaster
         double usableWidth;
         double usableHeight;
         
-        List<MPoint> pts = null;
+        List<Point> pts = null;
         public Layout Layout 
         { 
             get
@@ -69,12 +69,28 @@ namespace BrightMaster
             }
         }
 
-
-
-        public void SetBkGroundImage(System.Windows.Media.Imaging.BitmapImage bmpImage, List<MPoint> pts = null)
+        Point PointF2Point(PointF ptF,double xRatio, double yRatio)
         {
-            if(pts != null)
-                this.pts = pts;
+            return new Point((int)(ptF.X*xRatio), (int)(ptF.Y*yRatio));
+        }
+
+        public void SetBkGroundImage(System.Windows.Media.Imaging.BitmapImage bmpImage, List<MPoint> mpts = null, bool isFakeColor = false)
+        {
+            if(mpts != null && mpts.Count > 0)
+            {
+                pts = SortPoints(mpts);
+            }
+            else if(!isFakeColor)
+            {
+                pts = new List<Point>();
+                double tmpXRatio = bmpImage.Width / layout.Width;
+                double tmpYRatio = bmpImage.Height / layout.Height;
+                pts.Add(PointF2Point(layout.topLeft, tmpXRatio,tmpYRatio));
+                pts.Add(new Point((int)(tmpXRatio * layout.bottomRight.X), (int)(layout.topLeft.Y*tmpYRatio)));
+                pts.Add(PointF2Point(layout.bottomRight,tmpXRatio,tmpYRatio));
+                pts.Add(new Point((int)(layout.topLeft.X *tmpXRatio), (int)(layout.bottomRight.Y*tmpYRatio)));
+            }
+                
             width = bmpImage.Width;
             height = bmpImage.Height;
             CalcuUsable(out usableWidth, out usableHeight);
@@ -90,12 +106,34 @@ namespace BrightMaster
             imageBrush.Viewport = new System.Windows.Rect(0, 0, usableWidth, usableHeight);
             this.Background = imageBrush;
         }
+        
+        Point ConvertPt(MPoint mpt)
+        {
+            return new Point(mpt.x, mpt.y);
+        }
 
-        private System.Windows.Rect GetBoundingRectInUICoordinate(List<MPoint> pts)
+        private List<Point> SortPoints(List<MPoint> mpts)
+        {
+            List<Point> pts = new List<Point>();
+            int avgX = mpts.Sum(pt=>pt.x)/4;
+            int avgY = mpts.Sum(pt=>pt.y)/4;
+            Point ptMassCenter = new Point(avgX, avgY);
+            MPoint topLeft = mpts.Where(pt => pt.x < avgX && pt.y < avgY).First();
+            MPoint topRight = mpts.Where(pt => pt.x > avgX && pt.y < avgY).First();
+            MPoint bottomRight = mpts.Where(pt => pt.x > avgX && pt.y > avgY).First();
+            MPoint bottomLeft = mpts.Where(pt => pt.x < avgX && pt.y > avgY).First();
+            pts.Add(ConvertPt(topLeft));
+            pts.Add(ConvertPt(topRight));
+            pts.Add(ConvertPt(bottomRight));
+            pts.Add(ConvertPt(bottomLeft));
+            return pts;
+        }
+
+        private System.Windows.Rect GetBoundingRectInUICoordinate(List<Point> pts)
         {
             double left, top, right, bottom;
             int leftUICoord, topUICoord, rightUICoord, bottomUICoord;
-            if(pts == null)
+            if(pts == null || pts.Count == 0)
             {
                 leftUICoord = 0;
                 topUICoord = 0;
@@ -104,10 +142,10 @@ namespace BrightMaster
             }
             else
             {
-                left = pts.Min(pt => pt.x) + 4;
-                top = pts.Min(pt => pt.y) + 4;
-                right = pts.Max(pt => pt.x) - 3;
-                bottom = pts.Max(pt => pt.y) - 3;
+                left = pts.Min(pt => pt.X) + 4;
+                top = pts.Min(pt => pt.Y) + 4;
+                right = pts.Max(pt => pt.X) - 3;
+                bottom = pts.Max(pt => pt.Y) - 3;
                 leftUICoord = (int)(usableWidth * left / width);
                 topUICoord = (int)(usableHeight * top / height);
                 rightUICoord = (int)(usableWidth * right / width);
@@ -120,7 +158,26 @@ namespace BrightMaster
         {
             return System.Reflection.Assembly.GetExecutingAssembly().Location.Contains("VisualStudio");
         }
+            
 
+        //int Convert2UICoordX(float x)
+        //{
+        //    return (int)(usableWidth * x / width);
+        //}
+        //int Convert2UICoordY(float y)
+        //{
+        //    return (int)(usableHeight * y / height);
+        //}
+
+
+        int Convert2UICoordXFromImage(float x)
+        {
+            return (int)(usableWidth * x / width);
+        }
+        int Convert2UICoordYFromImage(float y)
+        {
+            return (int)(usableHeight * y / height);
+        }
 
 
         protected override void OnRender(System.Windows.Media.DrawingContext drawingContext)
@@ -131,14 +188,32 @@ namespace BrightMaster
            
             if (layout == null)
                 return;
-
+            
             var boundingRectUICoord = GetBoundingRectInUICoordinate(pts);
             System.Windows.Media.Brush redBrush = System.Windows.Media.Brushes.Red;
-            drawingContext.DrawRectangle(null, new System.Windows.Media.Pen(redBrush, 1), boundingRectUICoord);
+            System.Windows.Media.Pen pen = new System.Windows.Media.Pen(redBrush,1);
+            
+
+            bool validPt = pts != null && pts.Count == 4;
+            if (validPt)
+            {
+                for (int i = 0; i < 4; i++)
+                {
+                    int endIndex = (i + 1) % 4;
+                    System.Windows.Point startPt = new System.Windows.Point(Convert2UICoordXFromImage(pts[i].X), Convert2UICoordYFromImage(pts[i].Y));
+                    System.Windows.Point endPt = new System.Windows.Point(Convert2UICoordXFromImage(pts[endIndex].X), Convert2UICoordYFromImage(pts[endIndex].Y));
+                    drawingContext.DrawLine(pen, startPt, endPt);
+                }
+            }
+            else
+            {
+                drawingContext.DrawRectangle(null, new System.Windows.Media.Pen(redBrush, 1), boundingRectUICoord);
+            }
+
             if(layout != null)
             {
-                var circles = GlobalVars.Instance.Layout.GetCircles(boundingRectUICoord);
-                 
+                var circles = validPt ? GlobalVars.Instance.Layout.GetCircles(pts) :
+                    GlobalVars.Instance.Layout.GetCircles(boundingRectUICoord);
                 foreach(var circle in circles)
                     DrawCircle(circle.Position, circle.Size, drawingContext);
             }
@@ -146,8 +221,10 @@ namespace BrightMaster
 
         private void DrawCircle(PointF pt, PointF sz, DrawingContext drawingContext)
         {
+            System.Windows.Point uiPt = new System.Windows.Point(Convert2UICoordXFromImage(pt.X), Convert2UICoordYFromImage(pt.Y));
+
             drawingContext.DrawEllipse(null, new System.Windows.Media.Pen(System.Windows.Media.Brushes.Red,1),
-                new System.Windows.Point(pt.X, pt.Y), sz.X, sz.Y);
+                uiPt, sz.X, sz.Y);
         }
         
     }

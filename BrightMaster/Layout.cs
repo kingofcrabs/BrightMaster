@@ -13,7 +13,7 @@ namespace BrightMaster
     {
         public PointF topLeft;
         public PointF bottomRight;
-
+     
         private float width;
         private float height;
         private int xCount;
@@ -100,7 +100,7 @@ namespace BrightMaster
         {
             get
             {
-                return topLeft.X;
+                return topLeft.Y;
             }
 
             set
@@ -132,6 +132,57 @@ namespace BrightMaster
                 bottomRight.Y = value;
             }
         }
+
+        //#region firefly
+
+        //public float FireFlyTopLeftX
+        //{
+        //    get
+        //    {
+        //        return fireflyTopLeft.X;
+        //    }
+        //    set
+        //    {
+        //        fireflyTopLeft.X = value;
+        //    }
+        //}
+        //public float FireFlyTopLeftY
+        //{
+        //    get
+        //    {
+        //        return fireflyTopLeft.Y;
+        //    }
+
+        //    set
+        //    {
+        //        fireflyTopLeft.Y = value;
+        //    }
+        //}
+
+        //public float FireFlyBottomRightX
+        //{
+        //    get
+        //    {
+        //        return fireflybottomRight.X;
+        //    }
+        //    set
+        //    {
+        //        fireflybottomRight.X = value;
+        //    }
+        //}
+
+        //public float FireFlyBottomRightY
+        //{
+        //    get
+        //    {
+        //        return fireflybottomRight.Y;
+        //    }
+        //    set
+        //    {
+        //        fireflybottomRight.Y = value;
+        //    }
+        //}
+        //#endregion
 
         public Layout()
         {
@@ -175,6 +226,65 @@ namespace BrightMaster
             }
             return circles;
 
+        }
+
+        PointF GetPositionInImage(List<System.Drawing.Point> realPts, PointF ptInLayout)
+        {
+            PointF leftTop = realPts[0];
+            PointF rightTop = realPts[1];
+            PointF bottomLeft = realPts[3];
+            var layout = GlobalVars.Instance.Layout;
+            
+            Vector vec1 = new Vector(rightTop.X - leftTop.X, rightTop.Y - leftTop.Y);
+            Vector vec2 = new Vector(bottomLeft.X - leftTop.X, bottomLeft.Y - leftTop.Y);
+            PointF pt = leftTop;
+            pt.X += (float)(vec1.X * ptInLayout.X / layout.Width);
+            pt.Y += (float)(vec1.Y * ptInLayout.X / layout.Width);
+            pt.X += (float)(vec2.X * ptInLayout.Y / layout.Height);
+            pt.Y += (float)(vec2.Y * ptInLayout.Y / layout.Height);
+            return pt;
+            //topBoundInterset.X = leftTop.X + (rightTop.X - leftTop.X) * ptInLayout.X / layout.Width;
+            //topBoundInterset.Y = leftTop.Y + (rightTop.Y - leftTop.Y) * ptInLayout.Y / layout.Height;
+
+            //PointF leftBoundInterset = new PointF(100,100);
+            //leftBoundInterset.X = leftTop.X + (bottomLeft.X - leftTop.X) * ptInLayout.X / layout.Width;
+            //leftBoundInterset.Y = leftTop.Y + (bottomLeft.Y - leftTop.Y) * ptInLayout.Y / layout.Height;
+
+            //PointF pt = new PointF(0,0);
+            //pt.X = leftBoundInterset.X + topBoundInterset.X - leftTop.X;
+            //pt.Y = leftBoundInterset.Y + topBoundInterset.Y - leftTop.Y;
+            //return pt;
+
+        }
+
+        double GetDistance(PointF pt1, PointF pt2)
+        {
+            float xx = pt2.X - pt1.X;
+            float yy = pt2.Y - pt1.Y;
+            return Math.Sqrt(xx * xx + yy * yy);
+        }
+        internal List<CircleF> GetCircles(List<System.Drawing.Point> pts)
+        {
+            var layout = GlobalVars.Instance.Layout;
+            List<CircleF> circles = new List<CircleF>();
+
+            PointF ptStart = layout.topLeft;
+            PointF ptEnd = layout.bottomRight;
+            double realWidth = GetDistance(pts[0], pts[1]);
+            float radius = (float)(realWidth / layout.width * layout.radius);
+            for (int x = 0; x < layout.XCount; x++)
+            {
+                for (int y = 0; y < layout.YCount; y++)
+                {
+                    float xx = layout.XCount == 1 ? ptStart.X : (ptEnd.X - ptStart.X) * x / (layout.XCount - 1) + ptStart.X;
+                    float yy = layout.yCount == 1 ? ptStart.Y : (ptEnd.Y - ptStart.Y) * y / (layout.YCount - 1) + ptStart.Y;
+                    PointF realPt = GetPositionInImage(pts, new PointF(xx, yy));
+                    bool bNeedAdd = isN_N || ((x + y) % 2 == 0);
+                    if (bNeedAdd)
+                        circles.Add(new CircleF(realPt.X,realPt.Y, radius));
+                }
+            }
+            return circles;
         }
     }
 

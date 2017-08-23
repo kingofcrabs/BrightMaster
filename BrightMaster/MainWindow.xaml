@@ -48,13 +48,14 @@
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="4*"/>
+            <ColumnDefinition Width="5"/>
             <ColumnDefinition Width="3*"/>
 
 
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="30"/>
-            <RowDefinition Height="60"/>
+            <RowDefinition Height="40"/>
             <RowDefinition Height="4*"/>
             <RowDefinition Height="100"/>
         </Grid.RowDefinitions>
@@ -63,7 +64,7 @@
                 <MenuItem Command="Open" Header="打开" />
             </MenuItem>
             <MenuItem Header="帮助">
-                <MenuItem Header="关于" Command="Help" />
+                <MenuItem Header="关于" Command="Help"/>
             </MenuItem>
         </Menu>
 
@@ -71,26 +72,28 @@
             <ComboBox Width="150" Name="cmbLayouts"></ComboBox>
             <Button Name="btnStartAcquire" Command="{StaticResource StartAcquire}"  ToolTip="开始采集.">
                 <StackPanel Orientation="Vertical" >
-                    <Image Source="/Images/start.png" Height="50"/>
+                    <Image Source="/Images/start.png" Height="30"/>
                 </StackPanel>
             </Button>
-            <ToggleButton Style="{StaticResource ToggleButtonStyle1}" Command="{StaticResource FakeColor}"  Name="btnFakeColor" Width="60">
-                <Image ToolTip="伪彩" Height="50" Width="50" Source="/Images/fakeColor.jpg"/>
+            <ToggleButton Style="{StaticResource ToggleButtonStyle1}" Command="{StaticResource FakeColor}"  Name="btnFakeColor" Width="40">
+                <Image ToolTip="伪彩" Height="30" Width="30" Source="/Images/fakeColor.jpg"/>
             </ToggleButton>
-            <Button  Command="{StaticResource LayoutDef}"  Name="btnLayoutDef" Width="60">
-                <Image ToolTip="版图" Height="50" Width="50" Source="/Images/point.png"/>
+            <Button  Command="{StaticResource LayoutDef}"  Name="btnLayoutDef" Width="40">
+                <Image ToolTip="版图" Height="30" Width="30" Source="/Images/point.png"/>
             </Button>
-            <Button  Command="{StaticResource LiveFocus}"  Name="btnLiveFocus" Width="60">
-                <Image ToolTip="预览" Height="50" Width="50" Source="/Images/camera.jpg"/>
+            <Button  Command="{StaticResource LiveFocus}"  Name="btnLiveFocus" Width="40">
+                <Image ToolTip="预览" Height="30" Width="30" Source="/Images/camera.jpg"/>
             </Button>
         </StackPanel>
         <Grid Name="containerGrid" Grid.Row="2">
-            <local:MyCanvas x:Name="myCanvas"  Background="LightBlue" >
+            <ScrollViewer x:Name="scrollViewer" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+            <local:MyCanvas x:Name="myCanvas"  Background="LightBlue" Width="800" Height="600" >
             </local:MyCanvas>
+            </ScrollViewer>
         </Grid>
-        
-        
-        <ScrollViewer x:Name="scrollViewerResult" Grid.Row="2" Grid.Column="1" VerticalScrollBarVisibility="Auto"
+
+        <GridSplitter Grid.Column="1" Width="5" Grid.Row="2" HorizontalAlignment="Stretch" />
+        <ScrollViewer x:Name="scrollViewerResult" Grid.Row="2" Grid.Column="2" VerticalScrollBarVisibility="Auto"
                    HorizontalScrollBarVisibility="Auto" VerticalAlignment="Top" >
             <ListView Name="lstviewResult"  FontFamily="SimSun">
                 <ListView.Resources>

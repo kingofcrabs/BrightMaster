@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,69 +14,96 @@ namespace BrightMaster
         IntPtr device_ptr = IntPtr.Zero;
         IntPtr system_ptr = IntPtr.Zero;
         IntPtr recipe_ptr = IntPtr.Zero;
-        Ua.Device device;
-        Ua.Recipe recipe;
-        Ua.DeviceProperty device_property;
+        Device device;
+        Recipe recipe;
+        DeviceProperty device_property;
         bool initialized = false;
 
         IntPtr capture_data_ptr;
         Ua.CaptureData capture_data;
-        public async void Initialize()
+        public async Task Initialize()
         {
-            Task.Run()
-            if (initialized)
-                return ;
-
-            uaCore = new Ua.Core();
-            system_ptr = uaCore.uaInitialize(GlobalVars.Instance.ParamPath);
-            Ua.System ua_system = Ua.Utility.PtrToUaSystem(system_ptr);
-            Ua.Configuration[] configuration = { ua_system.ua_10 };
-            for (int i = 0; i < configuration.Length; i++)
+            await Task.Run(() =>
             {
-                for (int j = 0; j < configuration[i].num_connected; j++)
+                if (initialized)
+                    return;
+
+                uaCore = new Ua.Core();
+                system_ptr = uaCore.uaInitialize(GlobalVars.Instance.ParamPath);
+                Ua.System ua_system = Ua.Utility.PtrToUaSystem(system_ptr);
+                Ua.Configuration[] configuration = { ua_system.ua_10 };
+                for (int i = 0; i < configuration.Length; i++)
                 {
-                    device_ptr = uaCore.uaOpenDevice(configuration[i].connected_product_ids[j]);
-                    if (device_ptr != IntPtr.Zero)
+                    for (int j = 0; j < configuration[i].num_connected; j++)
                     {
-                        break;
+                        device_ptr = uaCore.uaOpenDevice(configuration[i].connected_product_ids[j]);
+                        if (device_ptr != IntPtr.Zero)
+                        {
+                            break;
+                        }
                     }
                 }
-            }
-            Ua.UaError n_err_code = uaCore.uaGetError();
-            if (n_err_code != Ua.UaError.UA_NO_ERROR)
-            {
-                throw new Exception(uaCore.uaGetErrorString(n_err_code));
-            }
-            device = Ua.Utility.PtrToUaDevice(device_ptr);
-            recipe_ptr = uaCore.uaCreateRecipe(device.type);
-            recipe = Ua.Utility.PtrToUaRecipe(recipe_ptr);
-            device_property = Ua.Utility.PtrToUaDeviceProperty(recipe.property_ptr);
-            uaCore.uaGetDeviceProperty(ref device, ref device_property);
-     
-            Ua.OptimizationCondition cond = Ua.OptimizationCondition.UA_OPTIMIZE_COND_GAIN_FIX_ND_FIX;
-            if (uaCore.uaIsUA10(device.type) == Ua.Constants.UA_TRUE)
-            {
-                cond = Ua.OptimizationCondition.UA_OPTIMIZE_COND_GAIN_FIX_ND_FIX;
-            }
-
-            // Console.WriteLine("uaOptimizeDeviceProperty");
-            uaCore.uaOptimizeDeviceProperty(
-                ref device, cond, ref device_property);
-
-            // Console.WriteLine("uaSetDeviceProperty");
-            uaCore.uaSetDeviceProperty(ref device, ref device_property);
-        
-            initialized = true;
+                Ua.UaError n_err_code = uaCore.uaGetError();
+                if (n_err_code != Ua.UaError.UA_NO_ERROR)
+                {
+                    throw new Exception(uaCore.uaGetErrorString(n_err_code));
+                }
+                device = Ua.Utility.PtrToUaDevice(device_ptr);
+                recipe_ptr = uaCore.uaCreateRecipe(device.type);
+                recipe = Ua.Utility.PtrToUaRecipe(recipe_ptr);
+                device_property = Ua.Utility.PtrToUaDeviceProperty(recipe.property_ptr);
+                uaCore.uaGetDeviceProperty(ref device, ref device_property);
+                initialized = true;
+            });
         }
+
+        
+
+      
+        public void SetLiveviewMode()
+        {
+            //Ua.UaError n_err_code = uaCore.uaGetError();
+            //if (n_err_code != Ua.UaError.UA_NO_ERROR)
+            //{
+            //    throw new Exception(uaCore.uaGetErrorString(n_err_code));
+            //}
+         
+            capture_data_ptr = uaCore.uaCreateCaptureData(device.type);
+            capture_data = Ua.Utility.PtrToUaCaptureData(capture_data_ptr);
+
+
+           
+            // set capture mode parameter
+            device_property.capture_mode = Ua.CaptureMode.UA_CAPTURE_FOCUS;
+            // Focus Rect
+            Ua.UaRect roi;
+            roi.width = capture_data.width / 4;
+            roi.height = capture_data.height / 4;
+            roi.x = capture_data.width / 2 - roi.width / 2;
+            roi.y = capture_data.height / 2 - roi.height / 2;
+            device_property.focus_roi = roi;
+
+            // set device Property
+            int ret = uaCore.uaSetDeviceProperty(ref device, ref device_property);
+     
+            Ua.UaError err = uaCore.uaGetError();
+            //if (err != Ua.UaError.UA_NO_ERROR)
+            //{
+            //    throw new Exception(uaCore.uaGetErrorString(err));
+            //}
+        }
+
 
         public void UnInitialize()
         {
-            if(recipe_ptr != IntPtr.Zero)
-                uaCore.uaDestroyRecipe(recipe_ptr);
+            
             if(device_ptr != IntPtr.Zero)
+            {
+                uaCore.uaDestroyCaptureData(capture_data_ptr);
                 uaCore.uaCloseDevice(device_ptr);
-            if(system_ptr != IntPtr.Zero)
-                uaCore.uaFinalize(system_ptr);
+                device_ptr = IntPtr.Zero;
+            }
+            uaCore.uaFinalize(system_ptr);
             initialized = false;
         }
 
@@ -107,6 +135,26 @@ namespace BrightMaster
             return allPixelInfos;
            
         }
+
+        public void SetMannualMode()
+        {
+            Ua.OptimizationCondition cond = Ua.OptimizationCondition.UA_OPTIMIZE_COND_GAIN_FIX_ND_FIX;
+            if (uaCore.uaIsUA10(device.type) == Ua.Constants.UA_TRUE)
+            {
+                cond = Ua.OptimizationCondition.UA_OPTIMIZE_COND_GAIN_FIX_ND_FIX;
+            }
+            // Console.WriteLine("uaOptimizeDeviceProperty");
+            uaCore.uaOptimizeDeviceProperty(
+                ref device, cond, ref device_property);
+            
+            device_property.capture_mode = Ua.CaptureMode.UA_CAPTURE_MANUAL;
+            // Console.WriteLine("uaSetDeviceProperty");
+            uaCore.uaSetDeviceProperty(ref device, ref device_property);
+            capture_data_ptr = uaCore.uaCreateCaptureData(device.type);
+            capture_data = Ua.Utility.PtrToUaCaptureData(capture_data_ptr);
+
+            
+        }
         public List<List<PixelInfo>> Acquire()
         {
             if (!initialized)
@@ -117,12 +165,11 @@ namespace BrightMaster
             if (device_ptr == IntPtr.Zero)
                 throw new Exception("Not initialized!");
 
-            device_property.capture_mode = Ua.CaptureMode.UA_CAPTURE_MANUAL;
-            capture_data_ptr = uaCore.uaCreateCaptureData(device.type);
-            capture_data = Ua.Utility.PtrToUaCaptureData(capture_data_ptr);
+            SetMannualMode();
             int average_count = 0;
             uaCore.uaGetOptimumAverageCount(
-                ref device, 0, device_property.exposure_time[1], ref average_count);
+                ref device, 0, 40, ref average_count);
+           
 
             // Console.WriteLine("uaStartCapture");
             uaCore.uaStartCapture(ref device);
@@ -143,9 +190,9 @@ namespace BrightMaster
 
             //WriteToCSV(ref xyz_image);
             var allPixels = GetData(xyz_image);
-            uaCore.uaSaveMeasurementData("..\\", null, ref xyz_image, ref recipe);
+            //uaCore.uaSaveMeasurementData("..\\", null, ref xyz_image, ref recipe);
             uaCore.uaDestroyXYZImage(xyz_image_ptr);
-            uaCore.uaDestroyCaptureData(capture_data_ptr);
+            //uaCore.uaDestroyCaptureData(capture_data_ptr);
             return allPixels;
            
         }
@@ -157,14 +204,7 @@ namespace BrightMaster
                 return device;
             }
         }
-        public DeviceProperty DeviceProperty
-        {
-            get
-            {
-                return device_property;
-            }
-        }
-
+       
         public bool Initialized
         {
             get
@@ -186,6 +226,17 @@ namespace BrightMaster
             get
             {
                 return capture_data;
+            }
+        }
+
+        internal void ClearFocus()
+        {
+            uaCore.uaStopCapture(ref device);
+            uaCore.uaDestroyCaptureData(capture_data_ptr);
+            Ua.UaError n_err_code = uaCore.uaGetError();
+            if (n_err_code != Ua.UaError.UA_NO_ERROR)
+            {
+                throw new Exception(uaCore.uaGetErrorString(n_err_code));
             }
         }
     }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,8 +12,12 @@ namespace BrightMaster
         static private GlobalVars instance;
 
         public Layout Layout;
+        bool isTest = false;
 
-
+        private GlobalVars()
+        {
+            isTest = bool.Parse(ConfigurationManager.AppSettings["Test"]);
+        }
         public string ParamPath
         {
             get
@@ -31,6 +36,13 @@ namespace BrightMaster
             }
         }
 
+        public bool IsTest
+        {
+            get
+            {
+                return isTest;
+            }
+        }
         static public GlobalVars Instance
         {
             get
@@ -38,6 +50,7 @@ namespace BrightMaster
                 if (instance == null)
                 {
                     instance = new GlobalVars();
+                    
                 }
                 return instance;
             }

@@ -38,12 +38,14 @@ namespace BrightMaster
         }
 
 
-     
 
-        public List<PixelInfo> GetResults(Rect boundingRect)
+
+        public List<PixelInfo> GetResults(List<MPoint> mpts)
         {
+            List<System.Drawing.Point> pts = new List<System.Drawing.Point>();
+            mpts.ForEach(pt => pts.Add(new System.Drawing.Point(pt.x, pt.y)));
             List<PixelInfo> results = new List<PixelInfo>();
-            var circles = GlobalVars.Instance.Layout.GetCircles(boundingRect);
+            var circles = GlobalVars.Instance.Layout.GetCircles(pts);
             int id = 1;
             foreach(var circle in circles)
             {

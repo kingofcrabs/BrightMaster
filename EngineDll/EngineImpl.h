@@ -6,6 +6,22 @@
 using namespace cv;
 
 
+struct LineSegment
+{
+	cv::Point2f ptStart;
+	cv::Point2f ptEnd;
+	LineSegment(cv::Point2f start, cv::Point2f end)
+	{
+		ptStart = start;
+		ptEnd = end;
+
+	}
+
+	LineSegment()
+	{
+
+	}
+};
 
 class EngineImpl
 {
@@ -36,7 +52,24 @@ private:
 		>& contours,
 		int min, int max, int cnt2Find);
 	//void on_trackbar(int val, void*);
+
+	void GothroughImage(Mat& src);
+	void SaveHistogram(Mat& src);
+	std::vector<Point2f> GetQuadRangle(std::vector<Point2f> hullPts);
+
+	bool PointIsNear(Point2f ptA, Point2f ptB);
 	
+	//float angleBetween(const Point &v1, const Point &v2);
+	bool HasNear(std::vector<LineSegment>& lines, int curIndex);
+	float GetDistance(LineSegment& line, Point2f pt);
+
+	bool IsClockWise(const Point2f v1, const Point2f& v2);
+	LineSegment FindNearest(std::vector<LineSegment>& lines, Point2f ptCenter);
+	void FilterOutLines(std::vector<LineSegment>& lines, RotatedRect& boundingRect, Mat& img);
+	void ProcessLines(std::vector<LineSegment>&);
+	std::vector<LineSegment> MergeNear(std::vector<LineSegment>& lines, int curIndex);
+	bool Intersection(Point2f o1, Point2f p1, Point2f o2, Point2f p2, Point2f &r);
+	std::vector<Point2f> IntersectLines(std::vector<LineSegment>& lines);
 	int thresholdVal;
 	
 };

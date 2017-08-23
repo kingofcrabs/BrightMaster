@@ -17,6 +17,7 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Windows.Threading;
 
 namespace BrightMaster
 {
@@ -31,12 +32,58 @@ namespace BrightMaster
         ObservableCollection<string> layoutFiles = new ObservableCollection<string>();
         double zoomRatio = 1;
 
+        Point? lastCenterPositionOnTarget;
+        Point? lastMousePositionOnTarget;
+        Point? lastDragPoint;
+
+
         public MainWindow()
         {
             InitializeComponent();
             this.Loaded += MainWindow_Loaded;
             this.Closing += MainWindow_Closing;
             this.PreviewMouseWheel +=MainWindow_PreviewMouseWheel;
+
+            scrollViewer.PreviewMouseLeftButtonDown += scrollViewer_PreviewMouseLeftButtonDown;
+            scrollViewer.PreviewMouseMove += scrollViewer_PreviewMouseMove;
+            scrollViewer.PreviewMouseLeftButtonUp += scrollViewer_PreviewMouseLeftButtonUp;
+            //scrollViewer.PreviewMouseLeftButtonDown += OnMouseLeftButtonDown;
+
+        }
+
+        void scrollViewer_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        {
+            scrollViewer.Cursor = Cursors.Arrow;
+            scrollViewer.ReleaseMouseCapture();
+            lastDragPoint = null;
+        }
+
+        void scrollViewer_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            var mousePos = e.GetPosition(scrollViewer);
+            if (mousePos.X <= scrollViewer.ViewportWidth && mousePos.Y <
+                scrollViewer.ViewportHeight) //make sure we still can use the scrollbars
+            {
+                scrollViewer.Cursor = Cursors.SizeAll;
+                lastDragPoint = mousePos;
+                Mouse.Capture(scrollViewer);
+            }
+        }
+
+        void scrollViewer_PreviewMouseMove(object sender, MouseEventArgs e)
+        {
+            if (lastDragPoint.HasValue)
+            {
+                Point posNow = e.GetPosition(scrollViewer);
+
+                double dX = posNow.X - lastDragPoint.Value.X;
+                double dY = posNow.Y - lastDragPoint.Value.Y;
+
+                lastDragPoint = posNow;
+
+                scrollViewer.ScrollToHorizontalOffset(scrollViewer.HorizontalOffset - dX);
+                scrollViewer.ScrollToVerticalOffset(scrollViewer.VerticalOffset - dY);
+            }
         }
 
         private void MainWindow_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
@@ -57,9 +104,13 @@ namespace BrightMaster
             GlobalVars.Instance.UAController.UnInitialize();
         }
 
-        async Task Initialize()
+        async void Initialize()
         {
             await GlobalVars.Instance.UAController.Initialize();
+            EnumLayouts();
+            uaController = new UAContorller();
+            this.IsEnabled = true;
+            SetInfo("初始化成功！", false);
         }
         void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
@@ -67,22 +118,19 @@ namespace BrightMaster
             this.IsEnabled = false;
             try
             {
-                GlobalVars.Instance.UAController.Initialize();
+                Initialize();
             }
             catch(Exception ex)
             {
-                SetInfo(ex.Message, true);
+                SetInfo("初始化失败，原因是："+ ex.Message, true);
             }
-            
-            EnumLayouts();
-            uaController = new UAContorller();
-            this.IsEnabled = true;
         }
 
         private void Zoom()
         {
+            
             ScaleTransform scaler = new ScaleTransform(zoomRatio, zoomRatio);
-            containerGrid.LayoutTransform = scaler;
+            myCanvas.LayoutTransform = scaler;
         }
 
         private void SetInfo(string str, bool error)
@@ -117,7 +165,7 @@ namespace BrightMaster
             {
                 bmpImage = ImageHelper.CreateImage(brightness.grayVals);
             }
-            myCanvas.SetBkGroundImage(bmpImage);            
+            myCanvas.SetBkGroundImage(bmpImage,null,true);            
         }
 
         private void LayoutDef_CanExecute(object sender, CanExecuteRoutedEventArgs e)
@@ -153,36 +201,57 @@ namespace BrightMaster
             e.CanExecute = bok;
         }
 
-        private void Acquire_Executed(object sender, ExecutedRoutedEventArgs e)
+        async Task  DoAcquisition()
         {
-            List<List<PixelInfo>> allPixels = GlobalVars.Instance.UAController.Acquire();
-            //List<float> xVals = new List<float>();
-            //List<float> yVals = new List<float>();
-            //List<float> zVals = new List<float>();
-            //List<List<PixelInfo>> allPixels = GenerateTestData(); //uaController.Acquire();
-            IEngine iEngine = new IEngine();
             
-            brightness = new Brightness(allPixels);
-            BitmapImage bmpImage = ImageHelper.CreateImage(brightness.grayVals);
-            string sImgFile = FolderHelper.GetImageFolder() + "latest.jpg";
-            ImageHelper.SaveBitmapImageIntoFile(bmpImage, sImgFile);
-            var pts = iEngine.FindRect(sImgFile);
-            myCanvas.SetBkGroundImage(bmpImage,pts);
-            Rect rc = GetRect(pts);
-            var results = brightness.GetResults(rc);
-            lstviewResult.ItemsSource = results;
+            await Task.Run(() =>
+            {
+                List<List<PixelInfo>> allPixels = GlobalVars.Instance.UAController.Acquire();
+                try
+                {
+                    brightness = new Brightness(allPixels);
+                    this.Dispatcher.Invoke(() =>
+                    {
+                        var bmpImage = ImageHelper.CreateImage(brightness.grayVals);
+                        IEngine iEngine = new IEngine();
+                        string sImgFile = FolderHelper.GetImageFolder() + "latest.jpg";
 
+                        ImageHelper.SaveBitmapImageIntoFile(bmpImage, sImgFile);
+                        var pts = iEngine.FindRect(sImgFile);
+                        myCanvas.SetBkGroundImage(bmpImage, pts);
+                        var results = brightness.GetResults(pts);
+                        lstviewResult.ItemsSource = results;
+                    });
+                }
+                catch (Exception ex)
+                {
+                    this.Dispatcher.Invoke(() =>
+                    {
+                        SetInfo("采集失败："+ex.Message, true);
+                        return;
+                    });
+                    
+                }
+                this.Dispatcher.Invoke(() =>
+                {
+                    SetInfo("采集完成。", false);
+                    this.IsEnabled = true;
+                    InvalidateVisual();
+                });
+            });
         }
 
-        private Rect GetRect(List<MPoint> pts)
+        private  async void Acquire_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            double left, right, top, bottom;
-            left = pts.Min(pt => pt.x) + 4;
-            top = pts.Min(pt => pt.y) + 4;
-            right = pts.Max(pt => pt.x) - 3;
-            bottom = pts.Max(pt => pt.y) - 3;
-            return new Rect(left, top, right - left, bottom - top);
+            SetInfo("开始采集。",false);
+            btnFakeColor.IsChecked = false;
+            this.IsEnabled = false;
+            await DoAcquisition();
         }
+
+    
+
+      
 
         private List<List<PixelInfo>> GenerateTestData()
         {
@@ -235,5 +304,18 @@ namespace BrightMaster
         //}
 
        
+    }
+
+    public static class ExtensionMethods
+    {
+        private static Action EmptyDelegate = delegate() { };
+
+        public static void Refresh(this UIElement uiElement)
+        {
+
+            uiElement.Dispatcher.Invoke(DispatcherPriority.ContextIdle, EmptyDelegate);
+
+        }
+
     }
 }
