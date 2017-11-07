@@ -19,7 +19,8 @@ namespace BrightMaster
         double width;
         double height;
         double usableWidth;
-        double usableHeight;
+        double usableHeight; 
+        bool isFakeColor = false;
         
         List<Point> pts = null;
         public Layout Layout 
@@ -76,6 +77,7 @@ namespace BrightMaster
 
         public void SetBkGroundImage(System.Windows.Media.Imaging.BitmapImage bmpImage, List<MPoint> mpts = null, bool isFakeColor = false)
         {
+            this.isFakeColor = isFakeColor;
             if(mpts != null && mpts.Count > 0)
             {
                 pts = SortPoints(mpts);
@@ -214,17 +216,38 @@ namespace BrightMaster
             {
                 var circles = validPt ? GlobalVars.Instance.Layout.GetCircles(pts) :
                     GlobalVars.Instance.Layout.GetCircles(boundingRectUICoord);
+                int index = 0;
                 foreach(var circle in circles)
-                    DrawCircle(circle.Position, circle.Size, drawingContext);
+                {
+                    System.Windows.Point uiPt = new System.Windows.Point(Convert2UICoordXFromImage(circle.Position.X), Convert2UICoordYFromImage(circle.Position.Y));
+                    DrawCircle(uiPt, circle.Size,  drawingContext);
+                    DrawText((index + 1).ToString(), uiPt, drawingContext, 12);
+                    index++;
+                }
             }
         }
 
-        private void DrawCircle(PointF pt, PointF sz, DrawingContext drawingContext)
-        {
-            System.Windows.Point uiPt = new System.Windows.Point(Convert2UICoordXFromImage(pt.X), Convert2UICoordYFromImage(pt.Y));
 
+        private void DrawText(string str, System.Windows.Point point, DrawingContext drawingContext, int fontSize = 16)
+        {
+            if (str == null)
+                return;
+
+            var txt = new FormattedText(
+               str,
+               System.Globalization.CultureInfo.CurrentCulture,
+               0,
+               new Typeface("Courier new"),
+               fontSize,
+               System.Windows.Media.Brushes.Black);
+
+            drawingContext.DrawText(txt, point);
+        }
+
+        private void DrawCircle(System.Windows.Point pt, PointF sz, DrawingContext drawingContext)
+        {
             drawingContext.DrawEllipse(null, new System.Windows.Media.Pen(System.Windows.Media.Brushes.Red,1),
-                uiPt, sz.X, sz.Y);
+                pt, sz.X, sz.Y);
         }
         
     }

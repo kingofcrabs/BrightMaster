@@ -13,22 +13,22 @@ namespace BrightMaster
     {
         public PointF topLeft;
         public PointF bottomRight;
-     
-        private float width;
-        private float height;
+
+        private PointF roiTopLeft;
+        private PointF roiBottomRight;
         private int xCount;
         private int yCount;
         private float radius;
         private bool isN_N;
-        public float Width 
+        public PointF ROITopLeft 
         { 
             get
             {
-                return width;
+                return roiTopLeft;
             }
             set
             {
-                SetProperty(ref width, value);
+                SetProperty(ref roiTopLeft, value);
             }
         }
 
@@ -45,15 +45,15 @@ namespace BrightMaster
         }
 
 
-        
-        public float Height
+
+        public PointF RoiBottomRight
         {
             get
             {
-                return height;
+                return roiBottomRight;
             }
             set{
-                SetProperty(ref height, value);
+                SetProperty(ref roiBottomRight, value);
             }
         }
         public int XCount
@@ -106,6 +106,54 @@ namespace BrightMaster
             set
             {
                 topLeft.Y = value;
+            }
+        }
+
+        public float ROITopLeftX
+        {
+            get
+            {
+                return roiTopLeft.X;
+            }
+            set
+            {
+                roiTopLeft.X = value;
+            }
+        }
+        public float ROITopLeftY
+        {
+            get
+            {
+                return roiTopLeft.Y;
+            }
+
+            set
+            {
+                roiTopLeft.Y = value;
+            }
+        }
+
+        public float ROIBottomRightX
+        {
+            get
+            {
+                return roiBottomRight.X;
+            }
+            set
+            {
+                roiBottomRight.X = value;
+            }
+        }
+
+        public float BottomRightY
+        {
+            get
+            {
+                return roiBottomRight.Y;
+            }
+            set
+            {
+                roiBottomRight.Y = value;
             }
         }
 
@@ -189,12 +237,12 @@ namespace BrightMaster
 
         }
 
-        public Layout(float width_, float height_,PointF topLeft_, PointF bottomRight_, int xCount_, int yCount_, float radius_)
+        public Layout(PointF roiTopLeft_, PointF roiBottomRight_, PointF topLeft_, PointF bottomRight_, int xCount_, int yCount_, float radius_)
         {
-            Width = width_;
-            Height = height_;
-            topLeft = topLeft_;
-            bottomRight = bottomRight_;
+            this.roiTopLeft = roiTopLeft_;
+            this.roiBottomRight = roiBottomRight_;
+            topLeft = roiTopLeft_;
+            bottomRight = roiBottomRight_;
             XCount = xCount_;
             YCount = yCount_;
             Radius = radius_;

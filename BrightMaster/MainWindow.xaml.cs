@@ -206,6 +206,7 @@ namespace BrightMaster
             
             await Task.Run(() =>
             {
+
                 List<List<PixelInfo>> allPixels = GlobalVars.Instance.UAController.Acquire();
                 try
                 {

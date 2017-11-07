@@ -166,14 +166,14 @@ namespace BrightMaster
                 throw new Exception("Not initialized!");
 
             SetMannualMode();
-            int average_count = 0;
-            uaCore.uaGetOptimumAverageCount(
-                ref device, 0, 40, ref average_count);
+            int average_count = 2;
+            //uaCore.uaGetOptimumAverageCount(
+            //    ref device, 0, 40, ref average_count);
            
 
             // Console.WriteLine("uaStartCapture");
             uaCore.uaStartCapture(ref device);
-
+            double expo = device_property.exposure_time[0];
             // Console.WriteLine("uaCaptureImage");
             uaCore.uaCaptureImage(
                 ref device, Ua.CaptureFilterType.UA_CAPTURE_FILTER_XYZ, average_count, ref capture_data);

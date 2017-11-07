@@ -32,22 +32,30 @@
             <Label>测试定义：</Label>
             
             <StackPanel Orientation="Horizontal" Margin="0,5,0,5">
-                <GroupBox Header="大小">
+                <GroupBox Header="ROI">
                     <StackPanel>
-                        <StackPanel Orientation="Horizontal">
-                            <Label>长度:</Label>
-                            <TextBox  Width="50" Text="{Binding Path=Width}" Margin="7,0,0,0"></TextBox>
-                            
+                        <StackPanel>
+                            <Label>左上角：</Label>
+                            <StackPanel Orientation="Horizontal">
+                                <Label>X:</Label>
+                                <TextBox Text="{Binding Path=ROITopLeftX}" Width="50"></TextBox>
+                                <Label>Y:</Label>
+                                <TextBox  Margin="3,0,0,0" Text="{Binding Path=ROITopLeftY}" Width="50"></TextBox>
+                            </StackPanel>
                         </StackPanel>
-                        <StackPanel Orientation="Horizontal" Margin="0,3,0,3">
-                            <Label>宽度:</Label>
-                            <TextBox  Width="50" Text="{Binding Path=Height}" Margin="7,0,0,0"></TextBox>
-                            
+                        <StackPanel>
+                            <Label>右下角：</Label>
+                            <StackPanel Orientation="Horizontal" >
+                                <Label>X:</Label>
+                                <TextBox Text="{Binding Path=ROIBottomRightX}" Width="50"></TextBox>
+                                <Label Margin="3,0,0,0">Y:</Label>
+                                <TextBox  Text="{Binding Path=ROIBottomRightY}" Width="50"></TextBox>
+                            </StackPanel>
                         </StackPanel>
                     </StackPanel>
                 </GroupBox>
             </StackPanel>
-            <GroupBox Header="位置">
+            <GroupBox Header="点位置">
                 <StackPanel>
                     <StackPanel>
                         <Label>左上角：</Label>
@@ -59,7 +67,7 @@
                         </StackPanel>
                     </StackPanel>
                     <StackPanel>
-                        <Label>右下上角：</Label>
+                        <Label>右下角：</Label>
                         <StackPanel Orientation="Horizontal" >
                             <Label>X:</Label>
                             <TextBox Text="{Binding Path=BottomRightX}" Width="50"></TextBox>

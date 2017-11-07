@@ -402,18 +402,17 @@ void EngineImpl::FindRect(std::string sFile, vector<pair<int, int>>& ptPairs)
 	Mat thresholdImg;
 	//Mat pseudoColor;
 	//applyColorMap(img, pseudoColor, COLORMAP_JET);
-	//sFile = sFile.substr(0, sFile.length() - 4) + "_pseudo.jpg";
-	//imwrite(sFile, pseudoColor);
+	
 	std::vector< std::vector<cv::Point> > allContours;
 	//cv::adaptiveThreshold(img, thresholdImg, 255, CV_ADAPTIVE_THRESH_MEAN_C, CV_THRESH_BINARY_INV, 7, 5);
-	cv::threshold(img, thresholdImg, 40, 255, CV_THRESH_BINARY);
-
-	//imshow("threshold", thresholdImg);
+	cv::threshold(img, thresholdImg, 100, 255, CV_THRESH_BINARY);
+	imwrite("d:\\threshold.png", thresholdImg);
 	cv::findContours(thresholdImg, allContours, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
+	
 	int width = img.size().width;
 	int height = img.size().height;
 	//assume rect length > with + height /2;
-	int valid = (width + height) / 2;
+	int valid = (width + height) / 3;
 	int min = 0;
 	int index = -1;
 	int allmostFull = (width + height) * 2 - 50;
@@ -611,6 +610,7 @@ int EngineImpl::SearchLights(uchar* pdata, int width, int height, int min, int m
 {
 	img = Mat(height, width, CV_8UC1, pdata);
 	Mat thresholdImg;
+	
 	thresholdVal = cv::threshold(img, thresholdImg, 0, 255, CV_THRESH_BINARY | CV_THRESH_OTSU);
 	//cv::adaptiveThreshold(img, thresholdImg, 255, CV_ADAPTIVE_THRESH_MEAN_C, CV_THRESH_BINARY, 7, 5);
 

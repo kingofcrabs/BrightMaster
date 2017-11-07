@@ -37,6 +37,7 @@ namespace BrightMaster
             SaveImage();
         }
 
+       
 
 
 
