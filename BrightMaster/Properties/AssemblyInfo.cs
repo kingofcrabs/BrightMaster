@@ -10,9 +10,9 @@ using System.Windows;
 [assembly: AssemblyTitle("BrightMaster")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Microsoft")]
+[assembly: AssemblyCompany("研德仪器")]
 [assembly: AssemblyProduct("BrightMaster")]
-[assembly: AssemblyCopyright("Copyright © Microsoft 2017")]
+[assembly: AssemblyCopyright("版权 © 研德仪器 2017")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

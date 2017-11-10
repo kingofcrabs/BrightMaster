@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BrightMaster", "BrightMaste
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EngineDll", "..\EngineDll\EngineDll.vcxproj", "{9F46951F-D766-4801-9AED-44DC5F017EB9}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestListView", "..\TestListView\TestListView.csproj", "{CC7805B5-BF61-43CB-B073-2BDA192618EC}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +47,18 @@ Global
 		{9F46951F-D766-4801-9AED-44DC5F017EB9}.Release|Win32.Build.0 = Release|Win32
 		{9F46951F-D766-4801-9AED-44DC5F017EB9}.Release|x64.ActiveCfg = Release|x64
 		{9F46951F-D766-4801-9AED-44DC5F017EB9}.Release|x64.Build.0 = Release|x64
+		{CC7805B5-BF61-43CB-B073-2BDA192618EC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{CC7805B5-BF61-43CB-B073-2BDA192618EC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{CC7805B5-BF61-43CB-B073-2BDA192618EC}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{CC7805B5-BF61-43CB-B073-2BDA192618EC}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{CC7805B5-BF61-43CB-B073-2BDA192618EC}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{CC7805B5-BF61-43CB-B073-2BDA192618EC}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{CC7805B5-BF61-43CB-B073-2BDA192618EC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{CC7805B5-BF61-43CB-B073-2BDA192618EC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{CC7805B5-BF61-43CB-B073-2BDA192618EC}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{CC7805B5-BF61-43CB-B073-2BDA192618EC}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{CC7805B5-BF61-43CB-B073-2BDA192618EC}.Release|Win32.ActiveCfg = Release|Any CPU
+		{CC7805B5-BF61-43CB-B073-2BDA192618EC}.Release|x64.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

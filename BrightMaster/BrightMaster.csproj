@@ -62,33 +62,39 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
-    <Compile Include="BindBase.cs" />
-    <Compile Include="BmpPlus.cs" />
-    <Compile Include="Brightness.cs" />
-    <Compile Include="CircleF.cs" />
-    <Compile Include="ColorCanvas.cs" />
-    <Compile Include="ColorMap.cs" />
-    <Compile Include="GlobalVars.cs" />
-    <Compile Include="ImageHelper.cs" />
-    <Compile Include="Layout.cs" />
-    <Compile Include="LayoutDefineWindow.xaml.cs">
-      <DependentUpon>LayoutDefineWindow.xaml</DependentUpon>
-    </Compile>
-    <Compile Include="LiveFocusView.cs">
+    <Compile Include="forms\AboutBox.cs">
       <SubType>Form</SubType>
     </Compile>
-    <Compile Include="LiveFocusView.Designer.cs">
+    <Compile Include="forms\AboutBox.Designer.cs">
+      <DependentUpon>AboutBox.cs</DependentUpon>
+    </Compile>
+    <Compile Include="settings\BindBase.cs" />
+    <Compile Include="utility\BmpPlus.cs" />
+    <Compile Include="data\Brightness.cs" />
+    <Compile Include="settings\CameraSetting.cs" />
+    <Compile Include="data\CircleF.cs" />
+    <Compile Include="data\ColorCanvas.cs" />
+    <Compile Include="data\ColorMap.cs" />
+    <Compile Include="settings\Constrain.cs" />
+    <Compile Include="utility\GlobalVars.cs" />
+    <Compile Include="utility\ImageHelper.cs" />
+    <Compile Include="settings\Layout.cs" />
+    <Compile Include="forms\LiveFocusView.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="forms\LiveFocusView.Designer.cs">
       <DependentUpon>LiveFocusView.cs</DependentUpon>
     </Compile>
-    <Compile Include="MyCanvas.cs" />
-    <Compile Include="PtInfo.cs" />
-    <Compile Include="UAContorller.cs" />
-    <Compile Include="Utility.cs" />
-    <Page Include="LayoutDefineWindow.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="MainWindow.xaml">
+    <Compile Include="utility\MyCanvas.cs" />
+    <Compile Include="data\PtInfo.cs" />
+    <Compile Include="settings\Recipe.cs" />
+    <Compile Include="forms\RecipeDefinitionWindow.xaml.cs">
+      <DependentUpon>RecipeDefinitionWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="settings\RecipeCollection.cs" />
+    <Compile Include="controller\UAContorller.cs" />
+    <Compile Include="utility\Utility.cs" />
+    <Page Include="forms\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
@@ -96,10 +102,14 @@
       <DependentUpon>App.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="MainWindow.xaml.cs">
+    <Compile Include="forms\MainWindow.xaml.cs">
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="forms\RecipeDefinitionWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Properties\AssemblyInfo.cs">
@@ -115,7 +125,10 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <EmbeddedResource Include="LiveFocusView.resx">
+    <EmbeddedResource Include="forms\AboutBox.resx">
+      <DependentUpon>AboutBox.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="forms\LiveFocusView.resx">
       <DependentUpon>LiveFocusView.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
@@ -138,19 +151,28 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\start.png" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Images\fakeColor.jpg" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Images\point.png" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\vedio.jpg" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\camera.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\points.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\roi.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\start.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\setting.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\setting.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

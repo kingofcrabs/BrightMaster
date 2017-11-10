@@ -33,21 +33,19 @@ namespace BrightMaster
             InitializeComponent();
             this.Load += LivewFocusView_Load;
             this.FormClosing += LivewFocusView_FormClosing;
-            this.MouseDown +=LivewFocusView_MouseDown;
-           
+            //this.MouseDown +=LivewFocusView_MouseDown;
+            pictureBox1.MouseDown += pictureBox1_MouseDown;
             ptStart = ptEnd = new Point(-1, -1);
         }
 
-      
-
-        void LivewFocusView_MouseDown(object sender, MouseEventArgs e)
+        void pictureBox1_MouseDown(object sender, MouseEventArgs e)
         {
             if (e.Button != System.Windows.Forms.MouseButtons.Left)
                 return;
-            if ((Control.ModifierKeys & Keys.Control) == Keys.Control)
+            if(Control.ModifierKeys != Keys.Control)
                 return;
 
-            if(ptStart.X != -1 &&ptEnd.X != -1)
+            if (ptStart.X != -1 && ptEnd.X != -1)
                 ptStart = ptEnd = new Point(-1, -1);
 
             if (ptStart.X == -1)
@@ -56,6 +54,13 @@ namespace BrightMaster
                 ptEnd = e.Location;
 
             Invalidate();
+        }
+
+      
+
+        void LivewFocusView_MouseDown(object sender, MouseEventArgs e)
+        {
+            
         }
 
         void StartLiveview()
@@ -142,8 +147,7 @@ namespace BrightMaster
         {
             BackgroundWorker worker = sender as BackgroundWorker;
 
-            Pen pRectPen = new Pen(Color.FromArgb(255, Color.White), 4);
-            Pen pFocusPen = new Pen(Color.FromArgb(255, Color.Red), 4);
+            Pen redPen = new Pen(Color.FromArgb(255, Color.Red), 4);
 
             Ua.UaRect roi = device_property.focus_roi;
 
@@ -203,15 +207,24 @@ namespace BrightMaster
                         {
                             if(ptEnd.X == -1) //only start
                             {
-                                bitmap_graphics.DrawEllipse(new Pen(Brushes.Red, 1), ptStart.X - 1, ptStart.Y - 1, ptStart.X + 1, ptStart.Y + 1);
+                                Pen bluePen = new Pen(Brushes.Blue, 12);
+                                bitmap_graphics.DrawEllipse(bluePen, 2 * ptStart.X - 1, 2 * ptStart.Y - 1, 2, 2);
+                                bluePen.Dispose();
                             }
                             else
-                                bitmap_graphics.DrawRectangle(new Pen(Brushes.Red, 1), ptStart.X, ptStart.Y, ptEnd.X, ptEnd.Y);
+                            {
+                                Pen twoPixelRedPen = new Pen(Brushes.Red,2);
+                                bitmap_graphics.DrawRectangle(twoPixelRedPen, 2 * ptStart.X, 2 * ptStart.Y, 2 * (ptEnd.X - ptStart.X), 2 * (ptEnd.Y - ptStart.Y));
+                                bitmap_graphics.DrawLine(twoPixelRedPen, new Point(ptStart.X * 2, ptStart.Y * 2), new Point(ptEnd.X * 2, ptEnd.Y * 2));
+                                bitmap_graphics.DrawLine(twoPixelRedPen, new Point(ptStart.X * 2, ptEnd.Y * 2), new Point(ptEnd.X * 2, ptStart.Y * 2));
+                                twoPixelRedPen.Dispose();
+                            }
+                                
                         }
                      
                         
-                        bitmap_graphics.DrawRectangle(pRectPen,
-                            roi.x, roi.y, roi.width, roi.height);
+                        //bitmap_graphics.DrawRectangle(pRectPen,
+                        //    roi.x, roi.y, roi.width, roi.height);
 
                         int posx = 0;
                         int posy = 0;
@@ -222,7 +235,7 @@ namespace BrightMaster
                           Ua.Constants.UA_FAILURE)
                         {
                             // Draw focus value  
-                            bitmap_graphics.DrawEllipse(pFocusPen, posx - 2, posy - 2, 4, 4);
+                            bitmap_graphics.DrawEllipse(redPen, posx - 2, posy - 2, 4, 4);
                         }
 
                         bitmap_graphics.Dispose();
@@ -239,8 +252,8 @@ namespace BrightMaster
 
             }
 
-            pRectPen.Dispose();
-            pFocusPen.Dispose();
+            //pRectPen.Dispose();
+            redPen.Dispose();
         }
 
         //private void btnPause_Click(object sender, EventArgs e)

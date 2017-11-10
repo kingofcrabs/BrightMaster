@@ -406,7 +406,7 @@ void EngineImpl::FindRect(std::string sFile, vector<pair<int, int>>& ptPairs)
 	std::vector< std::vector<cv::Point> > allContours;
 	//cv::adaptiveThreshold(img, thresholdImg, 255, CV_ADAPTIVE_THRESH_MEAN_C, CV_THRESH_BINARY_INV, 7, 5);
 	cv::threshold(img, thresholdImg, 100, 255, CV_THRESH_BINARY);
-	imwrite("d:\\threshold.png", thresholdImg);
+	//imwrite("d:\\threshold.png", thresholdImg);
 	cv::findContours(thresholdImg, allContours, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
 	
 	int width = img.size().width;
@@ -466,7 +466,7 @@ void EngineImpl::FindRect(std::string sFile, vector<pair<int, int>>& ptPairs)
 		line(drawing2, ptStart, ptEnd, color);
 		ptPairs.push_back(make_pair(ptStart.x, ptStart.y));
 	}
-	imwrite("D:\\Quad.jpg", drawing2);
+	//imwrite("D:\\Quad.jpg", drawing2);
 	imshow("Quad", drawing2);
 	waitKey(0);
 

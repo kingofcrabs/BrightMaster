@@ -24,6 +24,25 @@ namespace BrightMaster
         }
 
 
+        float Keep4Valid(float num)
+        {
+            if (num == 0)
+                return 0;
+            float value = num;
+            int count = 0;
+            if (num < 1000)
+            {
+                while (num < 1000)
+                {
+                    count++;
+                    num *= 10;
+                }
+            }
+            value = (float)Math.Round(value, count);
+            return value;
+        }
+
+        
         public float u
         {
             get
@@ -153,13 +172,13 @@ namespace BrightMaster
         public PixelInfo(int id,float XX, float YY, float ZZ)
         {
             this.id = id;
-            _X = XX;
-            _Y = YY;
-            _Z = ZZ;
-            _x = _X / (_X + _Y + _Z);
-            _y = _Y / (_X + _Y + _Z);
-            _u =  4*_X /(_X + 15*_Y + 3*_Z);
-            _v =  9*_Y / (_X + 15 * _Y + 3 *_Z);
+            _X = Keep4Valid(XX);
+            _Y = Keep4Valid(YY);
+            _Z = Keep4Valid(ZZ);
+            _x = Keep4Valid(_X / (_X + _Y + _Z));
+            _y = Keep4Valid(_Y / (_X + _Y + _Z));
+            _u = Keep4Valid(4 * _X / (_X + 15 * _Y + 3 * _Z));
+            _v = Keep4Valid(9 * _Y / (_X + 15 * _Y + 3 * _Z));
 
             double max = GlobalVars.Instance.Constrains.Maxx;
             double min = GlobalVars.Instance.Constrains.Minx;
