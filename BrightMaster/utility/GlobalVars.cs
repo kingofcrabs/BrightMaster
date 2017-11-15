@@ -1,8 +1,10 @@
-﻿using BrightMaster.settings;
+﻿using BrightMaster.data;
+using BrightMaster.settings;
 using BrightMaster.Settings;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,13 +14,51 @@ namespace BrightMaster
     class GlobalVars
     {
         static private GlobalVars instance;
-
+        GridViewColumnWidth columnWidths = new GridViewColumnWidth();
+        HistoryInfoCollection histroyInfoCollection = new HistoryInfoCollection();
         private RecipeCollection recipeCollection = new RecipeCollection();
-        bool isTest = false;
-
+        bool needBarcode = false;
         private GlobalVars()
         {
-           
+            needBarcode = bool.Parse(ConfigurationManager.AppSettings["InputBarcode"]);
+            string miscFolder = FolderHelper.GetMiscFolder();
+            string file = miscFolder + "misc.xml";
+            MiscSettings = SerializeHelper.Load<Misc>(file);
+            //autoFindRect = bool.Parse(ConfigurationManager.AppSettings["AutoFindRect"]);
+        }
+
+
+        public HistoryInfoCollection HistoryInfos
+        {
+            get
+            {
+                return histroyInfoCollection;
+            }
+            set
+            {
+                histroyInfoCollection = value;
+            }
+        }
+
+        public GridViewColumnWidth GridColumnWidth
+        {
+            get
+            {
+                return columnWidths;
+            }
+            set
+            {
+                columnWidths = value;
+            }
+        }
+
+        public Misc MiscSettings { get; set; }
+        public bool NeedBarcode
+        {
+            get
+            {
+                return needBarcode;
+            }
         }
         public string ParamPath
         {
@@ -66,13 +106,7 @@ namespace BrightMaster
             }
         }
 
-        public bool IsTest
-        {
-            get
-            {
-                return isTest;
-            }
-        }
+      
         static public GlobalVars Instance
         {
             get
@@ -85,5 +119,7 @@ namespace BrightMaster
                 return instance;
             }
         }
+
+        public string Barcode { get; set; }
     }
 }

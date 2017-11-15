@@ -1,6 +1,8 @@
-﻿using BrightMaster.Settings;
+﻿using BrightMaster.data;
+using BrightMaster.Settings;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -12,6 +14,37 @@ namespace BrightMaster
     {
         private float _X,_Y,_Z,_x,_y,_u,_v;
         bool _xValid, _yValid, _LValid;
+
+        static public void Save2File( List<PixelInfo> pixelInfos)
+        {
+            if (pixelInfos == null)
+                return;
+
+            string sFile = GlobalVars.Instance.MiscSettings.SaveFolder + GlobalVars.Instance.Barcode + ".csv";
+            string sHeader = "X,Y,Z,x,y,u',v',ok";
+            List<string> contents = new List<string>();
+            contents.Add(sHeader);
+            foreach(var pixelInfo in pixelInfos)
+            {
+                bool valid = pixelInfo.xValid && pixelInfo.yValid && pixelInfo.LValid;
+                string sLine = string.Format("{0},{1},{2},{3},{4},{5},{6},{7}",
+                    pixelInfo._X,
+                    pixelInfo._Y,
+                    pixelInfo._Z,
+                    pixelInfo._x,
+                    pixelInfo._y,
+                    pixelInfo._u,
+                    pixelInfo._v,valid);
+                contents.Add(sLine);
+            }
+            File.WriteAllLines(sFile, contents);
+        }
+
+        //public bool IsValid()
+        //{
+
+        //}
+
         public float X { get
             {
                 return _X;
@@ -190,6 +223,19 @@ namespace BrightMaster
 
             min = GlobalVars.Instance.Constrains.MinL;
             LValid = _Y > min;
+        }
+
+     
+        internal static TestResult GetResult(List<PixelInfo> results)
+        {
+            float maxL = results.Max(x => x.Y);
+            float minL = results.Min(x => x.Y);
+            float minUniform = GlobalVars.Instance.Constrains.MinUniform;
+            float uniform = minL / maxL * 100;
+            uniform = (float)Math.Round(uniform, 2);
+            bool isOk = uniform > minUniform;
+            TestResult testResult = new TestResult(maxL, minL, isOk, uniform);
+            return testResult;
         }
     }
 }

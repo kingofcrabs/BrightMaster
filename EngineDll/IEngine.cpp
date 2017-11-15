@@ -32,11 +32,13 @@ namespace EngineDll
 		return cv::Rect2f(ptStart, ptEnd);
 	}
 
-	List<MPoint^>^ IEngine::FindRect(System::String^ sFile)
+	List<MPoint^>^ IEngine::FindRect(System::String^ sFile, int% threshold, bool autoFindBoundary)
 	{
 		std::string nativeFileName = msclr::interop::marshal_as< std::string >(sFile);
 		std::vector<std::pair<int,int>> pts;
-		m_EngineImpl->FindRect(nativeFileName, pts);
+		int nativeThreshold = threshold;
+		m_EngineImpl->FindRect(nativeFileName, nativeThreshold, pts, autoFindBoundary);
+		threshold = nativeThreshold;
 		List<MPoint^>^ managedPts = gcnew List<MPoint^>(pts.size());
 		for (int i = 0; i < pts.size(); i++)
 		{
@@ -51,29 +53,6 @@ namespace EngineDll
 		std::string nativeDestFileName = msclr::interop::marshal_as< std::string >(sDestFile);
 		m_EngineImpl->Convert2PesudoColor(nativeSourceFileName, nativeDestFileName);
 	}
-
-	int IEngine::SearchLights(array<uchar>^ src, int width, int height, List<List<MPoint^>^>^% contours)
-	{
-		pin_ptr<uchar> pin = &src[0];
-		uchar * pData = pin;
-		//std::vector<uchar> afterThresholdDataInVec;
-		std::vector<std::vector<cv::Point>> contoursInVec;
-		int val = m_EngineImpl->SearchLights(pData, width, height, 20, 1000, contoursInVec);
-		//afterThresholdData = Copy2List(afterThresholdDataInVec);
-		for (int i = 0; i < contoursInVec.size(); i++)
-		{
-			List<MPoint^>^ pts = gcnew List<MPoint^>();
-			for (int j = 0; j < contoursInVec[i].size(); j++)
-			{
-				cv::Point& pt = contoursInVec[i][j];
-				pts->Add(gcnew MPoint(pt.x, pt.y));
-			}
-			contours->Add(pts);
-		}
-		return val;
-	}
-
-
 
 	template<typename T>  List<T>^  IEngine::Copy2List(std::vector<T> vector)
 	{

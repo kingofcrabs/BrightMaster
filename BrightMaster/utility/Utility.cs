@@ -30,11 +30,11 @@ namespace BrightMaster
             xs.Serialize(stream, setting);
             stream.Close();
         }
-        static public T Load<T>(string sFile) where T : class
+        static public T Load<T>(string sFile) where T : class,new()
         {
             Object obj = new object();
             if (!File.Exists(sFile))
-                throw new FileNotFoundException(string.Format("位于：{0}的配置文件不存在", sFile));
+                return new T();
             Stream stream = new FileStream(sFile, FileMode.Open, FileAccess.Read, FileShare.Read);
 
             XmlSerializer xs = new XmlSerializer(typeof(T));
@@ -107,6 +107,22 @@ namespace BrightMaster
             string s = System.IO.Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             int index = s.LastIndexOf("\\");
             return s.Substring(0, index) + "\\";
+        }
+
+        internal static string GetMiscFolder()
+        {
+            string miscFolder = GetExeParentFolder() + "Misc\\";
+            if (!Directory.Exists(miscFolder))
+                Directory.CreateDirectory(miscFolder);
+            return miscFolder;
+        }
+
+        internal static string GetDefaultSaveFolder()
+        {
+            string saveFolder = GetExeParentFolder() + "Save\\";
+            if (!Directory.Exists(saveFolder))
+                Directory.CreateDirectory(saveFolder);
+            return saveFolder;
         }
     }
 

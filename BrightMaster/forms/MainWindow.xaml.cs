@@ -1,11 +1,15 @@
-﻿using BrightMaster.settings;
+﻿using BrightMaster.data;
+using BrightMaster.forms;
+using BrightMaster.settings;
 using BrightMaster.Settings;
 using EngineDll;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.Configuration;
 using System.Diagnostics;
 using System.IO;
+using System.IO.Ports;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
@@ -33,6 +37,7 @@ namespace BrightMaster
         ObservableCollection<PixelInfo> pixelInfos = new ObservableCollection<PixelInfo>();
         double zoomRatio = 1;
         Point? lastDragPoint;
+        static SerialPort serialPort = new SerialPort();
 
         public MainWindow()
         {
@@ -56,16 +61,22 @@ namespace BrightMaster
         }
         void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-
+            
+            historyPanel.DataContext = GlobalVars.Instance.HistoryInfos;
             SetInfo("初始化，请等待！", false);
             this.IsEnabled = false;
             try
             {
+                string portName = ConfigurationManager.AppSettings["ComPort"];
+                serialPort = new SerialPort(portName, 9600, Parity.None, 8, StopBits.One);
+                serialPort.Open();
                 Initialize();
+
             }
             catch (Exception ex)
             {
                 SetInfo("初始化失败，原因是：" + ex.Message, true);
+                this.IsEnabled = true;
             }
             cmbRecipes.DataContext = GlobalVars.Instance.RecipeCollection;
         }
@@ -92,8 +103,15 @@ namespace BrightMaster
                 if(myCanvas.IsValidMove)
                 {
                     var pts = myCanvas.GeneratePtsImageCoord();
-                    var results = brightness.GetResults(pts);
-                    lstviewResult.ItemsSource = results;
+                    try
+                    {
+                        UpdateResults(pts);
+                    }
+                    catch(Exception ex)
+                    {
+                        SetInfo(ex.Message,true);
+                    }
+                    
                 }
                 myCanvas.OnLeftButtonUp();
                 return;
@@ -159,6 +177,7 @@ namespace BrightMaster
 
         void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
+            serialPort.Close();
             GlobalVars.Instance.UAController.UnInitialize();
         }
 
@@ -170,9 +189,18 @@ namespace BrightMaster
         {
             myCanvas.UserSelectROI = (bool)btnSetROI.IsChecked;
         }
+
+     
         private void FakeColor_Executed(object sender, ExecutedRoutedEventArgs e)
         {
             BitmapImage bmpImage;
+            bool isFakeColor = (bool)btnFakeColor.IsChecked;
+            int columnSpan = isFakeColor ? 1 : 2;
+            Grid.SetColumnSpan(scrollViewer, columnSpan);
+            colorBar.SetMinMax(brightness.Min, brightness.Max);
+            colorBar.Visibility = isFakeColor ? Visibility.Visible : Visibility.Collapsed;
+            
+
             if ((bool)btnFakeColor.IsChecked)
             {
                 bmpImage = ImageHelper.CreateImage(brightness.jpgFilePath);
@@ -198,8 +226,141 @@ namespace BrightMaster
        
         private void Acquire_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
-            e.CanExecute = cmbRecipes.SelectedItem != null;
+            e.CanExecute = cmbRecipes.SelectedItem != null && GlobalVars.Instance.UAController.Initialized;
         }
+
+        private void LiveFocus_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = true;
+        }
+
+        private void LiveFocus_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            LiveFocusView livewFocusView = new LiveFocusView();
+            livewFocusView.ShowDialog();
+        }
+
+     
+        private void MiscDef_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = true;
+        }
+
+        private void MiscDef_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            MiscForm saveFolderForm = new MiscForm();
+            saveFolderForm.ShowDialog();
+        }
+
+
+        async Task  OpenFile(string fileName)
+        {
+            await Task.Run(() =>
+            {
+                var allPixels = GlobalVars.Instance.UAController.LoadXYZImage(fileName);
+                this.Dispatcher.Invoke(() =>
+                {
+                    List<System.Drawing.Point> pts = FindBoundingPts(allPixels);
+                    if (pts.Count != 4)
+                    {
+                        SetInfo("无法找到外框", true);
+                    }
+                    else
+                    {
+                        SetInfo("采集完成。", false);
+                        UpdateResults(pts);
+                    }
+                    InvalidateVisual();
+                });
+            });
+        }
+     
+
+
+        private void Help_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            AboutBox aboutBox = new AboutBox();
+            aboutBox.ShowDialog();
+        }
+
+        private void Help_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = true;
+        }
+
+        private void Save_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            try
+            {
+                System.Windows.Forms.SaveFileDialog saveFileDialog = new System.Windows.Forms.SaveFileDialog();
+                saveFileDialog.AddExtension = true;
+                saveFileDialog.DefaultExt = "msr";
+                saveFileDialog.InitialDirectory = FolderHelper.GetDefaultSaveFolder();
+                if (saveFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                {
+                    string fileName = saveFileDialog.FileName;
+                    this.IsEnabled = false;
+                    GlobalVars.Instance.UAController.SaveXYZImage(fileName);
+                }
+            }
+            catch (Exception ex)
+            {
+                SetInfo(ex.Message, true);
+                this.IsEnabled = true;
+                return;
+            }
+            this.IsEnabled = true;
+            SetInfo("保存成功", false);
+        }
+        private void Save_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = GlobalVars.Instance.UAController.HaveXYZImage;
+        }
+        private async void Open_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            try
+            {
+                System.Windows.Forms.OpenFileDialog openFileDialog = new System.Windows.Forms.OpenFileDialog();
+                openFileDialog.InitialDirectory = FolderHelper.GetDefaultSaveFolder();
+                if (openFileDialog.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+                {
+                    string fileName = openFileDialog.FileName;
+                    this.IsEnabled = false;
+                    await OpenFile(fileName);
+                }
+            }
+            catch (Exception ex)
+            {
+                SetInfo(ex.Message, true);
+                this.IsEnabled = true;
+                return;
+            }
+            this.IsEnabled = true;
+            SetInfo("打开成功", false);
+        }
+
+
+
+        private void Open_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = true;
+        }
+
+     
+
+        private void Power_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = true;
+        }
+
+        private void Power_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            bool open = (bool)btnPower.IsChecked;
+            char val = open ? 'A' : 'a';
+            byte[] buffer = new byte[1]{ (byte)val};
+            serialPort.Write(buffer, 0, buffer.Length);
+        }
+
 #endregion
 
         async Task  DoAcquisition()
@@ -211,18 +372,21 @@ namespace BrightMaster
                 List<List<PixelInfo>> allPixels = GlobalVars.Instance.UAController.Acquire();
                 try
                 {
-                    brightness = new Brightness(allPixels);
+                    
                     this.Dispatcher.Invoke(() =>
                     {
-                        var bmpImage = ImageHelper.CreateImage(brightness.grayVals);
-                        IEngine iEngine = new IEngine();
-                        string sImgFile = FolderHelper.GetImageFolder() + "latest.jpg";
-
-                        ImageHelper.SaveBitmapImageIntoFile(bmpImage, sImgFile);
-                        var pts = iEngine.FindRect(sImgFile);
-                        myCanvas.SetBkGroundImage(bmpImage, pts);
-                        var results = brightness.GetResults(pts);
-                        lstviewResult.ItemsSource = results;
+                        List<System.Drawing.Point> pts = FindBoundingPts(allPixels);
+                        if (pts.Count != 4)
+                        {
+                            SetInfo("无法找到外框", true);
+                        }
+                        else
+                        {
+                            SetInfo("采集完成。", false);
+                            UpdateResults(pts);
+                        }
+                        this.IsEnabled = true;
+                        InvalidateVisual();
                     });
                 }
                 catch (Exception ex)
@@ -234,17 +398,63 @@ namespace BrightMaster
                     });
                     
                 }
-                this.Dispatcher.Invoke(() =>
-                {
-                    SetInfo("采集完成。", false);
-                    this.IsEnabled = true;
-                    InvalidateVisual();
-                });
+              
             });
         }
 
+        private List<System.Drawing.Point> FindBoundingPts(List<List<PixelInfo>> allPixels)
+        {
+            brightness = new Brightness(allPixels);
+            var bmpImage = ImageHelper.CreateImage(brightness.grayVals);
+            IEngine iEngine = new IEngine();
+            string sImgFile = FolderHelper.GetImageFolder() + "latest.jpg";
+
+            ImageHelper.SaveBitmapImageIntoFile(bmpImage, sImgFile);
+            var mpts = iEngine.FindRect(sImgFile, ref GlobalVars.Instance.MiscSettings.thresholdVal, GlobalVars.Instance.MiscSettings.AutoFindBoundary);
+            List<System.Drawing.Point> pts = AdjustPosition(mpts);
+            GlobalVars.Instance.MiscSettings.Save();
+            myCanvas.SetBkGroundImage(bmpImage, pts);
+            return pts;
+        }
+
+        private void UpdateResults(List<System.Drawing.Point> pts)
+        {
+            var results = brightness.GetResults(pts);
+            lstviewResult.ItemsSource = results;
+            PixelInfo.Save2File(results);
+            var result = PixelInfo.GetResult(results);
+            resultPanel.DataContext = result;
+            GlobalVars.Instance.HistoryInfos.AddNew(new HistoryInfo(GlobalVars.Instance.Barcode, result.IsOk));
+            
+        }
+
+        private List<System.Drawing.Point> AdjustPosition(List<MPoint> mpts)
+        {
+            List<System.Drawing.Point> pts = new List<System.Drawing.Point>();
+            int avgX = mpts.Sum(pt => pt.x) / 4;
+            int avgY = mpts.Sum(pt => pt.y) / 4;
+            Point ptMassCenter = new Point(avgX, avgY);
+            MPoint topLeft = mpts.Where(pt => pt.x < avgX && pt.y < avgY).First();
+            MPoint topRight = mpts.Where(pt => pt.x > avgX && pt.y < avgY).First();
+            MPoint bottomRight = mpts.Where(pt => pt.x > avgX && pt.y > avgY).First();
+            MPoint bottomLeft = mpts.Where(pt => pt.x < avgX && pt.y > avgY).First();
+            pts.Add(new System.Drawing.Point(topLeft.x + 2, topLeft.y));
+            pts.Add(new System.Drawing.Point(topRight.x, topRight.y));
+            pts.Add(new System.Drawing.Point(bottomRight.x, bottomRight.y));
+            pts.Add(new System.Drawing.Point(bottomLeft.x+2, bottomRight.y));
+            return pts;
+        }
+
+      
+
         private  async void Acquire_Executed(object sender, ExecutedRoutedEventArgs e)
         {
+            if(GlobalVars.Instance.NeedBarcode)
+            {
+                QueryBarcode queryBarcode = new QueryBarcode();
+                queryBarcode.ShowDialog();
+            }
+            btnSetROI.IsChecked = false;
             SetInfo("开始采集。",false);
             btnFakeColor.IsChecked = false;
             this.IsEnabled = false;
@@ -283,28 +493,24 @@ namespace BrightMaster
             
         }
 
-        private void LiveFocus_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        private void SetColumnsVisibility(object sender, RoutedEventArgs e)
         {
-            e.CanExecute = true;
+            ColumnVisibilityForm columnVisibilityForm = new ColumnVisibilityForm();
+            columnVisibilityForm.ShowDialog();
+            for (int i = 0; i < gridView1.Columns.Count; i++)
+                gridView1.Columns[i].Width = GlobalVars.Instance.GridColumnWidth[i];
+            InvalidateVisual();
+
         }
 
-        private void LiveFocus_Executed(object sender, ExecutedRoutedEventArgs e)
-        {
-            LiveFocusView livewFocusView = new LiveFocusView();
-            livewFocusView.ShowDialog();
-        }
+     
 
-        private void CommandHelp_Executed(object sender, ExecutedRoutedEventArgs e)
-        {
-            AboutBox aboutBox = new AboutBox();
-            aboutBox.ShowDialog();
-        }
+     
 
-        private void CommandHelp_CanExecute(object sender, CanExecuteRoutedEventArgs e)
-        {
-            e.CanExecute = true;
-        }
+     
 
+     
+  
         
 
        

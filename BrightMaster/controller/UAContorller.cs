@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -16,6 +17,8 @@ namespace BrightMaster
         IntPtr recipe_ptr = IntPtr.Zero;
         Device device;
         Recipe recipe;
+        IntPtr xyz_image_ptr = IntPtr.Zero;
+        Ua.XYZImage xyz_image;
         DeviceProperty device_property;
         bool initialized = false;
 
@@ -51,23 +54,20 @@ namespace BrightMaster
                 device = Ua.Utility.PtrToUaDevice(device_ptr);
                 recipe_ptr = uaCore.uaCreateRecipe(device.type);
                 recipe = Ua.Utility.PtrToUaRecipe(recipe_ptr);
+
+                //uaCore.uaDestroyRecipe(recipe_ptr);
                 device_property = Ua.Utility.PtrToUaDeviceProperty(recipe.property_ptr);
                 uaCore.uaGetDeviceProperty(ref device, ref device_property);
+                //复用一个xyz_image
+                xyz_image_ptr = uaCore.uaCreateXYZImage(device.type, Ua.DataType.UA_DATA_TRISTIMULUS_XYZ);
+                xyz_image = Ua.Utility.PtrToUaXYZImage(xyz_image_ptr);
                 initialized = true;
             });
         }
 
         
-
-      
         public void SetLiveviewMode()
         {
-            //Ua.UaError n_err_code = uaCore.uaGetError();
-            //if (n_err_code != Ua.UaError.UA_NO_ERROR)
-            //{
-            //    throw new Exception(uaCore.uaGetErrorString(n_err_code));
-            //}
-         
             capture_data_ptr = uaCore.uaCreateCaptureData(device.type);
             capture_data = Ua.Utility.PtrToUaCaptureData(capture_data_ptr);
 
@@ -87,10 +87,7 @@ namespace BrightMaster
             int ret = uaCore.uaSetDeviceProperty(ref device, ref device_property);
      
             Ua.UaError err = uaCore.uaGetError();
-            //if (err != Ua.UaError.UA_NO_ERROR)
-            //{
-            //    throw new Exception(uaCore.uaGetErrorString(err));
-            //}
+       
         }
 
 
@@ -98,6 +95,11 @@ namespace BrightMaster
         {
             if (uaCore == null)
                 return;
+
+            if (xyz_image_ptr != IntPtr.Zero)
+                uaCore.uaDestroyXYZImage(xyz_image_ptr);
+            if (recipe_ptr != IntPtr.Zero)
+                uaCore.uaDestroyRecipe(recipe_ptr);
 
             if(device_ptr != IntPtr.Zero)
             {
@@ -179,24 +181,39 @@ namespace BrightMaster
             // Console.WriteLine("uaCaptureImage");
             uaCore.uaCaptureImage(
                 ref device, Ua.CaptureFilterType.UA_CAPTURE_FILTER_XYZ, average_count, ref capture_data);
-
+            
             // Console.WriteLine("uaStopCapture");
             uaCore.uaStopCapture(ref device);
-
-
-            IntPtr xyz_image_ptr = uaCore.uaCreateXYZImage(device.type, Ua.DataType.UA_DATA_TRISTIMULUS_XYZ);
-
-            Ua.XYZImage xyz_image = Ua.Utility.PtrToUaXYZImage(xyz_image_ptr);
-
+            //if( xyz_image_ptr != IntPtr.Zero)
+            //    uaCore.uaDestroyXYZImage(xyz_image_ptr);
+            
             uaCore.uaToXYZImage(ref device, ref capture_data, ref xyz_image);
-
-            //WriteToCSV(ref xyz_image);
+            uaCore.uaDestroyCaptureData(capture_data_ptr);
             var allPixels = GetData(xyz_image);
-            //uaCore.uaSaveMeasurementData("..\\", null, ref xyz_image, ref recipe);
-            uaCore.uaDestroyXYZImage(xyz_image_ptr);
-            //uaCore.uaDestroyCaptureData(capture_data_ptr);
             return allPixels;
            
+        }
+
+        public List<List<PixelInfo>> LoadXYZImage(string imgName)
+        {
+            uaCore.uaLoadMeasurementData(imgName,ref xyz_image_ptr,ref recipe_ptr);
+            xyz_image = Ua.Utility.PtrToUaXYZImage(xyz_image_ptr);
+            var allPixels = GetData(xyz_image);
+            return allPixels;
+        }
+
+        public bool HaveXYZImage
+        {
+            get
+            {
+                return xyz_image_ptr != IntPtr.Zero;
+            }
+        }
+        public void SaveXYZImage(string fileName)
+        {
+            FileInfo fileInfo = new FileInfo(fileName);
+            uaCore.uaSaveMeasurementData(fileInfo.DirectoryName, fileInfo.Name, ref xyz_image, ref recipe);
+
         }
 
         public Device  Device

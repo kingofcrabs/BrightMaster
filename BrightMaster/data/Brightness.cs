@@ -41,12 +41,13 @@ namespace BrightMaster
 
 
 
-        public List<PixelInfo> GetResults(List<MPoint> mpts)
+        public List<PixelInfo> GetResults(List<System.Drawing.Point> pts)
         {
-            if (mpts.Count != 4)
-                throw new Exception(string.Format("外框角点数量必须为4！当前数量:{0}",mpts.Count));
-            List<System.Drawing.Point> pts = new List<System.Drawing.Point>();
-            mpts.ForEach(pt => pts.Add(new System.Drawing.Point(pt.x, pt.y)));
+            if (pts.Count != 4)
+            {
+                return null;
+            }
+           
             List<PixelInfo> results = new List<PixelInfo>();
             var circles = GlobalVars.Instance.Layout.GetCircles(pts);
             int id = 1;
@@ -110,17 +111,18 @@ namespace BrightMaster
             Width = orgVals[0].Count;
             List<float> maxList = orgVals.Select(l => l.Max()).ToList();
             List<float> minList = orgVals.Select(l => l.Min()).ToList();
-            double max = maxList.Max();
-            double min = minList.Min();
-            double grayUnit = (max - min) / 255;
+            Max = maxList.Max();
+            Min = minList.Min();
+            double grayUnit = (Max - Min) / 255;
             grayValsInArray = new byte[Height * Width];
             int pixelCnt = 0;
+            
             for (int y = 0; y < Height; y++)
             {
                 List<byte> thisLineGrayVals = new List<byte>();
                 for (int x = 0; x < Width; x++)
                 {
-                    byte val = (byte)((orgVals[y][x] - min) / grayUnit);
+                    byte val = (byte)((orgVals[y][x] - Min) / grayUnit);
                     GrayLevelCounts[val]++;
                     thisLineGrayVals.Add(val);
                     grayValsInArray[pixelCnt++] = val;

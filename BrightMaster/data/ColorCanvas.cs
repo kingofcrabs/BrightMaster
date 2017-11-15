@@ -47,7 +47,7 @@ namespace BrightMaster
                 string sLV = ((int)curV).ToString();
                 FormattedText ft = new FormattedText(sLV, CultureInfo.CurrentCulture,
                     FlowDirection.LeftToRight, new Typeface("Arial"), 10, Brushes.Black);
-                drawingContext.DrawLine(new Pen(Brushes.Black, 1), new Point(width, curHeight), new Point(startX, curHeight));
+                drawingContext.DrawLine(new Pen(Brushes.Black, 1), new Point(startX, curHeight), new Point(this.ActualWidth, curHeight));
                 drawingContext.DrawText(ft, new Point(startX, curHeight));
             }
         }

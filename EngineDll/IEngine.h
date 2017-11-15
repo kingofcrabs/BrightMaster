@@ -78,11 +78,7 @@ namespace EngineDll
 		~IEngine();
 		cv::Rect2f Convert2Rect2f(MRect^ rc);
 		void Convert2PseudoColor(System::String^ sOrgFile, System::String^ sDestFile);
-		List<MPoint^>^ IEngine::FindRect(System::String^ sFile);
-		//int AdaptiveThreshold(array<uchar>^ src, int width, int height, List<uchar>^% threshold);
-		int SearchLights(array<uchar>^ src, int width, int height, List<List<MPoint^>^>^% contours);
-		//void FindContours(array<uchar>^ arr, int width, int height, int cnt2Find);
-		//void FindContours(System::String^ sFile, int cnt2Find);
+		List<MPoint^>^ IEngine::FindRect(System::String^ sFile,int% threshold, bool autoFindBoundary);
 	private :
 		std::string IEngine::WStringToString(const std::wstring &wstr);
 		template<typename T>  List<T>^  Copy2List(std::vector<T> vector);

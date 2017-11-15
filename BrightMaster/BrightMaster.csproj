@@ -62,13 +62,35 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </ApplicationDefinition>
+    <Compile Include="data\GridViewColumnWidth.cs" />
+    <Compile Include="data\HistoryInfo.cs" />
+    <Compile Include="data\TestResult.cs" />
     <Compile Include="forms\AboutBox.cs">
       <SubType>Form</SubType>
     </Compile>
     <Compile Include="forms\AboutBox.Designer.cs">
       <DependentUpon>AboutBox.cs</DependentUpon>
     </Compile>
+    <Compile Include="forms\ColumnVisibilityForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="forms\ColumnVisibilityForm.Designer.cs">
+      <DependentUpon>ColumnVisibilityForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="forms\QueryBarcode.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="forms\QueryBarcode.Designer.cs">
+      <DependentUpon>QueryBarcode.cs</DependentUpon>
+    </Compile>
+    <Compile Include="forms\MiscForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="forms\MiscForm.Designer.cs">
+      <DependentUpon>MiscForm.cs</DependentUpon>
+    </Compile>
     <Compile Include="settings\BindBase.cs" />
+    <Compile Include="settings\Misc.cs" />
     <Compile Include="utility\BmpPlus.cs" />
     <Compile Include="data\Brightness.cs" />
     <Compile Include="settings\CameraSetting.cs" />
@@ -128,8 +150,17 @@
     <EmbeddedResource Include="forms\AboutBox.resx">
       <DependentUpon>AboutBox.cs</DependentUpon>
     </EmbeddedResource>
+    <EmbeddedResource Include="forms\ColumnVisibilityForm.resx">
+      <DependentUpon>ColumnVisibilityForm.cs</DependentUpon>
+    </EmbeddedResource>
     <EmbeddedResource Include="forms\LiveFocusView.resx">
       <DependentUpon>LiveFocusView.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="forms\QueryBarcode.resx">
+      <DependentUpon>QueryBarcode.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="forms\MiscForm.resx">
+      <DependentUpon>MiscForm.cs</DependentUpon>
     </EmbeddedResource>
     <EmbeddedResource Include="Properties\Resources.resx">
       <Generator>ResXFileCodeGenerator</Generator>
@@ -154,6 +185,7 @@
     <Resource Include="Images\fakeColor.jpg" />
   </ItemGroup>
   <ItemGroup>
+    <Resource Include="Images\plug.jpg" />
     <Resource Include="Images\vedio.jpg" />
   </ItemGroup>
   <ItemGroup>
@@ -173,6 +205,12 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\setting.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\open.jpg" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\save.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

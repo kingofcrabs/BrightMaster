@@ -215,8 +215,8 @@ namespace BrightMaster
                             {
                                 Pen twoPixelRedPen = new Pen(Brushes.Red,2);
                                 bitmap_graphics.DrawRectangle(twoPixelRedPen, 2 * ptStart.X, 2 * ptStart.Y, 2 * (ptEnd.X - ptStart.X), 2 * (ptEnd.Y - ptStart.Y));
-                                bitmap_graphics.DrawLine(twoPixelRedPen, new Point(ptStart.X * 2, ptStart.Y * 2), new Point(ptEnd.X * 2, ptEnd.Y * 2));
-                                bitmap_graphics.DrawLine(twoPixelRedPen, new Point(ptStart.X * 2, ptEnd.Y * 2), new Point(ptEnd.X * 2, ptStart.Y * 2));
+                                bitmap_graphics.DrawLine(twoPixelRedPen, new Point(0, 0), new Point(bitmap_.Width, bitmap_.Height));
+                                bitmap_graphics.DrawLine(twoPixelRedPen, new Point(bitmap_.Width, 0), new Point(0, bitmap_.Height));
                                 twoPixelRedPen.Dispose();
                             }
                                 

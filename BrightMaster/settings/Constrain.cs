@@ -9,12 +9,12 @@ namespace BrightMaster.Settings
     [Serializable]
     public class Constrains :BindableBase
     {
-        double minx;
-        double miny;
-        double maxx;
-        double maxy;
-        double minUniform;
-        double minL;
+        float minx;
+        float miny;
+        float maxx;
+        float maxy;
+        float minUniform;
+        float minL;
 
         
         public Constrains()
@@ -32,7 +32,7 @@ namespace BrightMaster.Settings
             if (minx < 0 || miny < 0 || maxx < 0 || maxy < 0 || minUniform < 0 || minL < 0)
                 throw new Exception("所有限制条件必须大于0！");
         }
-        public double Minx
+        public float Minx
         {
             get
             {
@@ -43,7 +43,7 @@ namespace BrightMaster.Settings
                 SetProperty(ref minx, value);
             }
         }
-        public double Maxx
+        public float Maxx
         {
             get
             {
@@ -54,7 +54,7 @@ namespace BrightMaster.Settings
                 SetProperty(ref maxx, value);
             }
         }
-        public double Miny
+        public float Miny
         {
             get
             {
@@ -65,7 +65,7 @@ namespace BrightMaster.Settings
                 SetProperty(ref miny, value);
             }
         }
-        public double Maxy
+        public float Maxy
         {
             get
             {
@@ -76,7 +76,7 @@ namespace BrightMaster.Settings
                 SetProperty(ref maxy, value);
             }
         }
-        public double MinUniform
+        public float MinUniform
         {
             get
             {
@@ -87,7 +87,7 @@ namespace BrightMaster.Settings
                 SetProperty(ref minUniform, value);
             }
         }
-        public double MinL
+        public float MinL
         {
             get
             {

@@ -49,7 +49,7 @@ namespace BrightMaster
             }
             set
             {
-                pts.Clear();
+                pts = new List<Point>();
                 userSelectROI = value;
                 InvalidateVisual();
             }
@@ -107,23 +107,13 @@ namespace BrightMaster
         }
 
 
-        public void SetBkGroundImage(System.Windows.Media.Imaging.BitmapImage bmpImage, List<MPoint> mpts = null, bool isFakeColor = false)
+        public void SetBkGroundImage(System.Windows.Media.Imaging.BitmapImage bmpImage, List<Point> newPts = null, bool isFakeColor = false)
         {
             this.isFakeColor = isFakeColor;
-            if(mpts != null && mpts.Count > 0)
+            if (newPts != null && newPts.Count > 0)
             {
-                pts = SortPoints(mpts);
+                pts = SortPoints(newPts);
             }
-            //else if(!isFakeColor)
-            //{
-            //    pts = new List<Point>();
-            //    PointF ptSize = new PointF((float)bmpImage.Width,(float)bmpImage.Height);
-            //    pts.Add(PointF2Point(ptSize,layout.TopLeftXRatio,layout.TopLeftYRatio));
-            //    //pts.Add(PointF2Point(bmpImage layout.topLeft, tmpXRatio, tmpYRatio));
-            //    //pts.Add(new Point((int)(tmpXRatio * layout.bottomRight.X), (int)(layout.topLeft.Y * tmpYRatio)));
-            //    //pts.Add(PointF2Point(layout.bottomRight, tmpXRatio, tmpYRatio));
-            //    //pts.Add(new Point((int)(layout.topLeft.X * tmpXRatio), (int)(layout.bottomRight.Y * tmpYRatio)));
-            //}
          
             width = bmpImage.Width;
             height = bmpImage.Height;
@@ -141,25 +131,22 @@ namespace BrightMaster
             this.Background = imageBrush;
         }
         
-        Point ConvertPt(MPoint mpt)
-        {
-            return new Point(mpt.x, mpt.y);
-        }
+       
 
-        private List<Point> SortPoints(List<MPoint> mpts)
+        internal List<Point> SortPoints(List<Point> orgPts)
         {
             List<Point> pts = new List<Point>();
-            int avgX = mpts.Sum(pt=>pt.x)/4;
-            int avgY = mpts.Sum(pt=>pt.y)/4;
+            int avgX = orgPts.Sum(pt=>pt.X)/4;
+            int avgY = orgPts.Sum(pt=>pt.Y)/4;
             Point ptMassCenter = new Point(avgX, avgY);
-            MPoint topLeft = mpts.Where(pt => pt.x < avgX && pt.y < avgY).First();
-            MPoint topRight = mpts.Where(pt => pt.x > avgX && pt.y < avgY).First();
-            MPoint bottomRight = mpts.Where(pt => pt.x > avgX && pt.y > avgY).First();
-            MPoint bottomLeft = mpts.Where(pt => pt.x < avgX && pt.y > avgY).First();
-            pts.Add(ConvertPt(topLeft));
-            pts.Add(ConvertPt(topRight));
-            pts.Add(ConvertPt(bottomRight));
-            pts.Add(ConvertPt(bottomLeft));
+            Point topLeft = orgPts.Where(pt => pt.X < avgX && pt.Y < avgY).First();
+            Point topRight = orgPts.Where(pt => pt.X > avgX && pt.Y < avgY).First();
+            Point bottomRight = orgPts.Where(pt => pt.X > avgX && pt.Y > avgY).First();
+            Point bottomLeft = orgPts.Where(pt => pt.X < avgX && pt.Y > avgY).First();
+            pts.Add(topLeft);
+            pts.Add(topRight);
+            pts.Add(bottomRight);
+            pts.Add(bottomLeft);
             return pts;
         }
 
@@ -185,10 +172,10 @@ namespace BrightMaster
                 }
                 else
                 {
-                    left = pts.Min(pt => pt.X) + 4;
-                    top = pts.Min(pt => pt.Y) + 4;
-                    right = pts.Max(pt => pt.X) - 3;
-                    bottom = pts.Max(pt => pt.Y) - 3;
+                    left = pts.Min(pt => pt.X);
+                    top = pts.Min(pt => pt.Y);
+                    right = pts.Max(pt => pt.X);
+                    bottom = pts.Max(pt => pt.Y);
                     leftUICoord = (int)(usableWidth * left / width);
                     topUICoord = (int)(usableHeight * top / height);
                     rightUICoord = (int)(usableWidth * right / width);
@@ -342,16 +329,16 @@ namespace BrightMaster
         }
 
 
-        public List<MPoint> GeneratePtsImageCoord()
+        public List<Point> GeneratePtsImageCoord()
         {
-            List<MPoint> tmpPts = new List<MPoint>();
-            tmpPts.Add(new MPoint(ptStart.X,ptStart.Y));
-            tmpPts.Add(new MPoint(ptEnd.X, ptStart.Y));
-            tmpPts.Add(new MPoint(ptEnd.X, ptEnd.Y));
-            tmpPts.Add(new MPoint(ptStart.X, ptEnd.Y));
+            List<Point> tmpPts = new List<Point>();
+            tmpPts.Add(ptStart);
+            tmpPts.Add(new Point(ptEnd.X, ptStart.Y));
+            tmpPts.Add(ptEnd);
+            tmpPts.Add(new Point(ptStart.X, ptEnd.Y));
 
-            List<MPoint> tmpRealPts = new List<MPoint>();
-            tmpPts.ForEach(pt => tmpRealPts.Add(new MPoint(Convert2RealXFromUI(pt.x), Convert2RealYFromUI(pt.y))));
+            List<Point> tmpRealPts = new List<Point>();
+            tmpPts.ForEach(pt => tmpRealPts.Add(new Point(Convert2RealXFromUI(pt.X), Convert2RealYFromUI(pt.Y))));
             return tmpRealPts;
         }
 
