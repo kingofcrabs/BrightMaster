@@ -1,6 +1,6 @@
 ﻿using BrightMaster.data;
 using BrightMaster.forms;
-using BrightMaster.settings;
+using BrightMaster.Settings;
 using BrightMaster.Settings;
 using EngineDll;
 using System;

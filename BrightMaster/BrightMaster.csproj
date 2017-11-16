@@ -89,8 +89,8 @@
     <Compile Include="forms\MiscForm.Designer.cs">
       <DependentUpon>MiscForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="settings\AdjustRatio.cs" />
     <Compile Include="settings\BindBase.cs" />
-    <Compile Include="settings\Misc.cs" />
     <Compile Include="utility\BmpPlus.cs" />
     <Compile Include="data\Brightness.cs" />
     <Compile Include="settings\CameraSetting.cs" />
@@ -107,6 +107,7 @@
     <Compile Include="forms\LiveFocusView.Designer.cs">
       <DependentUpon>LiveFocusView.cs</DependentUpon>
     </Compile>
+    <Compile Include="utility\Misc.cs" />
     <Compile Include="utility\MyCanvas.cs" />
     <Compile Include="data\PtInfo.cs" />
     <Compile Include="settings\Recipe.cs" />
@@ -186,22 +187,15 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\plug.jpg" />
-    <Resource Include="Images\vedio.jpg" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\camera.jpg" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Images\points.jpg" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\roi.jpg" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\start.jpg" />
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="Images\setting.jpg" />
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\setting.png" />

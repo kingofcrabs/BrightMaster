@@ -1,5 +1,5 @@
 ﻿using BrightMaster.data;
-using BrightMaster.settings;
+using BrightMaster.Settings;
 using BrightMaster.Settings;
 using System;
 using System.Collections.Generic;
@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using BrightMaster.utility;
 
 namespace BrightMaster
 {

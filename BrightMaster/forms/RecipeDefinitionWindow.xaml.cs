@@ -1,4 +1,4 @@
-﻿using BrightMaster.settings;
+﻿using BrightMaster.Settings;
 using System;
 using System.Collections.Generic;
 using System.Linq;

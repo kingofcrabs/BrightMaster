@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Windows.Data;
 
 namespace BrightMaster.Settings
 {
@@ -11,17 +12,20 @@ namespace BrightMaster.Settings
     {
         int workingDistance;
         int exposureTime;
+        bool autoExposure;
 
         public CameraSettings()
         {
             workingDistance = 1000;
             exposureTime = 80;
+            autoExposure = true;
         }
 
-        public CameraSettings(int wd, int epTime)
+        public CameraSettings(int wd, int epTime,bool autoExp)
         {
             workingDistance = wd;
             exposureTime = epTime;
+            autoExposure = autoExp;
         }
         public int WorkingDistance
         {
@@ -32,6 +36,18 @@ namespace BrightMaster.Settings
             set
             {
                 SetProperty(ref workingDistance, value);
+            }
+        }
+
+        public bool AutoExposure
+        {
+            get
+            {
+                return autoExposure;
+            }
+            set
+            {
+                SetProperty(ref autoExposure, value);
             }
         }
 
@@ -54,6 +70,20 @@ namespace BrightMaster.Settings
                 throw new Exception("工作距离必须大于0！");
             if (exposureTime < 0)
                 throw new Exception("曝光时间必须大于等于0！");
+        }
+    }
+
+
+    public class BooleanInverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            return !(bool)value;
+        }
+
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            return !(bool)value;
         }
     }
 }
