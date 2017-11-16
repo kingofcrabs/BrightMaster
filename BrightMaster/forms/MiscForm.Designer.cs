@@ -32,6 +32,7 @@
             this.txtSaveFolder = new System.Windows.Forms.TextBox();
             this.label1 = new System.Windows.Forms.Label();
             this.chkAutoFindBound = new System.Windows.Forms.CheckBox();
+            this.btnOk = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // btnBrowse
@@ -71,11 +72,23 @@
             this.chkAutoFindBound.UseVisualStyleBackColor = true;
             this.chkAutoFindBound.CheckedChanged += new System.EventHandler(this.chkAutoFindBound_CheckedChanged);
             // 
+            // btnOk
+            // 
+            this.btnOk.Location = new System.Drawing.Point(189, 117);
+            this.btnOk.Name = "btnOk";
+            this.btnOk.Size = new System.Drawing.Size(75, 23);
+            this.btnOk.TabIndex = 5;
+            this.btnOk.Text = "确定";
+            this.btnOk.UseVisualStyleBackColor = true;
+            this.btnOk.Click += new System.EventHandler(this.btnOk_Click);
+            // 
             // MiscForm
             // 
+            this.AcceptButton = this.btnOk;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(268, 159);
+            this.Controls.Add(this.btnOk);
             this.Controls.Add(this.chkAutoFindBound);
             this.Controls.Add(this.label1);
             this.Controls.Add(this.txtSaveFolder);
@@ -95,5 +108,6 @@
         private System.Windows.Forms.TextBox txtSaveFolder;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.CheckBox chkAutoFindBound;
+        private System.Windows.Forms.Button btnOk;
     }
 }

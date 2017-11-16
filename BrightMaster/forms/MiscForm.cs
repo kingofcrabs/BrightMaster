@@ -40,5 +40,10 @@ namespace BrightMaster.forms
             GlobalVars.Instance.MiscSettings.AutoFindBoundary = chkAutoFindBound.Checked;
             GlobalVars.Instance.MiscSettings.Save();
         }
+
+        private void btnOk_Click(object sender, EventArgs e)
+        {
+            this.Close();
+        }
     }
 }

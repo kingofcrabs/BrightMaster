@@ -32,7 +32,6 @@ namespace BrightMaster
     /// </summary>
     public partial class MainWindow : Window
     {
-        UAContorller uaController = null;
         Brightness brightness = null;
         ObservableCollection<PixelInfo> pixelInfos = new ObservableCollection<PixelInfo>();
         double zoomRatio = 1;
@@ -48,6 +47,13 @@ namespace BrightMaster
             scrollViewer.PreviewMouseLeftButtonDown += scrollViewer_PreviewMouseLeftButtonDown;
             scrollViewer.PreviewMouseMove += scrollViewer_PreviewMouseMove;
             scrollViewer.PreviewMouseLeftButtonUp += scrollViewer_PreviewMouseLeftButtonUp;
+            scrollViewer.ScrollChanged += scrollViewer_ScrollChanged;
+            
+        }
+
+        void scrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
+        {
+            myCanvas.InvalidateVisual();
         }
 
        
@@ -55,30 +61,32 @@ namespace BrightMaster
         async void Initialize()
         {
             await GlobalVars.Instance.UAController.Initialize();
-            uaController = new UAContorller();
             this.IsEnabled = true;
+            
             SetInfo("初始化成功！", false);
         }
         void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            
             historyPanel.DataContext = GlobalVars.Instance.HistoryInfos;
             SetInfo("初始化，请等待！", false);
             this.IsEnabled = false;
             try
             {
+                cmbRecipes.DataContext = GlobalVars.Instance.RecipeCollection;
                 string portName = ConfigurationManager.AppSettings["ComPort"];
-                serialPort = new SerialPort(portName, 9600, Parity.None, 8, StopBits.One);
-                serialPort.Open();
+                if(portName != "")
+                {
+                    serialPort = new SerialPort(portName, 9600, Parity.None, 8, StopBits.One);
+                    serialPort.Open();
+                }
                 Initialize();
-
             }
             catch (Exception ex)
             {
                 SetInfo("初始化失败，原因是：" + ex.Message, true);
                 this.IsEnabled = true;
             }
-            cmbRecipes.DataContext = GlobalVars.Instance.RecipeCollection;
+            
         }
 
         private void Zoom()
@@ -93,6 +101,7 @@ namespace BrightMaster
             txtInfo.Foreground = error ? Brushes.Red : Brushes.Black;
         }
 
+        
        
         #region commands & events
 
@@ -111,21 +120,41 @@ namespace BrightMaster
                     {
                         SetInfo(ex.Message,true);
                     }
-                    
+                    SetInfo("", false);
                 }
                 myCanvas.OnLeftButtonUp();
                 return;
             }
 
             scrollViewer.Cursor = Cursors.Arrow;
-            scrollViewer.ReleaseMouseCapture();
+            //scrollViewer.ReleaseMouseCapture();
             lastDragPoint = null;
         }
-     
 
+        private parentItem FindVisualParent<parentItem>(DependencyObject obj) where parentItem : DependencyObject
+        {
+            DependencyObject parent = VisualTreeHelper.GetParent(obj);
+            while (parent != null && !parent.GetType().Equals(typeof(parentItem)))
+            {
+                parent = VisualTreeHelper.GetParent(parent);
+            }
+            return parent as parentItem;
+        }
         void scrollViewer_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             var mousePos = e.GetPosition(myCanvas);
+            object original = e.OriginalSource;
+
+            if (!original.GetType().Equals(typeof(ScrollViewer)))
+            {
+                if (FindVisualParent<System.Windows.Controls.Primitives.ScrollBar>(original as DependencyObject) != null)
+                {
+                    return;
+                }
+
+            }
+
+
             if ((bool)btnSetROI.IsChecked)
             {
                 myCanvas.OnLeftButtonDown(mousePos);
@@ -137,7 +166,7 @@ namespace BrightMaster
             {
                 scrollViewer.Cursor = Cursors.SizeAll;
                 lastDragPoint = mousePos;
-                Mouse.Capture(scrollViewer);
+                //Mouse.Capture(scrollViewer);
             }
         }
 
@@ -177,7 +206,8 @@ namespace BrightMaster
 
         void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            serialPort.Close();
+            if(serialPort != null && serialPort.IsOpen)
+                serialPort.Close();
             GlobalVars.Instance.UAController.UnInitialize();
         }
 
@@ -199,8 +229,6 @@ namespace BrightMaster
             Grid.SetColumnSpan(scrollViewer, columnSpan);
             colorBar.SetMinMax(brightness.Min, brightness.Max);
             colorBar.Visibility = isFakeColor ? Visibility.Visible : Visibility.Collapsed;
-            
-
             if ((bool)btnFakeColor.IsChecked)
             {
                 bmpImage = ImageHelper.CreateImage(brightness.jpgFilePath);
@@ -223,10 +251,9 @@ namespace BrightMaster
             e.CanExecute = true;
         }
 
-       
         private void Acquire_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
-            e.CanExecute = cmbRecipes.SelectedItem != null && GlobalVars.Instance.UAController.Initialized;
+            e.CanExecute = cmbRecipes.SelectedItem != null;
         }
 
         private void LiveFocus_CanExecute(object sender, CanExecuteRoutedEventArgs e)
@@ -261,7 +288,7 @@ namespace BrightMaster
                 this.Dispatcher.Invoke(() =>
                 {
                     List<System.Drawing.Point> pts = FindBoundingPts(allPixels);
-                    if (pts.Count != 4)
+                    if (pts == null || pts.Count != 4)
                     {
                         SetInfo("无法找到外框", true);
                     }
@@ -376,7 +403,7 @@ namespace BrightMaster
                     this.Dispatcher.Invoke(() =>
                     {
                         List<System.Drawing.Point> pts = FindBoundingPts(allPixels);
-                        if (pts.Count != 4)
+                        if (pts== null || pts.Count != 4)
                         {
                             SetInfo("无法找到外框", true);
                         }
@@ -394,6 +421,7 @@ namespace BrightMaster
                     this.Dispatcher.Invoke(() =>
                     {
                         SetInfo("采集失败："+ex.Message, true);
+                        this.IsEnabled = true;
                         return;
                     });
                     
@@ -411,6 +439,8 @@ namespace BrightMaster
 
             ImageHelper.SaveBitmapImageIntoFile(bmpImage, sImgFile);
             var mpts = iEngine.FindRect(sImgFile, ref GlobalVars.Instance.MiscSettings.thresholdVal, GlobalVars.Instance.MiscSettings.AutoFindBoundary);
+            if (mpts.Count == 0)
+                return new List<System.Drawing.Point>();
             List<System.Drawing.Point> pts = AdjustPosition(mpts);
             GlobalVars.Instance.MiscSettings.Save();
             myCanvas.SetBkGroundImage(bmpImage, pts);
@@ -438,10 +468,12 @@ namespace BrightMaster
             MPoint topRight = mpts.Where(pt => pt.x > avgX && pt.y < avgY).First();
             MPoint bottomRight = mpts.Where(pt => pt.x > avgX && pt.y > avgY).First();
             MPoint bottomLeft = mpts.Where(pt => pt.x < avgX && pt.y > avgY).First();
-            pts.Add(new System.Drawing.Point(topLeft.x + 2, topLeft.y));
+            pts.Add(new System.Drawing.Point(topLeft.x, topLeft.y));
             pts.Add(new System.Drawing.Point(topRight.x, topRight.y));
             pts.Add(new System.Drawing.Point(bottomRight.x, bottomRight.y));
-            pts.Add(new System.Drawing.Point(bottomLeft.x+2, bottomRight.y));
+            pts.Add(new System.Drawing.Point(bottomLeft.x, bottomLeft.y));
+            pts = Layout.Convert2ROI(pts);
+            
             return pts;
         }
 
@@ -504,18 +536,6 @@ namespace BrightMaster
         }
 
      
-
-     
-
-     
-
-     
-  
-        
-
-       
-
-       
     }
 
     public static class ExtensionMethods

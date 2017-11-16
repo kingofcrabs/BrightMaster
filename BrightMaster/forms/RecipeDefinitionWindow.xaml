@@ -123,24 +123,24 @@
                         <ColumnDefinition Width="3*"/>
                     </Grid.ColumnDefinitions>
                     <StackPanel Margin="10,10,0,0">
-                        <StackPanel Orientation="Horizontal" Margin="0,2,0,2">
-                            <TextBox Width="40" Text="{Binding SelectedRecipe.Constrains.Minx}"></TextBox>
+                        <StackPanel Orientation="Horizontal" Margin="15,2,0,2">
+                            <TextBox Width="60" Text="{Binding SelectedRecipe.Constrains.Minx}"></TextBox>
                             <Label Content="&lt;x&lt;" Margin="0,0,5,0"></Label>
-                            <TextBox Width="40" Text="{Binding SelectedRecipe.Constrains.Maxx}"></TextBox>
+                            <TextBox Width="60" Text="{Binding SelectedRecipe.Constrains.Maxx}"></TextBox>
                         </StackPanel>
-                        <StackPanel Orientation="Horizontal" Margin="0,2,0,2">
-                            <TextBox Width="40" Text="{Binding SelectedRecipe.Constrains.Miny}"></TextBox>
+                        <StackPanel Orientation="Horizontal" Margin="15,2,0,2">
+                            <TextBox Width="60" Text="{Binding SelectedRecipe.Constrains.Miny}"></TextBox>
                             <Label Content="&lt;y&lt;" Margin="0,0,5,0"></Label>
-                            <TextBox Width="40" Text="{Binding SelectedRecipe.Constrains.Maxy}"></TextBox>
+                            <TextBox Width="60" Text="{Binding SelectedRecipe.Constrains.Maxy}"></TextBox>
                         </StackPanel>
                         <StackPanel Orientation="Horizontal" Margin="10,2,0,2">
-                            <Label Content="Uniform&gt;"></Label>
-                            <TextBox Width="40" Text="{Binding SelectedRecipe.Constrains.MinUniform}"></TextBox>
+                            <Label Content="Uniform  &gt;"></Label>
+                            <TextBox Margin="20,0,0,0" Width="60" Text="{Binding SelectedRecipe.Constrains.MinUniform}"></TextBox>
                         </StackPanel>
 
                         <StackPanel Orientation="Horizontal" Margin="10,2,0,2">
-                            <Label Content="L&gt;"></Label>
-                            <TextBox Width="40" Text="{Binding SelectedRecipe.Constrains.MinL}" Margin="42,0,0,0"></TextBox>
+                            <Label Content="L  &gt;"></Label>
+                            <TextBox  Width="60" Text="{Binding SelectedRecipe.Constrains.MinL}" Margin="62,0,0,0"></TextBox>
                         </StackPanel>
 
                     </StackPanel>
@@ -162,6 +162,22 @@
                         </StackPanel>
                     </StackPanel>
                 </Grid>
+            </TabItem>
+            <TabItem Header="修正系数">
+                <StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="2,2,0,0">
+                        <Label>X:</Label>
+                        <TextBox Width="60" Text="{Binding xRatio}"></TextBox>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="2,2,0,0">
+                        <Label>Y:</Label>
+                        <TextBox Width="60" Text="{Binding yRatio}"></TextBox>
+                    </StackPanel>
+                    <StackPanel Orientation="Horizontal" Margin="2,2,0,0">
+                        <Label>Z:</Label>
+                        <TextBox  Width="60" Text="{Binding zRatio}"></TextBox>
+                    </StackPanel>
+                </StackPanel>
             </TabItem>
         </TabControl>
         <Grid Grid.Row="1">
@@ -189,6 +205,7 @@
                 <StackPanel Margin="20,0,0,0">
                     <Label>当前配置：</Label>
                     <TextBox Margin="1,2,0,0" Width="120" Text="{Binding SelectedRecipe.Name,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></TextBox>
+                    <Button Margin="2,2,0,0"  Name="btnRefresh" Click="btnRefresh_Click">刷新</Button>
                     <Button Margin="2,2,0,0" Name="btnSave" Click="btnSave_Click" >保存</Button>
                 </StackPanel>
                 

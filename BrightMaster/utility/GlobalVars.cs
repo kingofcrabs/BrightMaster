@@ -67,7 +67,13 @@ namespace BrightMaster
                 return @"D:\Projects\BrightMaster\trunk\param";
             }
         }
-
+        public CameraSettings CameraSettings
+        {
+            get
+            {
+                return recipeCollection.SelectedRecipe.CameraSettings;
+            }
+        }
         public Constrains Constrains
         {
             get

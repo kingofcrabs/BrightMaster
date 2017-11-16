@@ -13,7 +13,8 @@ namespace BrightMaster
     {
         ColorMap map;
         int[,] cmap = new int[128, 4];
-        double min, max;
+        double min, max,adjustMax;
+        
         public ColorCanvas()
         {
             map = new ColorMap();
@@ -35,7 +36,7 @@ namespace BrightMaster
                     new System.Windows.Rect(0, height - dy - i * dy, width, dy));
             }
 
-            double adjustMax = ((int)max) / 1000 * 1000;
+            
             double hUnit = (adjustMax / max) * height / 10.0;
             double vUnit = adjustMax / 10;
             double startX = width * 1.2;
@@ -56,6 +57,14 @@ namespace BrightMaster
         {
             this.min = min;
             this.max = max;
+            adjustMax = max;
+            while (adjustMax > 10)
+                adjustMax /= 10.0;
+            int ceilVal = (int)Math.Ceiling(adjustMax);
+            while (ceilVal < max)
+                ceilVal *= 10;
+            adjustMax = ceilVal;
+            
         }
     }
 }

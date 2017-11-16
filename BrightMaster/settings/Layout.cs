@@ -246,10 +246,10 @@ namespace BrightMaster.Settings
             float radius = (float)(layout.RadiusRatio /100 * boundingRect.Width);
             PointF ptStart = new PointF(xStart, yStart);
             PointF ptEnd = new PointF(xEnd, yEnd);
-            
-            for (int x = 0; x < layout.XCount; x++)
+
+            for (int y = 0; y < layout.YCount; y++)
             {
-                for (int y = 0; y < layout.YCount; y++)
+                for (int x = 0; x < layout.XCount; x++)    
                 {
                     float xx = layout.XCount == 1 ? ptStart.X : (ptEnd.X - ptStart.X) * x / (layout.XCount - 1) + ptStart.X;
                     float yy = layout.yCount == 1 ? ptStart.Y : (ptEnd.Y - ptStart.Y) * y / (layout.YCount - 1) + ptStart.Y;
@@ -310,7 +310,43 @@ namespace BrightMaster.Settings
             return circles;
         }
 
-        
+
+
+        internal static List<System.Drawing.Point> Convert2ROI(List<System.Drawing.Point> pts)
+        {
+            List<System.Drawing.Point> roiPts = new List<System.Drawing.Point>();
+           
+            var topLeft = pts[0];
+            var topRight = pts[1];
+            var bottomRight = pts[2];
+            var bottomLeft = pts[3];
+            //double topWidth = topRight.X - topLeft.X;
+            //double bottomWidth = bottomRight.X - bottomLeft.X;
+            //double 
+
+           
+            var layout = GlobalVars.Instance.Layout;
+            
+            Vector vec1 = new Vector(topRight.X - topLeft.X, topRight.Y - topLeft.Y);
+            Vector vec2 = new Vector(bottomLeft.X - topLeft.X, bottomLeft.Y - topLeft.Y);
+     
+            roiPts.Add(CalculateROIPt(topLeft, layout.ROITopLeftRatio,vec1,vec2));
+            roiPts.Add(CalculateROIPt(topLeft, new PointF(layout.ROIBottomRightXRatio, layout.ROITopLeftYRatio), vec1, vec2));
+            roiPts.Add(CalculateROIPt(topLeft, layout.RoiBottomRightRatio, vec1, vec2));
+            roiPts.Add(CalculateROIPt(topLeft, new PointF(layout.ROITopLeftXRatio, layout.ROIBottomRightYRatio), vec1, vec2));
+            return roiPts;
+        }
+
+        private static System.Drawing.Point CalculateROIPt(System.Drawing.Point pt, PointF ratioXY, Vector vec1, Vector vec2)
+        {
+            pt.X += (int)(vec1.X * ratioXY.X/100);
+            pt.Y += (int)(vec1.Y * ratioXY.X/100);
+            pt.X += (int)(vec2.X * ratioXY.Y/100);
+            pt.Y += (int)(vec2.Y * ratioXY.Y/100);
+            return pt;
+        }
+
+     
     }
 
 

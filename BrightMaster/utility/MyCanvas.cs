@@ -104,6 +104,7 @@ namespace BrightMaster
             width = boundRectSize.Width;
             height = boundRectSize.Height;
             CalcuUsable(out usableWidth, out usableHeight);
+            InvalidateVisual();
         }
 
 
@@ -318,6 +319,13 @@ namespace BrightMaster
             InvalidateVisual();
         }
 
+        internal void OnLeftButtonUp()
+        {
+            pts = GeneratePts(ptStart, ptEnd);
+            InvalidateVisual();
+            validMouseMove = false;
+        }
+
         private List<Point> GeneratePts(Point ptStart, Point ptEnd)
         {
             List<Point> tmpPts = new List<Point>();
@@ -342,9 +350,6 @@ namespace BrightMaster
             return tmpRealPts;
         }
 
-        internal void OnLeftButtonUp()
-        {
-            validMouseMove = false;
-        }
+       
     }
 }

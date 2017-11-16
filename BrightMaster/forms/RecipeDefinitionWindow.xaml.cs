@@ -48,16 +48,13 @@ namespace BrightMaster
             {
                 CheckSettings();
                 GlobalVars.Instance.RecipeCollection.SelectedRecipe.Save();
-                
             }
             catch(Exception ex)
             {
                 SetInfo(ex.Message, true);
                 return;
             }
-
             SetInfo(string.Format("配置：{0}保存成功！", GlobalVars.Instance.RecipeCollection.SelectedRecipe.Name));
-            
         }
 
         private void CheckSettings()
@@ -73,6 +70,25 @@ namespace BrightMaster
         {
             txtInfo.Text = msg;
             txtInfo.Foreground = isError ? Brushes.Red : Brushes.Black;
+        }
+        private BitmapImage Bitmap2BitmapImage(System.Drawing.Bitmap bitmap)
+        {
+            BitmapImage bitmapImage = new BitmapImage();
+            using (System.IO.MemoryStream ms = new System.IO.MemoryStream())
+            {
+                bitmap.Save(ms, bitmap.RawFormat);
+                bitmapImage.BeginInit();
+                bitmapImage.StreamSource = ms;
+                bitmapImage.CacheOption = BitmapCacheOption.Default;
+                bitmapImage.EndInit();
+                bitmapImage.Freeze();
+            }
+            return bitmapImage;
+        }
+
+        private void btnRefresh_Click(object sender, RoutedEventArgs e)
+        {
+            canvas.SetBoundRect(new System.Drawing.SizeF((float)canvas.ActualWidth, (float)canvas.ActualHeight));
         }
     }
 }

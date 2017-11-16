@@ -24,12 +24,17 @@ namespace BrightMaster
 
         IntPtr capture_data_ptr;
         Ua.CaptureData capture_data;
+        public event EventHandler<bool> onInitialFinished;
         public async Task Initialize()
         {
             await Task.Run(() =>
             {
                 if (initialized)
+                {
+                    NotifyInitialFinish();
                     return;
+                }
+                    
 
                 uaCore = new Ua.Core();
                 system_ptr = uaCore.uaInitialize(GlobalVars.Instance.ParamPath);
@@ -62,7 +67,14 @@ namespace BrightMaster
                 xyz_image_ptr = uaCore.uaCreateXYZImage(device.type, Ua.DataType.UA_DATA_TRISTIMULUS_XYZ);
                 xyz_image = Ua.Utility.PtrToUaXYZImage(xyz_image_ptr);
                 initialized = true;
+                NotifyInitialFinish();
             });
+        }
+
+        private void NotifyInitialFinish()
+        {
+            if (onInitialFinished != null)
+                onInitialFinished(this,true);
         }
 
         
@@ -74,6 +86,7 @@ namespace BrightMaster
 
            
             // set capture mode parameter
+          
             device_property.capture_mode = Ua.CaptureMode.UA_CAPTURE_FOCUS;
             // Focus Rect
             Ua.UaRect roi;
@@ -103,9 +116,7 @@ namespace BrightMaster
 
             if(device_ptr != IntPtr.Zero)
             {
-                uaCore.uaDestroyCaptureData(capture_data_ptr);
                 uaCore.uaCloseDevice(device_ptr);
-                device_ptr = IntPtr.Zero;
             }
             uaCore.uaFinalize(system_ptr);
             initialized = false;
@@ -137,7 +148,6 @@ namespace BrightMaster
                 allPixelInfos.Add(lineInfos);
             }
             return allPixelInfos;
-           
         }
 
         public void SetMannualMode()
@@ -152,13 +162,16 @@ namespace BrightMaster
                 ref device, cond, ref device_property);
             
             device_property.capture_mode = Ua.CaptureMode.UA_CAPTURE_MANUAL;
+            //set distance & exposure time
+            for (int i = 0; i < device_property.exposure_time.Count();i++ )
+                device_property.exposure_time[i] = GlobalVars.Instance.CameraSettings.ExposureTime;
+            device_property.measurement_distance = GlobalVars.Instance.CameraSettings.WorkingDistance;
             // Console.WriteLine("uaSetDeviceProperty");
             uaCore.uaSetDeviceProperty(ref device, ref device_property);
             capture_data_ptr = uaCore.uaCreateCaptureData(device.type);
             capture_data = Ua.Utility.PtrToUaCaptureData(capture_data_ptr);
-
-            
         }
+
         public List<List<PixelInfo>> Acquire()
         {
             if (!initialized)

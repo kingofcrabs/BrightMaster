@@ -204,11 +204,15 @@ void EngineImpl::FindRectImpl(Mat& img, vector<pair<int, int>>& ptPairs, bool au
 	{
 		Point2f ptStart = approx[i];
 		Point2f ptEnd = approx[(i + 1) % approx.size()];
-		line(drawing, ptStart, ptEnd, color, 2);
+		line(drawing, ptStart, ptEnd, color, 1);
 		ptPairs.push_back(make_pair(ptStart.x, ptStart.y));
 	}
 	if (!autoFindBoundary)
+	{
 		imshow("threshold", drawing);
+		imwrite("d:\\test.png", drawing);
+	}
+		
 
 }
 
@@ -261,7 +265,7 @@ void EngineImpl::Convert2PesudoColor(std::string srcFile, std::string destFile)
 {
 	Mat orgImg = imread(srcFile);
 	Mat color;
-	applyColorMap(orgImg, color, COLORMAP_JET);
+	applyColorMap(orgImg, color, COLORMAP_RAINBOW);
 	imwrite(destFile,color);
 }
 

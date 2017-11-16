@@ -118,7 +118,7 @@
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
             </ComboBox>
-            <Button Name="btnStartAcquire" Command="{StaticResource StartAcquire}"  ToolTip="开始采集.">
+            <Button Command="{StaticResource StartAcquire}"  ToolTip="开始采集.">
                 <StackPanel Orientation="Vertical" >
                     <Image Source="/Images/start.jpg" Height="32"/>
                 </StackPanel>
