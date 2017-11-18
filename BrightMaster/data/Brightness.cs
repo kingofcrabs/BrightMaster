@@ -14,6 +14,7 @@ namespace BrightMaster
         public List<List<PixelInfo>> _allPixels = new List<List<PixelInfo>>();
         public List<List<byte>> grayVals = new List<List<byte>>();
         public List<List<float>> orgVals = new List<List<float>>();
+        public List<List<byte>> sparseGrayVals = new List<List<byte>>();
         public byte[] grayValsInArray;
         public string jpgFilePath;
         public int[] GrayLevelCounts = new int[256];
@@ -97,7 +98,13 @@ namespace BrightMaster
             bmp.Save(jpgFilePath);
         }
 
-        private List<List<byte>> Convert2Gray(List<List<float>> orgVals)
+
+        public List<List<byte>> GetSparseGrayLevels(int grayLevelCnt)
+        {
+            return Convert2Gray(orgVals, grayLevelCnt);
+        }
+
+        private List<List<byte>> Convert2Gray(List<List<float>> orgVals, int grayLevelCnt = 255)
         {
             List<List<byte>> vals = new List<List<byte>>();
             for (int i = 0; i < 255; i++)
@@ -113,7 +120,7 @@ namespace BrightMaster
             List<float> minList = orgVals.Select(l => l.Min()).ToList();
             Max = maxList.Max();
             Min = minList.Min();
-            double grayUnit = (Max - Min) / 255;
+            double grayUnit = (Max - Min) / grayLevelCnt;
             grayValsInArray = new byte[Height * Width];
             int pixelCnt = 0;
             
