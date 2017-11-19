@@ -1,0 +1,28 @@
+﻿<UserControl x:Class="ExtControls.DiscreteSlider"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    d:DesignHeight="400" d:DesignWidth="400">
+
+    <Canvas x:Name="LayoutRoot" Background="#FFEEEEEE"  MouseMove="LayoutRoot_MouseMove" Width="96" Height="400">
+        <Canvas Name="ticksCanvas" Width="10" Height="378" Canvas.Top="14" UseLayoutRounding="True"/>
+        <Rectangle Name="backgroundRect" Width="12" Height="400" Fill="{Binding SliderBrush}" 
+                   Canvas.Top="2" Canvas.Left="14" Stroke="#FF777777" RadiusX="6" RadiusY="6">
+        </Rectangle>
+        <Canvas Name="sliderCanvas" Width="87" Height="30" Canvas.Left="8" Canvas.Top="378">
+            <Ellipse x:Name="sliderThumb" Stroke="#FF777777" Cursor="Hand" Fill="{Binding ThumbBrush}" Effect="{Binding ThumbEffect}"
+			        MouseLeftButtonDown="Button_MouseLeftButtonDown" 
+			        MouseLeftButtonUp="Button_MouseLeftButtonUp"  Stretch="Fill" Height="24" UseLayoutRounding="False" Width="24" Canvas.Top="2">
+            </Ellipse>
+            <Path Data="M0,20 L25,0 L71,0 L73.4167,0.25 L75.0833,0.75 L76.5833,1.25 L77.9167,2.08333 L78.9167,3.08333 L79.75,4.41667 L80,6 L80,34 L79.75,35.4167 L79.4167,36.75 L78.5833,37.9167 L77.4167,38.75 L75.1696,39.2493 L73.4221,39.5608 L71,40 L25,40 L0,20" 
+                  Fill="White" Height="30" UseLayoutRounding="False" Width="60" Stretch="Fill" Canvas.Left="25">
+                <Path.Effect>
+                    <DropShadowEffect ShadowDepth="2" Color="#FF999999"/>
+                </Path.Effect>
+            </Path>
+            <TextBlock Text="{Binding Value}" Width="43" TextAlignment="Center" FontWeight="Bold" FontFamily="Arial" Canvas.Top="6" Canvas.Left="39" FontSize="18"></TextBlock>
+        </Canvas>
+    </Canvas>
+</UserControl>
