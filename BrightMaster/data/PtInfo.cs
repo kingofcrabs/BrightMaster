@@ -10,7 +10,7 @@ using System.Windows.Media;
 
 namespace BrightMaster
 {
-    class PixelInfo:BindableBase
+    public class PixelInfo:BindableBase
     {
         private float _X,_Y,_Z,_x,_y,_u,_v;
         bool _xValid, _yValid, _LValid;

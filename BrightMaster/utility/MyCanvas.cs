@@ -14,7 +14,7 @@ using System.Windows.Media;
 
 namespace BrightMaster
 {
-    class MyCanvas : Canvas
+    class BrightCanvas : Canvas
     {
    
         double width;
@@ -26,6 +26,7 @@ namespace BrightMaster
         List<Point> pts = null;
         Point ptStart = new Point(-1,-1);
         Point ptEnd = new Point(-1,-1);
+        Point ptCalculateCurve = new Point(-1, -1);
         bool validMouseMove = false;
         bool userSelectROI = false;
     
@@ -255,28 +256,36 @@ namespace BrightMaster
                     
                     drawingContext.DrawLine(pen, startPt, endPt);
                 }
+                if (layout != null)
+                {
+                    var circles = validPt ? GlobalVars.Instance.Layout.GetCircles(pts) :
+                        GlobalVars.Instance.Layout.GetCircles(boundingRectUICoord);
+                    int index = 0;
+                    if (userSelectROI && ptEnd.X == -1)
+                        return;
+                    foreach (var circle in circles)
+                    {
+                        System.Windows.Point uiPt = userSelectROI ? new System.Windows.Point(circle.Position.X, circle.Position.Y) :
+                            new System.Windows.Point(Convert2XUIFromReal(circle.Position.X), Convert2UIYFromReal(circle.Position.Y));
+                        DrawCircle(uiPt, circle.Size, drawingContext);
+                        DrawText((index + 1).ToString(), uiPt, drawingContext, 12);
+                        index++;
+                    }
+                }
             }
             else
             {
                 drawingContext.DrawRectangle(null, new System.Windows.Media.Pen(redBrush, 1), boundingRectUICoord);
             }
 
-            if(layout != null)
+            if(ptCalculateCurve.X != -1)
             {
-                var circles = validPt ? GlobalVars.Instance.Layout.GetCircles(pts) :
-                    GlobalVars.Instance.Layout.GetCircles(boundingRectUICoord);
-                int index = 0;
-                if(userSelectROI && ptEnd.X == -1)
-                    return;
-                foreach(var circle in circles)
-                {
-                    System.Windows.Point uiPt = userSelectROI ? new System.Windows.Point(circle.Position.X,circle.Position.Y):
-                        new System.Windows.Point(Convert2XUIFromReal(circle.Position.X), Convert2UIYFromReal(circle.Position.Y));
-                    DrawCircle(uiPt, circle.Size,  drawingContext);
-                    DrawText((index + 1).ToString(), uiPt, drawingContext, 12);
-                    index++;
-                }
+                pen = new System.Windows.Media.Pen(System.Windows.Media.Brushes.Blue, 1);
+                drawingContext.DrawLine(pen, new  System.Windows.Point(0,ptCalculateCurve.Y),new System.Windows.Point(this.ActualWidth,ptCalculateCurve.Y));
+                drawingContext.DrawLine(pen, new System.Windows.Point(ptCalculateCurve.X,0), new System.Windows.Point(ptCalculateCurve.X,this.ActualHeight));
             }
+
+            
         }
 
 
@@ -350,6 +359,12 @@ namespace BrightMaster
             return tmpRealPts;
         }
 
-       
+
+
+        internal void OnCurveMouseDown(System.Windows.Point pt)
+        {
+            ptCalculateCurve = new Point((int)pt.X, (int)pt.Y);
+            InvalidateVisual();
+        }
     }
 }

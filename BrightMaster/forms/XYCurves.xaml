@@ -1,0 +1,38 @@
+﻿<Window x:Class="BrightMaster.XYCurves"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:oxy="clr-namespace:OxyPlot.Wpf;assembly=OxyPlot.Wpf" 
+        xmlns:local="clr-namespace:BrightMaster"
+        Title="XYCurves" Height="780" Width="940">
+    <!--<Window.DataContext>
+        <simpleDemo:MainViewModel />
+    </Window.DataContext>
+    <Grid>
+        --><!-- The OxyPlot control is binding to a PlotModel in the MainViewModel --><!--
+        <oxy:PlotView Model="{Binding Model}" />
+    </Grid>-->
+    <Grid>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+            <ColumnDefinition Width="300"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"></RowDefinition>
+            <RowDefinition Height="300"></RowDefinition>
+        </Grid.RowDefinitions>
+        <Grid Name="container">
+            <local:BrightCanvas x:Name="myCanvas"  Background="LightBlue" Width="{Binding ElementName=container,Path=ActualWidth}"
+                                Height="{Binding ElementName=container,Path=ActualHeight}" >
+            </local:BrightCanvas>
+        </Grid>
+
+        <Grid Grid.Row="1">
+              <oxy:PlotView x:Name="plotView" Model="{Binding ModelX}" />
+       
+        </Grid>
+        <Grid Grid.Column="1">
+            <oxy:PlotView Model="{Binding ModelY}" />
+
+        </Grid>
+    </Grid>
+</Window>

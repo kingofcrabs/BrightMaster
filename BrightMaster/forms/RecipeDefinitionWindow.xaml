@@ -31,8 +31,8 @@
                             <RowDefinition Height="*"/>
                         </Grid.RowDefinitions>
                         <Label>示意图：</Label>
-                        <local:MyCanvas x:Name="canvas" Grid.Row="1" Background="LightBlue">
-                        </local:MyCanvas>
+                        <local:BrightCanvas x:Name="canvas" Grid.Row="1" Background="LightBlue">
+                        </local:BrightCanvas>
                     </Grid>
                     <StackPanel Grid.RowSpan="2">
                         <Label>测试定义：</Label>
@@ -176,15 +176,15 @@
                 <StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="2,2,0,0">
                         <Label>X:</Label>
-                        <TextBox Width="60" Text="{Binding XRatio}"></TextBox>
+                        <TextBox Width="60" Text="{Binding SelectedRecipe.AdjustRatio.XRatio}"></TextBox>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="2,2,0,0">
                         <Label>Y:</Label>
-                        <TextBox Width="60" Text="{Binding YRatio}"></TextBox>
+                        <TextBox Width="60" Text="{Binding SelectedRecipe.AdjustRatio.YRatio}"></TextBox>
                     </StackPanel>
                     <StackPanel Orientation="Horizontal" Margin="2,2,0,0">
                         <Label>Z:</Label>
-                        <TextBox  Width="60" Text="{Binding ZRatio}"></TextBox>
+                        <TextBox  Width="60" Text="{Binding SelectedRecipe.AdjustRatio.ZRatio}"></TextBox>
                     </StackPanel>
                 </StackPanel>
             </TabItem>

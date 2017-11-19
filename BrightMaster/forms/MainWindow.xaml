@@ -10,7 +10,7 @@
         <RoutedUICommand x:Key="LiveFocus" Text="对焦预览." />
         <RoutedUICommand x:Key="MiscDef" Text="路径设置." />
   
-        <RoutedUICommand x:Key="Power" Text="电源." />
+        <RoutedUICommand x:Key="Curve" Text="XY亮度曲线." />
         <Style x:Key="ToggleButtonStyle1" TargetType="{x:Type ToggleButton}">
             <Setter Property="Template">
                 <Setter.Value>
@@ -41,10 +41,10 @@
     <Window.InputBindings>
      
         <KeyBinding Modifiers="Ctrl" Key="G" Command="{StaticResource StartAcquire}"/>
-        <KeyBinding Modifiers="Ctrl" Key="C" Command="{StaticResource FakeColor}"/>
-        <KeyBinding Modifiers="Ctrl" Key="L" Command="{StaticResource RecipeDef}"/>
-        <KeyBinding Modifiers="Ctrl" Key="F" Command="{StaticResource LiveFocus}"/>
-        <KeyBinding Modifiers="Ctrl" Key="P" Command="{StaticResource Power}"/>
+        <KeyBinding Modifiers="Ctrl" Key="F" Command="{StaticResource FakeColor}"/>
+        <KeyBinding Modifiers="Ctrl" Key="R" Command="{StaticResource RecipeDef}"/>
+        <KeyBinding Modifiers="Ctrl" Key="L" Command="{StaticResource LiveFocus}"/>
+        <KeyBinding Modifiers="Ctrl" Key="V" Command="{StaticResource Curve}"/>
     </Window.InputBindings>
     <Window.CommandBindings>
         <CommandBinding Command="{StaticResource StartAcquire}"
@@ -54,9 +54,9 @@
                     CanExecute="FakeColor_CanExecute"
                     Executed="FakeColor_Executed"/>
        
-        <CommandBinding Command="{StaticResource Power}"
-                    CanExecute="Power_CanExecute"
-                    Executed="Power_Executed"/>
+        <CommandBinding Command="{StaticResource Curve}"
+                    CanExecute="Curve_CanExecute"
+                    Executed="Curve_Executed"/>
 
         <CommandBinding Command="Help" Executed="Help_Executed" CanExecute="Help_CanExecute"/>
         <CommandBinding Command="Save" Executed="Save_Executed" CanExecute="Save_CanExecute"/>
@@ -135,9 +135,9 @@
             <ToggleButton Style="{StaticResource ToggleButtonStyle1}" Click="btnSetROI_Click" Name="btnSetROI" >
                 <Image Source="/Images/roi.jpg"></Image>
             </ToggleButton>
-            <ToggleButton  Style="{StaticResource ToggleButtonStyle1}" Command="{StaticResource Power}" Name="btnPower" >
-                <Image Source="/Images/plug.jpg"></Image>
-            </ToggleButton>
+            <Button   Command="{StaticResource Curve}"  >
+                <Image Source="/Images/curve.png"></Image>
+            </Button>
         </StackPanel>
         <Grid Name="containerGrid" Grid.Row="2">
             <Grid.ColumnDefinitions>
@@ -145,8 +145,8 @@
                 <ColumnDefinition Width="60"></ColumnDefinition>
             </Grid.ColumnDefinitions>
             <ScrollViewer x:Name="scrollViewer" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
-            <local:MyCanvas x:Name="myCanvas"  Background="LightBlue" Width="800" Height="600" >
-            </local:MyCanvas>
+            <local:BrightCanvas x:Name="myCanvas"   Background="LightBlue" Width="800" Height="600" >
+            </local:BrightCanvas>
             </ScrollViewer>
             <local:ColorCanvas x:Name="colorBar" Visibility="Collapsed" Grid.Column="1">
             </local:ColorCanvas>

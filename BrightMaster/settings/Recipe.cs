@@ -1,4 +1,5 @@
-﻿using System;
+﻿using BrightMaster.Settings;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,6 +13,7 @@ namespace BrightMaster.Settings
         private Layout layout;
         private Constrains constrains;
         private CameraSettings cameraSettings;
+        private AdjustRatio adjustRatio;
         private string name;
 
         public Recipe()
@@ -24,8 +26,19 @@ namespace BrightMaster.Settings
             layout = new Layout();
             constrains = new Constrains();
             cameraSettings = new CameraSettings();
+            adjustRatio = new AdjustRatio();
         }
-
+        public AdjustRatio AdjustRatio
+        {
+            get
+            {
+                return adjustRatio;
+            }
+            set
+            {
+                SetProperty(ref adjustRatio, value);
+            }
+        }
         public CameraSettings CameraSettings
         {
             get

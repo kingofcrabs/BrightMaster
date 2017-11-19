@@ -163,8 +163,12 @@ namespace BrightMaster
             
             device_property.capture_mode = Ua.CaptureMode.UA_CAPTURE_MANUAL;
             //set distance & exposure time
-            for (int i = 0; i < device_property.exposure_time.Count();i++ )
-                device_property.exposure_time[i] = GlobalVars.Instance.CameraSettings.ExposureTime;
+            if(!GlobalVars.Instance.CameraSettings.AutoExposure)
+            {
+                for (int i = 0; i < device_property.exposure_time.Count(); i++)
+                    device_property.exposure_time[i] = GlobalVars.Instance.CameraSettings.ExposureTime;
+            }
+            
             device_property.measurement_distance = GlobalVars.Instance.CameraSettings.WorkingDistance;
             // Console.WriteLine("uaSetDeviceProperty");
             uaCore.uaSetDeviceProperty(ref device, ref device_property);

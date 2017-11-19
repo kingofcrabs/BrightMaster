@@ -210,7 +210,7 @@ void EngineImpl::FindRectImpl(Mat& img, vector<pair<int, int>>& ptPairs, bool au
 	if (!autoFindBoundary)
 	{
 		imshow("threshold", drawing);
-		imwrite("d:\\test.png", drawing);
+		imwrite("d:\\test.jpg", drawing);
 	}
 		
 

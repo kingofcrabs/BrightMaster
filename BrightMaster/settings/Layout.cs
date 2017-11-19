@@ -327,13 +327,23 @@ namespace BrightMaster.Settings
            
             var layout = GlobalVars.Instance.Layout;
             
-            Vector vec1 = new Vector(topRight.X - topLeft.X, topRight.Y - topLeft.Y);
-            Vector vec2 = new Vector(bottomLeft.X - topLeft.X, bottomLeft.Y - topLeft.Y);
-     
-            roiPts.Add(CalculateROIPt(topLeft, layout.ROITopLeftRatio,vec1,vec2));
-            roiPts.Add(CalculateROIPt(topLeft, new PointF(layout.ROIBottomRightXRatio, layout.ROITopLeftYRatio), vec1, vec2));
-            roiPts.Add(CalculateROIPt(topLeft, layout.RoiBottomRightRatio, vec1, vec2));
-            roiPts.Add(CalculateROIPt(topLeft, new PointF(layout.ROITopLeftXRatio, layout.ROIBottomRightYRatio), vec1, vec2));
+            Vector vecX = new Vector(topRight.X - topLeft.X, topRight.Y - topLeft.Y);
+            Vector vecY = new Vector(bottomLeft.X - topLeft.X, bottomLeft.Y - topLeft.Y);
+            roiPts.Add(CalculateROIPt(topLeft, layout.ROITopLeftRatio,vecX,vecY));
+
+            vecX = new Vector(topLeft.X - topRight.X, topLeft.Y - topRight.Y);
+            vecY = new Vector(bottomRight.X - topRight.X, bottomRight.Y - topRight.Y);
+            roiPts.Add(CalculateROIPt(topRight, new PointF(100 - layout.ROIBottomRightXRatio, layout.ROITopLeftYRatio), vecX, vecY));
+
+            vecX = new Vector(bottomLeft.X - bottomRight.X, bottomLeft.Y - bottomRight.Y);
+            vecY = new Vector(topRight.X - bottomRight.X, topRight.Y - bottomRight.Y);
+            roiPts.Add(CalculateROIPt(bottomRight, new PointF(100 - layout.ROIBottomRightXRatio, 100 - layout.ROIBottomRightYRatio), vecX, vecY));
+
+            vecX = new Vector(topLeft.X - bottomLeft.X ,topLeft.Y - bottomLeft.Y);
+            vecY = new Vector(bottomRight.X - bottomLeft.X, bottomRight.Y - bottomLeft.Y);
+            roiPts.Add(CalculateROIPt(bottomLeft, new PointF(layout.ROITopLeftXRatio, 100 - layout.ROIBottomRightYRatio), vecX, vecY));
+            //roiPts.Add(CalculateROIPt(topLeft, layout.RoiBottomRightRatio, vec1, vec2));
+            //roiPts.Add(CalculateROIPt(topLeft, new PointF(layout.ROITopLeftXRatio, layout.ROIBottomRightYRatio), vec1, vec2));
             return roiPts;
         }
 

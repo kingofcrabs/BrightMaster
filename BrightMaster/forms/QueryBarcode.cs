@@ -8,7 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 
-namespace BrightMaster.forms
+namespace BrightMaster
 {
     public partial class QueryBarcode : Form
     {

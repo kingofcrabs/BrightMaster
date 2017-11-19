@@ -1,4 +1,4 @@
-﻿namespace BrightMaster.forms
+﻿namespace BrightMaster
 {
     partial class QueryBarcode
     {

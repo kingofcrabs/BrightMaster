@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace BrightMaster.settings
+namespace BrightMaster.Settings
 {
     [Serializable]
     public class AdjustRatio:BindableBase

@@ -2,6 +2,7 @@
 using BrightMaster.forms;
 using BrightMaster.Settings;
 using BrightMaster.Settings;
+using BrightMaster.utility;
 using EngineDll;
 using System;
 using System.Collections.Generic;
@@ -56,13 +57,10 @@ namespace BrightMaster
             myCanvas.InvalidateVisual();
         }
 
-       
-
         async void Initialize()
         {
             await GlobalVars.Instance.UAController.Initialize();
             this.IsEnabled = true;
-            
             SetInfo("初始化成功！", false);
         }
         void MainWindow_Loaded(object sender, RoutedEventArgs e)
@@ -375,17 +373,16 @@ namespace BrightMaster
 
      
 
-        private void Power_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        private void Curve_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
-            e.CanExecute = true;
+            //e.CanExecute = brightness != null;
+            e.CanExecute =true;
         }
 
-        private void Power_Executed(object sender, ExecutedRoutedEventArgs e)
+        private void Curve_Executed(object sender, ExecutedRoutedEventArgs e)
         {
-            bool open = (bool)btnPower.IsChecked;
-            char val = open ? 'A' : 'a';
-            byte[] buffer = new byte[1]{ (byte)val};
-            serialPort.Write(buffer, 0, buffer.Length);
+            XYCurves curveForm = new XYCurves(brightness);
+            curveForm.ShowDialog();
         }
 
 #endregion
@@ -454,6 +451,10 @@ namespace BrightMaster
             PixelInfo.Save2File(results);
             var result = PixelInfo.GetResult(results);
             resultPanel.DataContext = result;
+            if(!result.IsOk)
+            {
+                PlaySound.OnError();
+            }
             GlobalVars.Instance.HistoryInfos.AddNew(new HistoryInfo(GlobalVars.Instance.Barcode, result.IsOk));
             
         }

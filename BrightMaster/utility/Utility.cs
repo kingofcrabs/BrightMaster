@@ -14,6 +14,8 @@ namespace BrightMaster
 {
     public class SerializeHelper
     {
+
+       
         static public void Save<T>(T setting, string sFile) where T : class
         {
             int pos = sFile.LastIndexOf("\\");
