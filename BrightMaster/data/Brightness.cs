@@ -9,7 +9,7 @@ using System.Windows;
 
 namespace BrightMaster
 {
-    class Brightness
+    public class Brightness
     {
         public List<List<PixelInfo>> _allPixels = new List<List<PixelInfo>>();
         public List<List<byte>> grayVals = new List<List<byte>>();
@@ -122,6 +122,7 @@ namespace BrightMaster
             Min = minList.Min();
             double grayUnit = (Max - Min) / grayLevelCnt;
             grayValsInArray = new byte[Height * Width];
+            int ratio = 256 / grayLevelCnt;
             int pixelCnt = 0;
             
             for (int y = 0; y < Height; y++)
@@ -129,13 +130,26 @@ namespace BrightMaster
                 List<byte> thisLineGrayVals = new List<byte>();
                 for (int x = 0; x < Width; x++)
                 {
-                    byte val = (byte)((orgVals[y][x] - Min) / grayUnit);
+                    byte val = (byte)((int)((orgVals[y][x] - Min) / grayUnit) * ratio);
                     GrayLevelCounts[val]++;
                     thisLineGrayVals.Add(val);
                     grayValsInArray[pixelCnt++] = val;
                 }
                 vals.Add(thisLineGrayVals);
             }
+            return vals;
+        }
+
+        internal List<float> GetHorizontoalLineVals(int y)
+        {
+            return orgVals[y];
+        }
+
+        internal List<float> GetVerticalLineVals(int x)
+        {
+            List<float> vals = new List<float>();
+            for (int y = 0; y < Height; y++)
+                vals.Add(orgVals[y][x]);
             return vals;
         }
     }

@@ -3,7 +3,8 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:oxy="clr-namespace:OxyPlot.Wpf;assembly=OxyPlot.Wpf" 
         xmlns:local="clr-namespace:BrightMaster"
-        Title="XYCurves" Height="780" Width="940">
+        xmlns:extControl="clr-namespace:ExtControls"
+        Title="XYCurves" Height="800" Width="940">
     <!--<Window.DataContext>
         <simpleDemo:MainViewModel />
     </Window.DataContext>
@@ -14,16 +15,17 @@
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"></ColumnDefinition>
-            <ColumnDefinition Width="300"></ColumnDefinition>
+            <ColumnDefinition Width="320"></ColumnDefinition>
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"></RowDefinition>
-            <RowDefinition Height="300"></RowDefinition>
+            <RowDefinition Height="320"></RowDefinition>
         </Grid.RowDefinitions>
         <Grid Name="container">
-            <local:BrightCanvas x:Name="myCanvas"  Background="LightBlue" Width="{Binding ElementName=container,Path=ActualWidth}"
-                                Height="{Binding ElementName=container,Path=ActualHeight}" >
-            </local:BrightCanvas>
+            <ScrollViewer x:Name="scrollViewer" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
+                <local:BrightCanvas x:Name="myCanvas"   Background="LightBlue" Width="800" Height="600" >
+                </local:BrightCanvas>
+            </ScrollViewer>
         </Grid>
 
         <Grid Grid.Row="1">
@@ -33,6 +35,9 @@
         <Grid Grid.Column="1">
             <oxy:PlotView Model="{Binding ModelY}" />
 
+        </Grid>
+        <Grid Grid.Column="1" Grid.Row="1">
+            <extControl:DiscreteSlider HorizontalAlignment="Left" x:Name="discreteSlider1" ></extControl:DiscreteSlider>
         </Grid>
     </Grid>
 </Window>

@@ -38,7 +38,7 @@ namespace BrightMaster
         double zoomRatio = 1;
         Point? lastDragPoint;
         static SerialPort serialPort = new SerialPort();
-
+        ProgressForm progressForm;
         public MainWindow()
         {
             InitializeComponent();
@@ -410,6 +410,7 @@ namespace BrightMaster
                             UpdateResults(pts);
                         }
                         this.IsEnabled = true;
+                        progressForm.Close();
                         InvalidateVisual();
                     });
                 }
@@ -487,10 +488,13 @@ namespace BrightMaster
                 QueryBarcode queryBarcode = new QueryBarcode();
                 queryBarcode.ShowDialog();
             }
+            progressForm = new ProgressForm();
+            progressForm.Show();
             btnSetROI.IsChecked = false;
             SetInfo("开始采集。",false);
             btnFakeColor.IsChecked = false;
             this.IsEnabled = false;
+         
             await DoAcquisition();
         }
 

@@ -8,6 +8,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Interop;
 using System.Windows.Media.Imaging;
@@ -43,17 +44,38 @@ namespace BrightMaster
             var b = new Bitmap(width, height, PixelFormat.Format24bppRgb);
             LockBitmap lockBitmap = new LockBitmap(b);
             lockBitmap.LockBits();
-            
-            for (int y = 0; y < height; y++)
-            {
-                for (int x = 0; x < width; x++)
-                {
-                    byte val = vals[y][x];
-                    lockBitmap.SetPixel(x, y, Color.FromArgb(val, val, val));
-                }
-            }
+            Parallel.Invoke(() =>
+              {
+                  SetPixels(lockBitmap,vals, 0, 0, width / 2, height / 2);
+              },
+              () =>
+              {
+                  SetPixels(lockBitmap, vals, width/2, 0,width , height / 2);
+              },
+              () =>
+              {
+                  SetPixels(lockBitmap, vals, 0, height/2,width/2 , height);
+              },
+              () =>
+              {
+                  SetPixels(lockBitmap, vals, width/2, height/2, width, height);
+              }
+              
+              
+              );
             lockBitmap.UnlockBits();
             return b.ToBitmapImage();
+        }
+
+        private static void SetPixels(LockBitmap lockBitmap, List<List<byte>> vals, int startX, int startY, int endX, int endY)
+        {
+            for (int y = startY; y < endY; y++)
+            {
+                for (int x = startX; x < endX; x++)
+                {
+                    lockBitmap.SetPixel(x, y, Color.FromArgb(vals[y][x], vals[y][x], vals[y][x]));
+                }
+            }
         }
     }
 

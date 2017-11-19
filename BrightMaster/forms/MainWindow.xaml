@@ -135,7 +135,7 @@
             <ToggleButton Style="{StaticResource ToggleButtonStyle1}" Click="btnSetROI_Click" Name="btnSetROI" >
                 <Image Source="/Images/roi.jpg"></Image>
             </ToggleButton>
-            <Button   Command="{StaticResource Curve}"  >
+            <Button Command="{StaticResource Curve}"  >
                 <Image Source="/Images/curve.png"></Image>
             </Button>
         </StackPanel>

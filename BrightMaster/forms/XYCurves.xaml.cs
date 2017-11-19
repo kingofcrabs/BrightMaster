@@ -7,6 +7,10 @@ using System.Windows.Input;
 using OxyPlot;
 using OxyPlot.Axes;
 using OxyPlot.Series;
+using System.Linq;
+using System.Windows.Media;
+using System.Windows.Controls;
+using System.Threading.Tasks;
 
 namespace BrightMaster
 {
@@ -22,16 +26,9 @@ namespace BrightMaster
 
         public XYCurves(Brightness brightness)
         {
+            this.brightness = brightness;
             InitializeComponent();
             this.Loaded +=XYCurves_Loaded;
-           
-            List<float> xVals = brightness.GetHorizontoalLineVals(brightness.Height/2);
-            List<float> yVals = brightness.GetVerticalLineVals(brightness.Width / 2);
-            this.brightness = brightness;
-            myCanvas.OnCurveMouseDown(new Point(myCanvas.ActualWidth / 2, myCanvas.ActualHeight / 2));
-            this.ModelX = CurveModel.CreateModel(xVals, true);
-            this.ModelY = CurveModel.CreateModel(yVals,false); 
-            this.DataContext = this;
             myCanvas.MouseDown += myCanvas_MouseDown;
         }
 
@@ -39,6 +36,18 @@ namespace BrightMaster
         {
             if (!Keyboard.IsKeyDown(Key.LeftCtrl))
                 return;
+
+            object original = e.OriginalSource;
+
+            if (!original.GetType().Equals(typeof(ScrollViewer)))
+            {
+                if (FindVisualParent<System.Windows.Controls.Primitives.ScrollBar>(original as DependencyObject) != null)
+                {
+                    return;
+                }
+
+            }
+
             var pt = e.GetPosition(myCanvas);
             myCanvas.OnCurveMouseDown(pt);
           
@@ -55,16 +64,55 @@ namespace BrightMaster
             ModelY.InvalidatePlot(true);
         }
 
-    
+        private parentItem FindVisualParent<parentItem>(DependencyObject obj) where parentItem : DependencyObject
+        {
+            DependencyObject parent = VisualTreeHelper.GetParent(obj);
+            while (parent != null && !parent.GetType().Equals(typeof(parentItem)))
+            {
+                parent = VisualTreeHelper.GetParent(parent);
+            }
+            return parent as parentItem;
+        }
         void XYCurves_Loaded(object sender, RoutedEventArgs e)
         {
-            
+            List<float> xVals = brightness.GetHorizontoalLineVals(brightness.Height / 2);
+            List<float> yVals = brightness.GetVerticalLineVals(brightness.Width / 2);
+           
+            myCanvas.OnCurveMouseDown(new Point(myCanvas.ActualWidth / 2, myCanvas.ActualHeight / 2));
+            this.ModelX = CurveModel.CreateModel(xVals, true);
+            this.ModelY = CurveModel.CreateModel(yVals, false);
+            this.DataContext = this;
+
             var bmpImage = ImageHelper.CreateImage(brightness.grayVals);
-            string sImgFile = "d:\\test.jpg";
-            ImageHelper.SaveBitmapImageIntoFile(bmpImage, sImgFile);
             myCanvas.SetBkGroundImage(bmpImage);
+            ResetSlider(discreteSlider1, 8);
+            discreteSlider1.PropertyChanged += discreteSlider1_PropertyChanged;
         }
 
-       
+        void UpdateImage(int grayLevelCnt)
+        {
+            var sparseGrayVals = brightness.GetSparseGrayLevels(grayLevelCnt);
+            var bmpImage = ImageHelper.CreateImage(sparseGrayVals);
+            myCanvas.SetBkGroundImage(bmpImage);
+           
+        }
+
+        void discreteSlider1_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
+        {
+            //discreteSlider1.Value
+            //this.IsEnabled = false;
+            UpdateImage(discreteSlider1.Value);
+            //this.IsEnabled = true;
+        }
+
+        private void ResetSlider(ExtControls.DiscreteSlider slider, int count)
+        {
+            int[] values = new int[count];
+            for (int i = 0; i < values.Length; i++)
+            {
+                values[i] = (int)Math.Pow(2, i + 1);
+            }
+            slider.Reset(values.OrderByDescending(x => x).ToArray());
+        }
     }
 }
