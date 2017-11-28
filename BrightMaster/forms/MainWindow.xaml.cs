@@ -1,7 +1,6 @@
 ﻿using BrightMaster.data;
 using BrightMaster.forms;
 using BrightMaster.Settings;
-using BrightMaster.Settings;
 using BrightMaster.utility;
 using EngineDll;
 using System;
@@ -39,6 +38,8 @@ namespace BrightMaster
         Point? lastDragPoint;
         static SerialPort serialPort = new SerialPort();
         ProgressForm progressForm;
+        PowerControl powerControl;
+        Stopwatch watch = new Stopwatch();
         public MainWindow()
         {
             InitializeComponent();
@@ -59,9 +60,21 @@ namespace BrightMaster
 
         async void Initialize()
         {
+            GlobalVars.Instance.UAController.onInitialFinished += UAController_onInitialFinished;
             await GlobalVars.Instance.UAController.Initialize();
-            this.IsEnabled = true;
-            SetInfo("初始化成功！", false);
+        }
+
+        void UAController_onInitialFinished(bool bok, string errMsg)
+        {
+            this.Dispatcher.Invoke(() =>
+            {
+                this.IsEnabled = true;
+                if (bok)
+                    SetInfo("初始化成功！", false);
+                else
+                    SetInfo("初始化失败：" + errMsg, true);
+            });
+            
         }
         void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
@@ -71,12 +84,7 @@ namespace BrightMaster
             try
             {
                 cmbRecipes.DataContext = GlobalVars.Instance.RecipeCollection;
-                string portName = ConfigurationManager.AppSettings["ComPort"];
-                if(portName != "")
-                {
-                    serialPort = new SerialPort(portName, 9600, Parity.None, 8, StopBits.One);
-                    serialPort.Open();
-                }
+                powerControl = new PowerControl();
                 Initialize();
             }
             catch (Exception ex)
@@ -149,9 +157,7 @@ namespace BrightMaster
                 {
                     return;
                 }
-
             }
-
 
             if ((bool)btnSetROI.IsChecked)
             {
@@ -181,9 +187,7 @@ namespace BrightMaster
             {
                 double dX = posNow.X - lastDragPoint.Value.X;
                 double dY = posNow.Y - lastDragPoint.Value.Y;
-
                 lastDragPoint = posNow;
-
                 scrollViewer.ScrollToHorizontalOffset(scrollViewer.HorizontalOffset - dX);
                 scrollViewer.ScrollToVerticalOffset(scrollViewer.VerticalOffset - dY);
             }
@@ -211,7 +215,7 @@ namespace BrightMaster
 
         private void FakeColor_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
-            e.CanExecute = brightness != null &&  brightness.grayVals.Count != 0;
+            e.CanExecute = brightness != null &&  brightness.grayVals.GetLength(0) != 0;
         }
         private void btnSetROI_Click(object sender, RoutedEventArgs e)
         {
@@ -258,6 +262,7 @@ namespace BrightMaster
         {
             e.CanExecute = true;
         }
+
 
         private void LiveFocus_Executed(object sender, ExecutedRoutedEventArgs e)
         {
@@ -364,7 +369,23 @@ namespace BrightMaster
             SetInfo("打开成功", false);
         }
 
+        private void Power_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = true;
+        }
 
+        private void Power_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            bool isChecked = (bool)chkPower.IsChecked;
+            if(!isChecked)
+            {
+                powerControl.PowerOff();
+            }
+            else
+            {
+                powerControl.PowerOn();
+            }
+        }
 
         private void Open_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
@@ -389,24 +410,24 @@ namespace BrightMaster
 
         async Task  DoAcquisition()
         {
-            
             await Task.Run(() =>
             {
-
-                List<List<PixelInfo>> allPixels = GlobalVars.Instance.UAController.Acquire();
+                watch.Restart();
+                var allPixels = GlobalVars.Instance.UAController.Acquire();
                 try
                 {
-                    
                     this.Dispatcher.Invoke(() =>
                     {
                         List<System.Drawing.Point> pts = FindBoundingPts(allPixels);
+                        watch.Stop();
+                        string elapsed = (watch.ElapsedMilliseconds/1000).ToString();
                         if (pts== null || pts.Count != 4)
                         {
-                            SetInfo("无法找到外框", true);
+                            SetInfo(string.Format("无法找到外框，用时:{0}秒", elapsed), false);
                         }
                         else
                         {
-                            SetInfo("采集完成。", false);
+                            SetInfo(string.Format("采集完成，用时:{0}秒",elapsed), false);
                             UpdateResults(pts);
                         }
                         this.IsEnabled = true;
@@ -419,6 +440,8 @@ namespace BrightMaster
                     this.Dispatcher.Invoke(() =>
                     {
                         SetInfo("采集失败："+ex.Message, true);
+                        if(progressForm.Visible)
+                            progressForm.Close();
                         this.IsEnabled = true;
                         return;
                     });
@@ -428,18 +451,25 @@ namespace BrightMaster
             });
         }
 
-        private List<System.Drawing.Point> FindBoundingPts(List<List<PixelInfo>> allPixels)
+        private List<System.Drawing.Point> FindBoundingPts(LightPixelInfo[,] allPixels)
         {
             brightness = new Brightness(allPixels);
             var bmpImage = ImageHelper.CreateImage(brightness.grayVals);
-            IEngine iEngine = new IEngine();
+            if(!GlobalVars.Instance.MiscSettings.AutoFindBoundary)
+            {
+                var boundPts = GlobalVars.Instance.MiscSettings.BoundaryPts;
+                myCanvas.SetBkGroundImage(bmpImage, boundPts);
+                return boundPts;
+            }
             string sImgFile = FolderHelper.GetImageFolder() + "latest.jpg";
-
             ImageHelper.SaveBitmapImageIntoFile(bmpImage, sImgFile);
-            var mpts = iEngine.FindRect(sImgFile, ref GlobalVars.Instance.MiscSettings.thresholdVal, GlobalVars.Instance.MiscSettings.AutoFindBoundary);
+            List<System.Drawing.Point> pts = new List<System.Drawing.Point>();
+            IEngine iEngine = new IEngine();
+            var mpts = iEngine.FindRect(sImgFile, ref GlobalVars.Instance.MiscSettings.thresholdVal, GlobalVars.Instance.MiscSettings.MannualThreshold);
             if (mpts.Count == 0)
                 return new List<System.Drawing.Point>();
-            List<System.Drawing.Point> pts = AdjustPosition(mpts);
+            pts = AdjustPosition(mpts);
+            GlobalVars.Instance.MiscSettings.BoundaryPts = pts;
             GlobalVars.Instance.MiscSettings.Save();
             myCanvas.SetBkGroundImage(bmpImage, pts);
             return pts;
@@ -490,12 +520,26 @@ namespace BrightMaster
             }
             progressForm = new ProgressForm();
             progressForm.Show();
+            CheckPowerSetting();
             btnSetROI.IsChecked = false;
+            myCanvas.UserSelectROI = false;
             SetInfo("开始采集。",false);
             btnFakeColor.IsChecked = false;
             this.IsEnabled = false;
-         
+            watch.Reset();
+            watch.Start();
+
             await DoAcquisition();
+        }
+
+        private void CheckPowerSetting()
+        {
+            bool isChecked = (bool)chkPower.IsChecked;
+            if(!isChecked)
+            {
+                chkPower.IsChecked = true;
+            }
+            powerControl.PowerOn();
         }
 
     
@@ -539,6 +583,8 @@ namespace BrightMaster
             InvalidateVisual();
 
         }
+
+       
 
      
     }

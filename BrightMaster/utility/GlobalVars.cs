@@ -1,4 +1,5 @@
 ﻿using BrightMaster.data;
+using BrightMaster.settings;
 using BrightMaster.Settings;
 using BrightMaster.Settings;
 using System;
@@ -54,6 +55,13 @@ namespace BrightMaster
         }
 
         public Misc MiscSettings { get; set; }
+        public PowerSettings PowerSettings
+        {
+            get
+            {
+                return recipeCollection.SelectedRecipe.PowerSettings;
+            }
+        }
         public bool NeedBarcode
         {
             get
@@ -87,6 +95,8 @@ namespace BrightMaster
         {
             get
             {
+                if (recipeCollection.SelectedRecipe == null)
+                    return null;
                 return recipeCollection.SelectedRecipe.Layout;
             }
         }

@@ -10,6 +10,18 @@ using System.Windows.Media;
 
 namespace BrightMaster
 {
+    public struct LightPixelInfo
+    {
+        public float X;
+        public float Y;
+        public float Z;
+        public LightPixelInfo(float X,float Y,float Z)
+        {
+            this.X = X;
+            this.Y = Y;
+            this.Z = Z;
+        }
+    }
     public class PixelInfo:BindableBase
     {
         private float _X,_Y,_Z,_x,_y,_u,_v;

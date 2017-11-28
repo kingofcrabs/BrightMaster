@@ -67,6 +67,12 @@ namespace ExtControls
         {
             this.DataContext = this;
             InitializeComponent();
+            this.Loaded += DiscreteSlider_Loaded;
+            
+        }
+
+        void DiscreteSlider_Loaded(object sender, RoutedEventArgs e)
+        {
             Reset(values);
         }
 
@@ -90,8 +96,8 @@ namespace ExtControls
                     ticksCanvas.Children.Add(line);
                     yCoords[i] = line.Y1;
                 }
-                sliderCanvas.SetValue(Canvas.TopProperty, yCoords.Last());
-                Value = values.Last();
+                sliderCanvas.SetValue(Canvas.TopProperty, yCoords.First());
+                Value = values.First();
                 selectedIndex = 0;
             }
         }

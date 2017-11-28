@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -24,57 +25,65 @@ namespace BrightMaster
 
         IntPtr capture_data_ptr;
         Ua.CaptureData capture_data;
-        public event EventHandler<bool> onInitialFinished;
+        public  delegate void DelegateInitFinish(bool bok, string errMsg);
+        public event DelegateInitFinish onInitialFinished;
         public async Task Initialize()
         {
             await Task.Run(() =>
             {
                 if (initialized)
                 {
-                    NotifyInitialFinish();
+                    NotifyInitialFinish(true);
                     return;
                 }
                     
-
-                uaCore = new Ua.Core();
-                system_ptr = uaCore.uaInitialize(GlobalVars.Instance.ParamPath);
-                Ua.System ua_system = Ua.Utility.PtrToUaSystem(system_ptr);
-                Ua.Configuration[] configuration = { ua_system.ua_10 };
-                for (int i = 0; i < configuration.Length; i++)
-                {
-                    for (int j = 0; j < configuration[i].num_connected; j++)
+                try{
+                    uaCore = new Ua.Core();
+                    system_ptr = uaCore.uaInitialize(GlobalVars.Instance.ParamPath);
+                    Ua.System ua_system = Ua.Utility.PtrToUaSystem(system_ptr);
+                    Ua.Configuration[] configuration = { ua_system.ua_10 };
+                    for (int i = 0; i < configuration.Length; i++)
                     {
-                        device_ptr = uaCore.uaOpenDevice(configuration[i].connected_product_ids[j]);
-                        if (device_ptr != IntPtr.Zero)
+                        for (int j = 0; j < configuration[i].num_connected; j++)
                         {
-                            break;
+                            device_ptr = uaCore.uaOpenDevice(configuration[i].connected_product_ids[j]);
+                            if (device_ptr != IntPtr.Zero)
+                            {
+                                break;
+                            }
                         }
                     }
-                }
-                Ua.UaError n_err_code = uaCore.uaGetError();
-                if (n_err_code != Ua.UaError.UA_NO_ERROR)
-                {
-                    throw new Exception(uaCore.uaGetErrorString(n_err_code));
-                }
-                device = Ua.Utility.PtrToUaDevice(device_ptr);
-                recipe_ptr = uaCore.uaCreateRecipe(device.type);
-                recipe = Ua.Utility.PtrToUaRecipe(recipe_ptr);
+                    Ua.UaError n_err_code = uaCore.uaGetError();
+                    if (n_err_code != Ua.UaError.UA_NO_ERROR)
+                    {
+                        throw new Exception(uaCore.uaGetErrorString(n_err_code));
+                    }
+                    device = Ua.Utility.PtrToUaDevice(device_ptr);
+                    recipe_ptr = uaCore.uaCreateRecipe(device.type);
+                    recipe = Ua.Utility.PtrToUaRecipe(recipe_ptr);
 
-                //uaCore.uaDestroyRecipe(recipe_ptr);
-                device_property = Ua.Utility.PtrToUaDeviceProperty(recipe.property_ptr);
-                uaCore.uaGetDeviceProperty(ref device, ref device_property);
-                //复用一个xyz_image
-                xyz_image_ptr = uaCore.uaCreateXYZImage(device.type, Ua.DataType.UA_DATA_TRISTIMULUS_XYZ);
-                xyz_image = Ua.Utility.PtrToUaXYZImage(xyz_image_ptr);
-                initialized = true;
-                NotifyInitialFinish();
+                    //uaCore.uaDestroyRecipe(recipe_ptr);
+                    device_property = Ua.Utility.PtrToUaDeviceProperty(recipe.property_ptr);
+                    uaCore.uaGetDeviceProperty(ref device, ref device_property);
+                    //复用一个xyz_image
+                    xyz_image_ptr = uaCore.uaCreateXYZImage(device.type, Ua.DataType.UA_DATA_TRISTIMULUS_XYZ);
+                    xyz_image = Ua.Utility.PtrToUaXYZImage(xyz_image_ptr);
+                
+                    initialized = true;
+                    NotifyInitialFinish(true);
+                }
+                catch(Exception ex)
+                {
+                    NotifyInitialFinish(false, ex.Message);
+                }
+                
             });
         }
 
-        private void NotifyInitialFinish()
+        private void NotifyInitialFinish(bool bok,string errMsg = "")
         {
             if (onInitialFinished != null)
-                onInitialFinished(this,true);
+                onInitialFinished(bok,errMsg);
         }
 
         
@@ -82,9 +91,6 @@ namespace BrightMaster
         {
             capture_data_ptr = uaCore.uaCreateCaptureData(device.type);
             capture_data = Ua.Utility.PtrToUaCaptureData(capture_data_ptr);
-
-
-           
             // set capture mode parameter
           
             device_property.capture_mode = Ua.CaptureMode.UA_CAPTURE_FOCUS;
@@ -123,7 +129,7 @@ namespace BrightMaster
         }
 
 
-        List<List<PixelInfo>> GetData(XYZImage img)
+        LightPixelInfo[,] GetData(XYZImage img)
         {
             if (img.Y_ptr == IntPtr.Zero)
                 throw new Exception("Invalid image.");
@@ -131,24 +137,67 @@ namespace BrightMaster
             float[] y_ptr = Ua.Utility.PtrToFloat(img.Y_ptr, img.size);
             float[] x_ptr = Ua.Utility.PtrToFloat(img.X_ptr, img.size);
             float[] z_ptr = Ua.Utility.PtrToFloat(img.Z_ptr, img.size);
-                //System.IO.StreamWriter writer = new System.IO.StreamWriter("..\\out.csv", false);
-            List<List<PixelInfo>> allPixelInfos = new List<List<PixelInfo>>();
+            LightPixelInfo[,] allPixelInfos = new LightPixelInfo[img.height, img.width];
             int ID = 1;
-            for (int y = 0; y < img.height; y++)
+            int height = img.height;
+            int width = img.width;
+
+            //unsafe
             {
-                List<PixelInfo> lineInfos = new List<PixelInfo>();
-                for (int x = 0; x < img.width; x++)
+                Parallel.Invoke(() =>
                 {
-                    float Y = y_ptr[y * img.width + x];
-                    float X = x_ptr[y * img.width + x];
-                    float Z = z_ptr[y * img.width + x];
-                    PixelInfo pixelInfo = new PixelInfo(ID++,X, Y, Z);
-                    lineInfos.Add(pixelInfo);
-                }
-                allPixelInfos.Add(lineInfos);
+                    GetPixelInfos(allPixelInfos, x_ptr, y_ptr, z_ptr, 0, height / 4, width, height);
+                },
+                () =>
+                {
+                    GetPixelInfos(allPixelInfos, x_ptr, y_ptr, z_ptr, height / 4, height / 2, width, height);
+                },
+                () =>
+                {
+                    GetPixelInfos(allPixelInfos, x_ptr, y_ptr, z_ptr, height / 2, height * 3 / 4, width, height);
+                },
+                () =>
+                {
+                    GetPixelInfos(allPixelInfos, x_ptr, y_ptr, z_ptr, height * 3 / 4, height, width, height);
+                });
+                //Parallel.For(0, height, y =>
+                //{
+                //    List<PixelInfo> lineInfos = new List<PixelInfo>();
+                //    int startPos = y * width;
+                //    for (int x = 0; x < width; x++)
+                //    {
+                //        int curIndex = startPos + x;
+                //        allPixelInfos[y, x] = new PixelInfo(ID++, x_ptr[curIndex], y_ptr[curIndex], z_ptr[curIndex]);
+                //    }
+                //});
             }
+          
+           
             return allPixelInfos;
         }
+
+        private void GetPixelInfos(LightPixelInfo[,] allPixelInfos, 
+            float[] x_ptr, 
+            float[] y_ptr, 
+            float[] z_ptr, 
+            int startY, 
+            int endY,
+            int width, int height)
+        {
+            int ID = startY * width +1;
+            for( int y = startY; y < endY; y++)
+            {
+                List<LightPixelInfo> lineInfos = new List<LightPixelInfo>();
+                int startPos = y * width;
+                for (int x = 0; x < width; x++)
+                {
+                    int curIndex = startPos + x;
+                    allPixelInfos[y, x] = new LightPixelInfo(x_ptr[curIndex], y_ptr[curIndex], z_ptr[curIndex]);
+                }
+            }
+        }
+
+        
 
         public void SetMannualMode()
         {
@@ -163,20 +212,14 @@ namespace BrightMaster
             
             device_property.capture_mode = Ua.CaptureMode.UA_CAPTURE_MANUAL;
             //set distance & exposure time
-            if(!GlobalVars.Instance.CameraSettings.AutoExposure)
-            {
-                for (int i = 0; i < device_property.exposure_time.Count(); i++)
-                    device_property.exposure_time[i] = GlobalVars.Instance.CameraSettings.ExposureTime;
-            }
-            
-            device_property.measurement_distance = GlobalVars.Instance.CameraSettings.WorkingDistance;
+
             // Console.WriteLine("uaSetDeviceProperty");
             uaCore.uaSetDeviceProperty(ref device, ref device_property);
             capture_data_ptr = uaCore.uaCreateCaptureData(device.type);
             capture_data = Ua.Utility.PtrToUaCaptureData(capture_data_ptr);
         }
 
-        public List<List<PixelInfo>> Acquire()
+        public LightPixelInfo[,] Acquire()
         {
             if (!initialized)
             {
@@ -187,36 +230,45 @@ namespace BrightMaster
                 throw new Exception("Not initialized!");
 
             SetMannualMode();
-            int average_count = 2;
+            int average_count = 1;
             //uaCore.uaGetOptimumAverageCount(
             //    ref device, 0, 40, ref average_count);
-           
+            if (!GlobalVars.Instance.CameraSettings.AutoExposure)
+            {
+                for (int i = 0; i < device_property.exposure_time.Count(); i++)
+                    device_property.exposure_time[i] = GlobalVars.Instance.CameraSettings.ExposureTime;
+            }
 
-            // Console.WriteLine("uaStartCapture");
+            device_property.measurement_distance = GlobalVars.Instance.CameraSettings.WorkingDistance;
+            Stopwatch watch = new Stopwatch();
+            watch.Start();
             uaCore.uaStartCapture(ref device);
             double expo = device_property.exposure_time[0];
-            // Console.WriteLine("uaCaptureImage");
-            uaCore.uaCaptureImage(
-                ref device, Ua.CaptureFilterType.UA_CAPTURE_FILTER_XYZ, average_count, ref capture_data);
+            uaCore.uaCaptureImage(ref device,
+                Ua.CaptureFilterType.UA_CAPTURE_FILTER_XYZ, 
+                average_count, 
+                ref capture_data);
             
             // Console.WriteLine("uaStopCapture");
             uaCore.uaStopCapture(ref device);
+            Debug.WriteLine("used time:" + watch.ElapsedMilliseconds+"ms");
             //if( xyz_image_ptr != IntPtr.Zero)
             //    uaCore.uaDestroyXYZImage(xyz_image_ptr);
             
             uaCore.uaToXYZImage(ref device, ref capture_data, ref xyz_image);
             uaCore.uaDestroyCaptureData(capture_data_ptr);
             var allPixels = GetData(xyz_image);
+            Debug.WriteLine("used time 2:" + watch.ElapsedMilliseconds + "ms");
+            watch.Stop();
             return allPixels;
            
         }
 
-        public List<List<PixelInfo>> LoadXYZImage(string imgName)
+        public LightPixelInfo[,] LoadXYZImage(string imgName)
         {
             uaCore.uaLoadMeasurementData(imgName,ref xyz_image_ptr,ref recipe_ptr);
             xyz_image = Ua.Utility.PtrToUaXYZImage(xyz_image_ptr);
-            var allPixels = GetData(xyz_image);
-            return allPixels;
+            return GetData(xyz_image);
         }
 
         public bool HaveXYZImage

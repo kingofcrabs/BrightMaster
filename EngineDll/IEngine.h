@@ -78,7 +78,7 @@ namespace EngineDll
 		~IEngine();
 		cv::Rect2f Convert2Rect2f(MRect^ rc);
 		void Convert2PseudoColor(System::String^ sOrgFile, System::String^ sDestFile);
-		List<MPoint^>^ IEngine::FindRect(System::String^ sFile,int% threshold, bool autoFindBoundary);
+		List<MPoint^>^ IEngine::FindRect(System::String^ sFile,int% threshold, bool mannualThreshold);
 	private :
 		std::string IEngine::WStringToString(const std::wstring &wstr);
 		template<typename T>  List<T>^  Copy2List(std::vector<T> vector);

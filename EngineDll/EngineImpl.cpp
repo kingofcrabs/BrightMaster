@@ -154,7 +154,7 @@ static void on_trackbar(int val, void* parent)
 }
 
 
-void EngineImpl::FindRectImpl(Mat& img, vector<pair<int, int>>& ptPairs, bool autoFindBoundary)
+void EngineImpl::FindRectImpl(Mat& img, vector<pair<int, int>>& ptPairs, bool mannualThreshold)
 {
 	std::vector< std::vector<cv::Point> > allContours;
 	Mat thresholdImg;
@@ -207,25 +207,27 @@ void EngineImpl::FindRectImpl(Mat& img, vector<pair<int, int>>& ptPairs, bool au
 		line(drawing, ptStart, ptEnd, color, 1);
 		ptPairs.push_back(make_pair(ptStart.x, ptStart.y));
 	}
-	if (!autoFindBoundary)
+	if (mannualThreshold)
 	{
 		imshow("threshold", drawing);
+#if _DEBUG
 		imwrite("d:\\test.jpg", drawing);
+#endif
 	}
 		
 
 }
 
-void EngineImpl::FindRect(std::string sFile, int& defaultThreshold, vector<pair<int, int>>& ptPairs,bool autoFindBoundary)
+void EngineImpl::FindRect(std::string sFile, int& defaultThreshold, vector<pair<int, int>>& ptPairs, bool mannualThreshold)
 {
 	thresholdVal = defaultThreshold;
 	auto img = cv::imread(sFile, 0);
 	Mat thresholdImg;
 	globalImg = img.clone();
 	cv::threshold(img, thresholdImg, thresholdVal, 255, CV_THRESH_BINARY);
-	if (autoFindBoundary)
+	if (!mannualThreshold)
 	{
-		FindRectImpl(img, ptPairs, autoFindBoundary);
+		FindRectImpl(img, ptPairs, mannualThreshold);
 		return;
 	}
 	string winName = "threshold";

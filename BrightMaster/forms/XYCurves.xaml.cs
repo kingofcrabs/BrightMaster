@@ -57,8 +57,10 @@ namespace BrightMaster
             List<float> yVals = brightness.GetVerticalLineVals(xPixel);
             List<float> xVals = brightness.GetHorizontoalLineVals(yPixel);
             ModelX.Series.Clear();
+            CurveModel.AdjustYAxis(ModelX, xVals);
             ModelX.Series.Add(CurveModel.CreateSeries(xVals));
             ModelY.Series.Clear();
+            CurveModel.AdjustYAxis(ModelY, yVals);
             ModelY.Series.Add(CurveModel.CreateSeries(yVals,false));
             ModelX.InvalidatePlot(true);
             ModelY.InvalidatePlot(true);

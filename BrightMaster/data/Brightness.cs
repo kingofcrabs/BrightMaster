@@ -1,6 +1,7 @@
 ﻿using EngineDll;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -11,10 +12,9 @@ namespace BrightMaster
 {
     public class Brightness
     {
-        public List<List<PixelInfo>> _allPixels = new List<List<PixelInfo>>();
-        public List<List<byte>> grayVals = new List<List<byte>>();
-        public List<List<float>> orgVals = new List<List<float>>();
-        public List<List<byte>> sparseGrayVals = new List<List<byte>>();
+        public LightPixelInfo[,] _allPixels;
+        public byte[,] grayVals;
+        public byte[,] sparseGrayVals;
         public byte[] grayValsInArray;
         public string jpgFilePath;
         public int[] GrayLevelCounts = new int[256];
@@ -24,23 +24,77 @@ namespace BrightMaster
         public double Max { get; set; }
         public double Min { get; set; }
 
-        public Brightness(List<List<PixelInfo>> pixels)
+        public Brightness(LightPixelInfo[,] pixels)
         {
+            Stopwatch watch = new Stopwatch();
+            watch.Start();
+
             _allPixels = pixels;
-            orgVals.Clear();
-            foreach(var linePixel in pixels)
+            Height = pixels.GetLength(0);
+            Width = pixels.GetLength(1);
+
+            grayVals = new byte[Height, Width];
+            sparseGrayVals = new byte[Height, Width];
+            Min = 999999;
+            Max = 0;
+
+            float[] maxArray = new float[4];
+            float[] minArray = new float[4];
+            for(int i = 0; i< 4; i++)
             {
-                List<float> vals = linePixel.Select(x => x.Y).ToList();
-                orgVals.Add(vals);
+                maxArray[i] = 0;
+                minArray[i] = 999999;
             }
-            grayVals = Convert2Gray(orgVals);
-            jpgFilePath = FolderHelper.GetImageFolder() + "latest.jpg";
-            SaveImage();
+            unsafe
+            {
+
+                Parallel.Invoke(() =>
+                {
+                    GetMaxMin(0, Height / 4, ref maxArray[0],ref minArray[0]);
+                },
+                 () =>
+                 {
+                     GetMaxMin(Height / 4,Height/2, ref maxArray[1], ref minArray[1]);
+                 },
+                 () =>
+                 {
+                     GetMaxMin(Height/2, Height*3/4, ref maxArray[2], ref minArray[2]);
+                 },
+                 () =>
+                 {
+                     GetMaxMin(Height*3/4, Height, ref maxArray[3], ref minArray[3]);
+                 });
+                for (int i = 0; i < 4; i++)
+                {
+                    if (Max < maxArray[i])
+                        Max = maxArray[i];
+                    if (Min > minArray[i])
+                        Min = minArray[i];
+                }
+            }
+            Debug.WriteLine(string.Format("Brightness find max min elapsed:{0}", watch.ElapsedMilliseconds));
+            grayVals = Convert2Gray();
+            Debug.WriteLine(string.Format("Brightness convert2Gray elapsed:{0}", watch.ElapsedMilliseconds));
+            //jpgFilePath = FolderHelper.GetImageFolder() + "latest.jpg";
+            //SaveImage();
+            Debug.WriteLine(string.Format("Brightness save image elapsed:{0}", watch.ElapsedMilliseconds));
+            watch.Stop();
         }
 
-       
+        private void GetMaxMin(int yStart, int yEnd, ref float max, ref float min)
+        {
 
-
+            for (int y = yStart; y < yEnd; y++)
+            {
+                for (int x = 0; x < Width; x++)
+                {
+                    if (max < _allPixels[y, x].Y)
+                        max = _allPixels[y, x].Y;
+                    if (min > _allPixels[y, x].Y)
+                        min = _allPixels[y, x].Y;
+                }
+            }
+        }
 
         public List<PixelInfo> GetResults(List<System.Drawing.Point> pts)
         {
@@ -61,19 +115,23 @@ namespace BrightMaster
 
         private PixelInfo GetAvgVals(float xx, float yy, float radius, int ID)
         {
-            List<PixelInfo> vals = new List<PixelInfo>();
+            List<LightPixelInfo> vals = new List<LightPixelInfo>();
             int xStart = (int)(xx - radius);
             int yStart = (int)(yy - radius);
             int xEnd = (int)(xx + radius);
             int yEnd = (int)(yy + radius);
-            for(int x = xStart; x < xEnd; x++)
+            unsafe
             {
-                for(int y = yStart; y< yEnd; y++)
+                for (int x = xStart; x < xEnd; x++)
                 {
-                    vals.Add(_allPixels[y][x]);
+                    for (int y = yStart; y < yEnd; y++)
+                    {
+                        if (GetDistance(x, y, xx, yy) <= radius)
+                            vals.Add(_allPixels[y, x]);
+                    }
                 }
             }
-
+          
             float X,Y,Z;
             X = vals.Average(val => val.X);
             Y = vals.Average(val => val.Y);
@@ -81,32 +139,44 @@ namespace BrightMaster
             return new PixelInfo(ID,X, Y, Z);
         }
 
+        private float GetDistance(int x, int y, float xx, float yy)
+        {
+            float xDis = xx- x;
+            float yDis = yy - y;
+            return (float)Math.Sqrt(xDis * xDis + yDis * yDis);
+        }
+
         private void SaveImage()
         {
-            Bitmap bmp = new Bitmap(grayVals[0].Count, grayVals.Count);
+            Bitmap bmp = new Bitmap(Width,Height);
             LockBitmap lockBmp = new LockBitmap(bmp);
-            lockBmp.LockBits();
-            for (int y = 0; y < lockBmp.Height; y++)
+            unsafe
             {
-                List<double> vals = new List<double>();
-                for (int x = 0; x < lockBmp.Width; x++)
+                lockBmp.LockBits();
+                for (int y = 0; y < lockBmp.Height; y++)
                 {
-                    byte grayVal = grayVals[y][x];
-                    lockBmp.SetPixel(x,y,Color.FromArgb(grayVal,grayVal,grayVal));
+                    List<double> vals = new List<double>();
+                    for (int x = 0; x < lockBmp.Width; x++)
+                    {
+                        byte grayVal = grayVals[y, x];
+                        lockBmp.SetPixel(x, y, Color.FromArgb(grayVal, grayVal, grayVal));
+                    }
                 }
+                lockBmp.UnlockBits();
             }
             bmp.Save(jpgFilePath);
         }
 
 
-        public List<List<byte>> GetSparseGrayLevels(int grayLevelCnt)
+        public byte[,] GetSparseGrayLevels(int grayLevelCnt)
         {
-            return Convert2Gray(orgVals, grayLevelCnt);
+            return Convert2Gray(grayLevelCnt);
         }
 
-        private List<List<byte>> Convert2Gray(List<List<float>> orgVals, int grayLevelCnt = 255)
+        private byte[,] Convert2Gray( int grayLevelCnt = 255)
         {
-            List<List<byte>> vals = new List<List<byte>>();
+           
+            byte[,] vals = new byte[Height,Width];
             for (int i = 0; i < 255; i++)
             {
                 GrayLevelCounts[i] = 0;
@@ -114,42 +184,62 @@ namespace BrightMaster
             byte[] map = new byte[256];
             long[] lCounts = new long[256];
             //each gray level count
-            Height = orgVals.Count;
-            Width = orgVals[0].Count;
-            List<float> maxList = orgVals.Select(l => l.Max()).ToList();
-            List<float> minList = orgVals.Select(l => l.Min()).ToList();
-            Max = maxList.Max();
-            Min = minList.Min();
+         
             double grayUnit = (Max - Min) / grayLevelCnt;
             grayValsInArray = new byte[Height * Width];
             int ratio = 256 / grayLevelCnt;
-            int pixelCnt = 0;
-            
-            for (int y = 0; y < Height; y++)
+            unsafe
             {
-                List<byte> thisLineGrayVals = new List<byte>();
-                for (int x = 0; x < Width; x++)
-                {
-                    byte val = (byte)((int)((orgVals[y][x] - Min) / grayUnit) * ratio);
-                    GrayLevelCounts[val]++;
-                    thisLineGrayVals.Add(val);
-                    grayValsInArray[pixelCnt++] = val;
-                }
-                vals.Add(thisLineGrayVals);
+                Parallel.Invoke(() =>
+                 {
+                    GetGrayVal(0,Height/4,grayUnit,ratio, vals, _allPixels,Width,Height);
+                 },
+                 () =>
+                 {
+                     GetGrayVal(Height / 4, Height / 2, grayUnit, ratio, vals, _allPixels, Width, Height);
+                 },
+                 () =>
+                 {
+                     GetGrayVal(Height / 2, Height * 3 / 4, grayUnit, ratio, vals, _allPixels, Width, Height);
+                 },
+                 () =>
+                 {
+                     GetGrayVal(Height * 3 / 4, Height, grayUnit, ratio, vals, _allPixels, Width, Height);
+                 }
+             );
             }
             return vals;
         }
 
+        private void GetGrayVal(int yStart,int yEnd,double grayUnit, double ratio, 
+            byte[,] vals, 
+            LightPixelInfo[,] lightPixels,
+            int Width,
+            int Height)
+        {
+            for (int y = yStart; y < yEnd; y++)
+            {
+                for (int x = 0; x < Width; x++)
+                {
+                    byte val = (byte)((int)((lightPixels[y, x].Y - Min) / grayUnit) * ratio);
+                    vals[y, x] = val;
+                }
+            }
+        }
+
         internal List<float> GetHorizontoalLineVals(int y)
         {
-            return orgVals[y];
+            List<float> vals = new List<float>();
+            for (int x = 0; x < Width; x++)
+                vals.Add(_allPixels[y, x].Y);
+            return vals;
         }
 
         internal List<float> GetVerticalLineVals(int x)
         {
             List<float> vals = new List<float>();
             for (int y = 0; y < Height; y++)
-                vals.Add(orgVals[y][x]);
+                vals.Add(_allPixels[y, x].Y);
             return vals;
         }
     }

@@ -37,46 +37,38 @@ namespace BrightMaster
                 encoder.Save(fileStream);
             }
         }
-        static public BitmapImage CreateImage(List<List<byte>> vals)
+        static public BitmapImage CreateImage(byte[,] vals)
         {
-            int height = vals.Count;
-            int width = vals[0].Count;
-            var b = new Bitmap(width, height, PixelFormat.Format24bppRgb);
-            LockBitmap lockBitmap = new LockBitmap(b);
-            lockBitmap.LockBits();
-            Parallel.Invoke(() =>
-              {
-                  SetPixels(lockBitmap,vals, 0, 0, width / 2, height / 2);
-              },
-              () =>
-              {
-                  SetPixels(lockBitmap, vals, width/2, 0,width , height / 2);
-              },
-              () =>
-              {
-                  SetPixels(lockBitmap, vals, 0, height/2,width/2 , height);
-              },
-              () =>
-              {
-                  SetPixels(lockBitmap, vals, width/2, height/2, width, height);
-              }
-              
-              
-              );
-            lockBitmap.UnlockBits();
-            return b.ToBitmapImage();
-        }
-
-        private static void SetPixels(LockBitmap lockBitmap, List<List<byte>> vals, int startX, int startY, int endX, int endY)
-        {
-            for (int y = startY; y < endY; y++)
+            int height = vals.GetLength(0);
+            int width = vals.GetLength(1);
+            unsafe
             {
-                for (int x = startX; x < endX; x++)
+                var b = new Bitmap(width, height, PixelFormat.Format24bppRgb);
+                LockBitmap lockBitmap = new LockBitmap(b);
+                lockBitmap.LockBits();
+
+                for (int y = 0; y < height; y++)
                 {
-                    lockBitmap.SetPixel(x, y, Color.FromArgb(vals[y][x], vals[y][x], vals[y][x]));
+                    for (int x = 0; x < width; x++)
+                    {
+                        lockBitmap.SetPixel(x, y, Color.FromArgb(vals[y, x], vals[y, x], vals[y, x]));
+                    }
                 }
+                lockBitmap.UnlockBits();
+                return b.ToBitmapImage();
             }
         }
+
+        //private static void SetPixels(LockBitmap lockBitmap, byte[,] vals, int startX, int startY, int endX, int endY)
+        //{
+        //    for (int y = startY; y < endY; y++)
+        //    {
+        //        for (int x = startX; x < endX; x++)
+        //        {
+        //            lockBitmap.SetPixel(x, y, Color.FromArgb(vals[y,x], vals[y,x], vals[y,x]));
+        //        }
+        //    }
+        //}
     }
 
     public class LockBitmap

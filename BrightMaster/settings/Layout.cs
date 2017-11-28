@@ -249,10 +249,10 @@ namespace BrightMaster.Settings
 
             for (int y = 0; y < layout.YCount; y++)
             {
+                float yy = layout.yCount == 1 ? ptStart.Y : (ptEnd.Y - ptStart.Y) * y / (layout.YCount - 1) + ptStart.Y;
                 for (int x = 0; x < layout.XCount; x++)    
                 {
                     float xx = layout.XCount == 1 ? ptStart.X : (ptEnd.X - ptStart.X) * x / (layout.XCount - 1) + ptStart.X;
-                    float yy = layout.yCount == 1 ? ptStart.Y : (ptEnd.Y - ptStart.Y) * y / (layout.YCount - 1) + ptStart.Y;
                     bool bNeedAdd =  isN_N || ((x + y) % 2 == 0);
                     if(bNeedAdd)
                         circles.Add(new CircleF(xx, yy, radius));
@@ -295,12 +295,13 @@ namespace BrightMaster.Settings
             PointF ptEnd = layout.bottomRightRatio;
             double realWidth = GetDistance(pts[0], pts[1]);
             float radius = (float)(realWidth * layout.radiusRatio/100);
-            for (int x = 0; x < layout.XCount; x++)
+            
+            for (int y = 0; y < layout.YCount; y++)
             {
-                for (int y = 0; y < layout.YCount; y++)
+                float yy = layout.yCount == 1 ? ptStart.Y : (ptEnd.Y - ptStart.Y) * y / (layout.YCount - 1) + ptStart.Y;
+                for (int x = 0; x < layout.XCount; x++)    
                 {
                     float xx = layout.XCount == 1 ? ptStart.X : (ptEnd.X - ptStart.X) * x / (layout.XCount - 1) + ptStart.X;
-                    float yy = layout.yCount == 1 ? ptStart.Y : (ptEnd.Y - ptStart.Y) * y / (layout.YCount - 1) + ptStart.Y;
                     PointF realPt = GetPositionInImage(pts, new PointF(xx/100, yy/100));
                     bool bNeedAdd = isN_N || ((x + y) % 2 == 0);
                     if (bNeedAdd)

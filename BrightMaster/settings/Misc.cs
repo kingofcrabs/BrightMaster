@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -11,6 +12,8 @@ namespace BrightMaster.Settings
     {
         public string SaveFolder { get; set; }
         public bool AutoFindBoundary { get; set; }
+        public bool MannualThreshold { get; set; }
+        public List<Point> BoundaryPts { get; set; }
 
         [System.Xml.Serialization.XmlIgnore]
         public int ThresholdVal
@@ -30,6 +33,8 @@ namespace BrightMaster.Settings
             SaveFolder = FolderHelper.GetDefaultSaveFolder();
             thresholdVal = 40;
             AutoFindBoundary = false;
+            MannualThreshold = false;
+            BoundaryPts = new List<Point>();
         }
 
         internal void Save()

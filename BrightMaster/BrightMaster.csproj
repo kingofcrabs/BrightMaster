@@ -109,6 +109,8 @@
     <Compile Include="settings\AdjustRatio.cs" />
     <Compile Include="settings\BindBase.cs" />
     <Compile Include="settings\Misc.cs" />
+    <Compile Include="controller\PowerControl.cs" />
+    <Compile Include="settings\PowerSetting.cs" />
     <Compile Include="utility\BmpPlus.cs" />
     <Compile Include="data\Brightness.cs" />
     <Compile Include="settings\CameraSetting.cs" />
@@ -238,6 +240,9 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="Images\Curve.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\power.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

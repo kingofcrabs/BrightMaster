@@ -18,6 +18,8 @@ namespace BrightMaster.forms
             InitializeComponent();
             txtSaveFolder.Text = GlobalVars.Instance.MiscSettings.SaveFolder;
             chkAutoFindBound.Checked = GlobalVars.Instance.MiscSettings.AutoFindBoundary;
+            //chkAutoFindBound.Checked = GlobalVars.Instance.MiscSettings.AutoFindBoundary;
+            chkMannual.Checked = GlobalVars.Instance.MiscSettings.MannualThreshold;
         }
 
         private void btnBrowse_Click(object sender, EventArgs e)
@@ -44,6 +46,12 @@ namespace BrightMaster.forms
         private void btnOk_Click(object sender, EventArgs e)
         {
             this.Close();
+        }
+
+        private void chkMannualThreshold_CheckedChanged(object sender, EventArgs e)
+        {
+            GlobalVars.Instance.MiscSettings.MannualThreshold = chkMannual.Checked;
+            GlobalVars.Instance.MiscSettings.Save();
         }
     }
 }

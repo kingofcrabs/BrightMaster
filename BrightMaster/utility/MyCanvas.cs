@@ -331,6 +331,14 @@ namespace BrightMaster
         internal void OnLeftButtonUp()
         {
             pts = GeneratePts(ptStart, ptEnd);
+            Point ptTopRight = new Point(ptEnd.X, ptStart.Y);
+            Point ptBottomLeft = new Point(ptStart.X, ptEnd.Y);
+
+            //GlobalVars.Instance.MiscSettings.BoundaryPts = new List<Point>() { ptStart, ptTopRight, ptEnd, ptBottomLeft };
+            List<Point> uiPts = new List<Point>() { ptStart, ptTopRight, ptEnd, ptBottomLeft };
+            List<Point> tmpRealPts = new List<Point>();
+            uiPts.ForEach(pt => tmpRealPts.Add(new Point(Convert2RealXFromUI(pt.X), Convert2RealYFromUI(pt.Y))));
+            GlobalVars.Instance.MiscSettings.BoundaryPts = tmpRealPts;
             InvalidateVisual();
             validMouseMove = false;
         }

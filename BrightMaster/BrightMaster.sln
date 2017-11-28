@@ -9,6 +9,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "EngineDll", "..\EngineDll\E
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestListView", "..\TestListView\TestListView.csproj", "{CC7805B5-BF61-43CB-B073-2BDA192618EC}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestPowerMeter", "..\TestPowerMeter\TestPowerMeter.csproj", "{6312F249-5B73-41FC-A5E7-DD7EF9EFBA4A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -59,6 +61,18 @@ Global
 		{CC7805B5-BF61-43CB-B073-2BDA192618EC}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{CC7805B5-BF61-43CB-B073-2BDA192618EC}.Release|Win32.ActiveCfg = Release|Any CPU
 		{CC7805B5-BF61-43CB-B073-2BDA192618EC}.Release|x64.ActiveCfg = Release|Any CPU
+		{6312F249-5B73-41FC-A5E7-DD7EF9EFBA4A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6312F249-5B73-41FC-A5E7-DD7EF9EFBA4A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6312F249-5B73-41FC-A5E7-DD7EF9EFBA4A}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{6312F249-5B73-41FC-A5E7-DD7EF9EFBA4A}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{6312F249-5B73-41FC-A5E7-DD7EF9EFBA4A}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{6312F249-5B73-41FC-A5E7-DD7EF9EFBA4A}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{6312F249-5B73-41FC-A5E7-DD7EF9EFBA4A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6312F249-5B73-41FC-A5E7-DD7EF9EFBA4A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6312F249-5B73-41FC-A5E7-DD7EF9EFBA4A}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{6312F249-5B73-41FC-A5E7-DD7EF9EFBA4A}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{6312F249-5B73-41FC-A5E7-DD7EF9EFBA4A}.Release|Win32.ActiveCfg = Release|Any CPU
+		{6312F249-5B73-41FC-A5E7-DD7EF9EFBA4A}.Release|x64.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
