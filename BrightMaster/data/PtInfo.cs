@@ -32,7 +32,10 @@ namespace BrightMaster
             if (pixelInfos == null)
                 return;
 
-            string sFile = GlobalVars.Instance.MiscSettings.SaveFolder + GlobalVars.Instance.Barcode + ".csv";
+            string fileName = GlobalVars.Instance.Barcode;
+            if (fileName == "")
+                fileName = DateTime.Now.ToString("yyyyMMddHHmmss");
+            string sFile = GlobalVars.Instance.MiscSettings.SaveFolder + fileName + ".csv";
             string sHeader = "X,Y,Z,x,y,u',v',ok";
             List<string> contents = new List<string>();
             contents.Add(sHeader);

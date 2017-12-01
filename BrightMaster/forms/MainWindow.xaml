@@ -111,7 +111,8 @@
                     <Image Source="/Images/save.png" Height="32"/>
                 </StackPanel>
             </Button>
-            <ComboBox Width="150" Name="cmbRecipes" ItemsSource="{Binding Recipes}" SelectedItem="{Binding SelectedRecipe,Mode=TwoWay}">
+            <Label Name="lblSelectedRecipe"></Label>
+            <!--<ComboBox Width="150" Name="cmbRecipes" ItemsSource="{Binding Recipes}" SelectedItem="{Binding SelectedRecipe,Mode=TwoWay}">
                 <ComboBox.ItemTemplate>
                     <DataTemplate>
                         <Grid>
@@ -119,7 +120,7 @@
                         </Grid>
                     </DataTemplate>
                 </ComboBox.ItemTemplate>
-            </ComboBox>
+            </ComboBox>-->
             <Button Command="{StaticResource StartAcquire}"  ToolTip="开始采集.">
                 <StackPanel Orientation="Vertical" >
                     <Image Source="/Images/start.jpg" Height="32"/>
@@ -161,18 +162,17 @@
         </Grid>
 
         <GridSplitter Grid.Column="1" Width="5" Grid.Row="2" Grid.RowSpan="1" HorizontalAlignment="Stretch" />
-        <Grid  Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="2">
+        <Grid  Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="2" Grid.RowSpan="2">
             <Grid.RowDefinitions>
-                <RowDefinition Height="400"></RowDefinition>
-                <RowDefinition Height="5"/>
+                
                 <RowDefinition Height="*"></RowDefinition>
             </Grid.RowDefinitions>
             <ScrollViewer x:Name="scrollViewerResult" VerticalScrollBarVisibility="Auto"
-                   HorizontalScrollBarVisibility="Auto"  >
+                   HorizontalScrollBarVisibility="Auto" >
                 <ListView Name="lstviewResult"  FontFamily="SimSun">
                     <ListView.Resources>
                         <DataTemplate x:Key="LItem">
-                            <TextBox Name="tL" Text="{Binding Y}" />
+                            <Label Name="tL" Content="{Binding Y}" />
                             <DataTemplate.Triggers>
                                 <DataTrigger Binding="{Binding LValid}" Value="false">
                                     <Setter TargetName="tL" Property="Background" Value="Red" />
@@ -181,7 +181,7 @@
                         </DataTemplate>
 
                         <DataTemplate x:Key="xItem">
-                            <TextBox Name="tx" Text="{Binding x}" />
+                            <Label Name="tx" Content="{Binding x}" />
                             <DataTemplate.Triggers>
                                 <DataTrigger Binding="{Binding xValid}" Value="false">
                                     <Setter TargetName="tx" Property="Background" Value="Red" />
@@ -189,7 +189,7 @@
                             </DataTemplate.Triggers>
                         </DataTemplate>
                         <DataTemplate x:Key="yItem">
-                            <TextBox Name="ty" Text="{Binding y}" />
+                            <Label Name="ty" Content="{Binding y}" />
                             <DataTemplate.Triggers>
                                 <DataTrigger Binding="{Binding yValid}" Value="false">
                                     <Setter TargetName="ty" Property="Background" Value="Red" />
@@ -202,6 +202,7 @@
                     <ListView.View>
                         <GridView x:Name="gridView1">
                             <GridViewColumn  Header="ID" Width="40"  DisplayMemberBinding="{Binding Path = ID}"></GridViewColumn>
+                            <GridViewColumn Header="L"  Width="60" CellTemplate="{StaticResource LItem}"></GridViewColumn>
                             <GridViewColumn Header="X" Width="60"   DisplayMemberBinding="{Binding Path = X}"></GridViewColumn>
                             <GridViewColumn Header="Y" Width="60"  DisplayMemberBinding="{Binding Path = Y}"></GridViewColumn>
                             <GridViewColumn Header="Z"  Width="60"  DisplayMemberBinding="{Binding Path = Z}"></GridViewColumn>
@@ -209,7 +210,6 @@
                             <GridViewColumn Header="y"  Width="60" CellTemplate="{StaticResource yItem}" ></GridViewColumn>
                             <GridViewColumn Header="u'"  Width="60"  DisplayMemberBinding="{Binding Path = u}"></GridViewColumn>
                             <GridViewColumn Header="v'"  Width="60"  DisplayMemberBinding="{Binding Path = v}"></GridViewColumn>
-                            <GridViewColumn Header="L"  Width="60" CellTemplate="{StaticResource LItem}"></GridViewColumn>
                         </GridView>
                     </ListView.View>
                     <ListView.ContextMenu>
@@ -221,11 +221,11 @@
 
             </ScrollViewer>
 
-            <GridSplitter Grid.Row="1" HorizontalAlignment="Stretch"></GridSplitter >
+           
 
         </Grid>
 
-        <Grid Grid.Row="3" Grid.ColumnSpan="4">
+        <Grid Grid.Row="3" Grid.ColumnSpan="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="300"></ColumnDefinition>
                 <ColumnDefinition Width="5"/>
@@ -276,6 +276,10 @@
                             <Label>总数</Label>
                             <TextBox Text="{Binding TotalCnt,Mode=OneWay}" IsReadOnly="True" Width="50"></TextBox>
                         </StackPanel>
+                        <StackPanel  Margin="2,0,0,0">
+                            <Button Name="btnMoreInfo" Click="btnMoreInfo_Click" Width="60" Height="30" Margin="5,20,0,0">更多信息</Button>
+                        </StackPanel>
+                        
 
                         <!--<StackPanel>
                             <Label>条码:</Label>

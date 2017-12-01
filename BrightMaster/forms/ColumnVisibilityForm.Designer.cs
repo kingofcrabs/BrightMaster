@@ -37,6 +37,7 @@
             this.chkv = new System.Windows.Forms.CheckBox();
             this.chkL = new System.Windows.Forms.CheckBox();
             this.btnOk = new System.Windows.Forms.Button();
+            this.chkZ = new System.Windows.Forms.CheckBox();
             this.SuspendLayout();
             // 
             // chkID
@@ -52,7 +53,7 @@
             // chkX
             // 
             this.chkX.AutoSize = true;
-            this.chkX.Location = new System.Drawing.Point(12, 35);
+            this.chkX.Location = new System.Drawing.Point(12, 34);
             this.chkX.Name = "chkX";
             this.chkX.Size = new System.Drawing.Size(33, 17);
             this.chkX.TabIndex = 1;
@@ -62,7 +63,7 @@
             // chkY
             // 
             this.chkY.AutoSize = true;
-            this.chkY.Location = new System.Drawing.Point(12, 58);
+            this.chkY.Location = new System.Drawing.Point(12, 56);
             this.chkY.Name = "chkY";
             this.chkY.Size = new System.Drawing.Size(33, 17);
             this.chkY.TabIndex = 2;
@@ -72,7 +73,7 @@
             // chk_x
             // 
             this.chk_x.AutoSize = true;
-            this.chk_x.Location = new System.Drawing.Point(12, 81);
+            this.chk_x.Location = new System.Drawing.Point(12, 100);
             this.chk_x.Name = "chk_x";
             this.chk_x.Size = new System.Drawing.Size(31, 17);
             this.chk_x.TabIndex = 3;
@@ -82,7 +83,7 @@
             // chk_y
             // 
             this.chk_y.AutoSize = true;
-            this.chk_y.Location = new System.Drawing.Point(12, 104);
+            this.chk_y.Location = new System.Drawing.Point(12, 122);
             this.chk_y.Name = "chk_y";
             this.chk_y.Size = new System.Drawing.Size(31, 17);
             this.chk_y.TabIndex = 4;
@@ -92,7 +93,7 @@
             // chku
             // 
             this.chku.AutoSize = true;
-            this.chku.Location = new System.Drawing.Point(12, 127);
+            this.chku.Location = new System.Drawing.Point(12, 144);
             this.chku.Name = "chku";
             this.chku.Size = new System.Drawing.Size(34, 17);
             this.chku.TabIndex = 5;
@@ -102,7 +103,7 @@
             // chkv
             // 
             this.chkv.AutoSize = true;
-            this.chkv.Location = new System.Drawing.Point(12, 150);
+            this.chkv.Location = new System.Drawing.Point(12, 166);
             this.chkv.Name = "chkv";
             this.chkv.Size = new System.Drawing.Size(34, 17);
             this.chkv.TabIndex = 6;
@@ -112,7 +113,7 @@
             // chkL
             // 
             this.chkL.AutoSize = true;
-            this.chkL.Location = new System.Drawing.Point(12, 173);
+            this.chkL.Location = new System.Drawing.Point(12, 188);
             this.chkL.Name = "chkL";
             this.chkL.Size = new System.Drawing.Size(32, 17);
             this.chkL.TabIndex = 7;
@@ -121,7 +122,7 @@
             // 
             // btnOk
             // 
-            this.btnOk.Location = new System.Drawing.Point(131, 167);
+            this.btnOk.Location = new System.Drawing.Point(131, 184);
             this.btnOk.Name = "btnOk";
             this.btnOk.Size = new System.Drawing.Size(75, 23);
             this.btnOk.TabIndex = 8;
@@ -129,11 +130,22 @@
             this.btnOk.UseVisualStyleBackColor = true;
             this.btnOk.Click += new System.EventHandler(this.btnOk_Click);
             // 
+            // chkZ
+            // 
+            this.chkZ.AutoSize = true;
+            this.chkZ.Location = new System.Drawing.Point(13, 78);
+            this.chkZ.Name = "chkZ";
+            this.chkZ.Size = new System.Drawing.Size(33, 17);
+            this.chkZ.TabIndex = 9;
+            this.chkZ.Text = "Z";
+            this.chkZ.UseVisualStyleBackColor = true;
+            // 
             // ColumnVisibilityForm
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(215, 197);
+            this.ClientSize = new System.Drawing.Size(215, 216);
+            this.Controls.Add(this.chkZ);
             this.Controls.Add(this.btnOk);
             this.Controls.Add(this.chkL);
             this.Controls.Add(this.chkv);
@@ -161,5 +173,6 @@
         private System.Windows.Forms.CheckBox chkv;
         private System.Windows.Forms.CheckBox chkL;
         private System.Windows.Forms.Button btnOk;
+        private System.Windows.Forms.CheckBox chkZ;
     }
 }

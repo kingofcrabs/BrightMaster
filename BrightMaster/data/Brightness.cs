@@ -16,7 +16,7 @@ namespace BrightMaster
         public byte[,] grayVals;
         public byte[,] sparseGrayVals;
         public byte[] grayValsInArray;
-        public string jpgFilePath;
+        public string jpgFilePath = "";
         public int[] GrayLevelCounts = new int[256];
         public int Width { get; set; }
         public int Height { get; set; }
@@ -71,11 +71,13 @@ namespace BrightMaster
                     if (Min > minArray[i])
                         Min = minArray[i];
                 }
+                Max *= GlobalVars.Instance.RecipeCollection.SelectedRecipe.AdjustRatio.YRatio;
+                Min *= GlobalVars.Instance.RecipeCollection.SelectedRecipe.AdjustRatio.YRatio;
             }
             Debug.WriteLine(string.Format("Brightness find max min elapsed:{0}", watch.ElapsedMilliseconds));
             grayVals = Convert2Gray();
             Debug.WriteLine(string.Format("Brightness convert2Gray elapsed:{0}", watch.ElapsedMilliseconds));
-            //jpgFilePath = FolderHelper.GetImageFolder() + "latest.jpg";
+            
             //SaveImage();
             Debug.WriteLine(string.Format("Brightness save image elapsed:{0}", watch.ElapsedMilliseconds));
             watch.Stop();
@@ -133,9 +135,10 @@ namespace BrightMaster
             }
           
             float X,Y,Z;
-            X = vals.Average(val => val.X);
-            Y = vals.Average(val => val.Y);
-            Z = vals.Average(val => val.Z);
+
+            X = vals.Average(val => val.X) * GlobalVars.Instance.RecipeCollection.SelectedRecipe.AdjustRatio.XRatio;
+            Y = vals.Average(val => val.Y) * GlobalVars.Instance.RecipeCollection.SelectedRecipe.AdjustRatio.YRatio;
+            Z = vals.Average(val => val.Z) * GlobalVars.Instance.RecipeCollection.SelectedRecipe.AdjustRatio.ZRatio;
             return new PixelInfo(ID,X, Y, Z);
         }
 
@@ -146,8 +149,11 @@ namespace BrightMaster
             return (float)Math.Sqrt(xDis * xDis + yDis * yDis);
         }
 
-        private void SaveImage()
+        public void SaveImage()
         {
+            if (jpgFilePath != "")
+                return;
+
             Bitmap bmp = new Bitmap(Width,Height);
             LockBitmap lockBmp = new LockBitmap(bmp);
             unsafe
@@ -164,6 +170,7 @@ namespace BrightMaster
                 }
                 lockBmp.UnlockBits();
             }
+            jpgFilePath = FolderHelper.GetImageFolder() + "latest.jpg";
             bmp.Save(jpgFilePath);
         }
 
@@ -187,41 +194,43 @@ namespace BrightMaster
          
             double grayUnit = (Max - Min) / grayLevelCnt;
             grayValsInArray = new byte[Height * Width];
-            int ratio = 256 / grayLevelCnt;
+            int grayValsPerLevel = 256 / grayLevelCnt;
             unsafe
             {
                 Parallel.Invoke(() =>
                  {
-                    GetGrayVal(0,Height/4,grayUnit,ratio, vals, _allPixels,Width,Height);
+                    GetGrayVal(0,Height/4,grayUnit,grayValsPerLevel, vals, _allPixels,Width,Height);
                  },
                  () =>
                  {
-                     GetGrayVal(Height / 4, Height / 2, grayUnit, ratio, vals, _allPixels, Width, Height);
+                     GetGrayVal(Height / 4, Height / 2, grayUnit, grayValsPerLevel, vals, _allPixels, Width, Height);
                  },
                  () =>
                  {
-                     GetGrayVal(Height / 2, Height * 3 / 4, grayUnit, ratio, vals, _allPixels, Width, Height);
+                     GetGrayVal(Height / 2, Height * 3 / 4, grayUnit, grayValsPerLevel, vals, _allPixels, Width, Height);
                  },
                  () =>
                  {
-                     GetGrayVal(Height * 3 / 4, Height, grayUnit, ratio, vals, _allPixels, Width, Height);
+                     GetGrayVal(Height * 3 / 4, Height, grayUnit, grayValsPerLevel, vals, _allPixels, Width, Height);
                  }
              );
             }
             return vals;
         }
 
-        private void GetGrayVal(int yStart,int yEnd,double grayUnit, double ratio, 
+        private void GetGrayVal(int yStart, int yEnd, double grayUnit, double grayValsPerLevel, 
             byte[,] vals, 
             LightPixelInfo[,] lightPixels,
             int Width,
             int Height)
         {
+
+            double k = GlobalVars.Instance.RecipeCollection.SelectedRecipe.AdjustRatio.YRatio * grayValsPerLevel / grayUnit;
             for (int y = yStart; y < yEnd; y++)
             {
                 for (int x = 0; x < Width; x++)
                 {
-                    byte val = (byte)((int)((lightPixels[y, x].Y - Min) / grayUnit) * ratio);
+                    byte val = (byte)((int)(lightPixels[y, x].Y - Min)*k);
                     vals[y, x] = val;
                 }
             }
@@ -231,7 +240,7 @@ namespace BrightMaster
         {
             List<float> vals = new List<float>();
             for (int x = 0; x < Width; x++)
-                vals.Add(_allPixels[y, x].Y);
+                vals.Add(_allPixels[y, x].Y * GlobalVars.Instance.RecipeCollection.SelectedRecipe.AdjustRatio.YRatio);
             return vals;
         }
 
@@ -239,8 +248,13 @@ namespace BrightMaster
         {
             List<float> vals = new List<float>();
             for (int y = 0; y < Height; y++)
-                vals.Add(_allPixels[y, x].Y);
+                vals.Add(_allPixels[y, x].Y * GlobalVars.Instance.RecipeCollection.SelectedRecipe.AdjustRatio.YRatio);
             return vals;
+        }
+
+        internal void ClearGrayImage()
+        {
+            jpgFilePath = "";
         }
     }
 }

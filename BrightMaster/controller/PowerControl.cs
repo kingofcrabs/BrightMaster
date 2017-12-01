@@ -20,10 +20,15 @@ namespace BrightMaster
         string powerOff = "[:]OUTP 0\r\n";
         string setVoltage = "[:]VOLTage";
         string setCurrent = "[:]CURR";
-
+        bool hasCOM = true;
         public PowerControl()
         {
-            string comport = "COM1";
+            string comport = ConfigurationManager.AppSettings["SerialPort"];
+            if(comport == "")
+            {
+                hasCOM = false;
+                return;
+            }
             serialPort = new SerialPort(comport, 9600);
             //serialPort.RtsEnable = 
             serialPort.RtsEnable = true;
@@ -43,6 +48,8 @@ namespace BrightMaster
 
         private void Send(string s)
         {
+            if (!hasCOM)
+                return;
             Send(Encoding.Default.GetBytes(s));
         }
         private void Send(byte[] bytes)
@@ -53,23 +60,28 @@ namespace BrightMaster
 
         public void PowerOff()
         {
+           
             Send(powerOff);
         }
 
         public void SetVoltage(float voltage)
         {
             string cmd = string.Format("{0} {1}\r\n", setVoltage, voltage);
-            serialPort.WriteLine(cmd);
+            //serialPort.WriteLine(cmd);
+            Send(cmd);
         }
 
         public void SetCurrent(float current)
         {
             string cmd = string.Format("{0} {1}\r\n", setCurrent, current);
-            serialPort.WriteLine(cmd);
+            Send(cmd);
         }
 
         public void Close()
         {
+            if (!hasCOM)
+                return;
+
             closing = true;
             if (serialPort != null && serialPort.IsOpen)
             {

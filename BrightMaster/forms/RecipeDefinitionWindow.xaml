@@ -3,17 +3,20 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:BrightMaster"
         xmlns:Settings="clr-namespace:BrightMaster.Settings"
-        Title="RecipeDefinition" Height="650" Width="800">
+        Title="RecipeDefinition" Height="750" Width="1000">
     <Window.Resources>
             <Settings:BooleanInverter x:Key="boolInverter" />
     </Window.Resources>
     <Grid>
-        
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="200"></ColumnDefinition>
+            <ColumnDefinition Width="*"></ColumnDefinition>
+        </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="*"></RowDefinition>
             <RowDefinition Height="100"></RowDefinition>
         </Grid.RowDefinitions>
-        <TabControl>
+        <TabControl Grid.Column="1">
             <TabItem Header="布局定义">
 
                 <Grid>
@@ -35,77 +38,123 @@
                         </local:BrightCanvas>
                     </Grid>
                     <StackPanel Grid.RowSpan="2">
-                        <Label>测试定义：</Label>
-                        <GroupBox Header="ROI">
-                            <StackPanel>
+                        <StackPanel Name="common">
+                            <Label>测试定义：</Label>
+                            <GroupBox Header="ROI">
                                 <StackPanel>
-                                    <Label>左上角（百分比）：</Label>
-                                    <StackPanel Orientation="Horizontal">
-                                        <Label>X:</Label>
-                                        <TextBox Text="{Binding Path=SelectedRecipe.Layout.ROITopLeftXRatio}" Width="50"></TextBox>
-                                        <Label>Y:</Label>
-                                        <TextBox  Margin="3,0,0,0" Text="{Binding Path=SelectedRecipe.Layout.ROITopLeftYRatio}" Width="50"></TextBox>
+                                    <StackPanel>
+                                        <Label>左上角（百分比）：</Label>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Label>X:</Label>
+                                            <TextBox Text="{Binding Path=SelectedRecipe.Layout.ROITopLeftXRatio}" Width="50"></TextBox>
+                                            <Label>Y:</Label>
+                                            <TextBox  Margin="3,0,0,0" Text="{Binding Path=SelectedRecipe.Layout.ROITopLeftYRatio}" Width="50"></TextBox>
+                                        </StackPanel>
+                                    </StackPanel>
+                                    <StackPanel>
+                                        <Label>右下角：</Label>
+                                        <StackPanel Orientation="Horizontal" >
+                                            <Label>X:</Label>
+                                            <TextBox Text="{Binding Path=SelectedRecipe.Layout.ROIBottomRightXRatio}" Width="50"></TextBox>
+                                            <Label Margin="3,0,0,0">Y:</Label>
+                                            <TextBox  Text="{Binding Path=SelectedRecipe.Layout.ROIBottomRightYRatio}" Width="50"></TextBox>
+                                        </StackPanel>
                                     </StackPanel>
                                 </StackPanel>
+                            </GroupBox>
+                        </StackPanel>
+                        <TabControl>
+                            <TabItem Header="xy方式">
                                 <StackPanel>
-                                    <Label>右下角：</Label>
-                                    <StackPanel Orientation="Horizontal" >
-                                        <Label>X:</Label>
-                                        <TextBox Text="{Binding Path=SelectedRecipe.Layout.ROIBottomRightXRatio}" Width="50"></TextBox>
-                                        <Label Margin="3,0,0,0">Y:</Label>
-                                        <TextBox  Text="{Binding Path=SelectedRecipe.Layout.ROIBottomRightYRatio}" Width="50"></TextBox>
+                                    
+
+                                    <GroupBox Header="点位置（百分比）">
+                                        <StackPanel>
+                                            <StackPanel>
+                                                <Label>左上角：</Label>
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Label>X:</Label>
+                                                    <TextBox Text="{Binding Path=SelectedRecipe.Layout.TopLeftXRatio}" Width="50"></TextBox>
+                                                    <Label>Y:</Label>
+                                                    <TextBox  Margin="3,0,0,0" Text="{Binding Path=SelectedRecipe.Layout.TopLeftYRatio}" Width="50"></TextBox>
+                                                </StackPanel>
+                                            </StackPanel>
+                                            <StackPanel>
+                                                <Label>右下角：</Label>
+                                                <StackPanel Orientation="Horizontal" >
+                                                    <Label>X:</Label>
+                                                    <TextBox Text="{Binding Path=SelectedRecipe.Layout.BottomRightXRatio}" Width="50"></TextBox>
+                                                    <Label Margin="3,0,0,0">Y:</Label>
+                                                    <TextBox  Text="{Binding Path=SelectedRecipe.Layout.BottomRightYRatio}" Width="50"></TextBox>
+                                                </StackPanel>
+                                            </StackPanel>
+                                        </StackPanel>
+
+                                    </GroupBox>
+                                    <GroupBox Header="点数量大小">
+
+                                        <StackPanel>
+                                            <StackPanel Orientation="Horizontal" Margin="0,10,0,5">
+                                                <Label>X方向数量:</Label>
+                                                <TextBox  Width="50" Text="{Binding Path=SelectedRecipe.Layout.XCount}" Margin="36,0,0,0"></TextBox>
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal" Margin="0,5,0,5">
+                                                <Label>Y方向数量:</Label>
+                                                <TextBox  Width="50" Text="{Binding Path=SelectedRecipe.Layout.YCount}" Margin="36,0,0,0"></TextBox>
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal" Margin="0,5,0,5">
+                                                <Label>半径:（百分比）</Label>
+                                                <TextBox  Width="50" Text="{Binding Path=SelectedRecipe.Layout.RadiusRatio}" Margin="0,0,0,0"></TextBox>
+                                            </StackPanel>
+                                        </StackPanel>
+                                    </GroupBox>
+
+                                    <GroupBox Header="其他">
+                                        <StackPanel Orientation="Horizontal">
+                                            <Label>点分布规律：</Label>
+                                            <CheckBox IsChecked="{Binding Path= SelectedRecipe.Layout.IsSquare}"  VerticalAlignment="Center">n*n</CheckBox>
+                                        </StackPanel>
+                                    </GroupBox>
+                                </StackPanel>
+                            </TabItem>
+                            <TabItem Header="单个定义方式" Visibility="Hidden">
+                                <Grid>
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="30"/>
+                                        <RowDefinition Height="*"/>
+                                        <RowDefinition Height="100"/>
+                                    </Grid.RowDefinitions>
+                                    <Label>所有点：</Label>
+                                    <ListView Name="lvInterestingPts" ItemsSource= "{Binding AllInterestingPts}" Grid.Row="1"  FontFamily="SimSun">
+                                        <ListView.View>
+                                            <GridView x:Name="gridView1">
+                                                <GridViewColumn  Header="ID" Width="40"  DisplayMemberBinding="{Binding Path = ID}"></GridViewColumn>
+                                                <GridViewColumn Header="XOffset" Width="60"   DisplayMemberBinding="{Binding Path = XOffset}"></GridViewColumn>
+                                                <GridViewColumn Header="YOffset" Width="60"  DisplayMemberBinding="{Binding Path = YOffset}"></GridViewColumn>
+                                            </GridView>
+                                        </ListView.View>
+                                    </ListView>
+                                    <StackPanel Margin="0,5,0,0" Grid.Row="2">
+                                        <StackPanel  Orientation="Horizontal">
+                                            <Button Name="btnAddPt" Width="50" Height="30">+</Button>
+                                            <Button Name="btnRemovePt" Margin="5,0,0,0" Width="50" Height="30">-</Button>
+                                            
+                                        </StackPanel>
+                                        <Label>当前点：</Label>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Label>X:</Label>
+                                            <TextBox Width="50" Text="{Binding SelectedPt.X,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></TextBox>
+                                            <Label>Y:</Label>
+                                            <TextBox Width="50" Text="{Binding SelectedPt.Y,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></TextBox>
+                                        </StackPanel>
                                     </StackPanel>
-                                </StackPanel>
-                            </StackPanel>
-                        </GroupBox>
+                                  
 
-                        <GroupBox Header="点位置（百分比）">
-                            <StackPanel>
-                                <StackPanel>
-                                    <Label>左上角：</Label>
-                                    <StackPanel Orientation="Horizontal">
-                                        <Label>X:</Label>
-                                        <TextBox Text="{Binding Path=SelectedRecipe.Layout.TopLeftXRatio}" Width="50"></TextBox>
-                                        <Label>Y:</Label>
-                                        <TextBox  Margin="3,0,0,0" Text="{Binding Path=SelectedRecipe.Layout.TopLeftYRatio}" Width="50"></TextBox>
-                                    </StackPanel>
-                                </StackPanel>
-                                <StackPanel>
-                                    <Label>右下角：</Label>
-                                    <StackPanel Orientation="Horizontal" >
-                                        <Label>X:</Label>
-                                        <TextBox Text="{Binding Path=SelectedRecipe.Layout.BottomRightXRatio}" Width="50"></TextBox>
-                                        <Label Margin="3,0,0,0">Y:</Label>
-                                        <TextBox  Text="{Binding Path=SelectedRecipe.Layout.BottomRightYRatio}" Width="50"></TextBox>
-                                    </StackPanel>
-                                </StackPanel>
-                            </StackPanel>
-
-                        </GroupBox>
-                        <GroupBox Header="点数量大小">
-
-                            <StackPanel>
-                                <StackPanel Orientation="Horizontal" Margin="0,10,0,5">
-                                    <Label>X方向数量:</Label>
-                                    <TextBox  Width="50" Text="{Binding Path=SelectedRecipe.Layout.XCount}" Margin="36,0,0,0"></TextBox>
-                                </StackPanel>
-                                <StackPanel Orientation="Horizontal" Margin="0,5,0,5">
-                                    <Label>Y方向数量:</Label>
-                                    <TextBox  Width="50" Text="{Binding Path=SelectedRecipe.Layout.YCount}" Margin="36,0,0,0"></TextBox>
-                                </StackPanel>
-                                <StackPanel Orientation="Horizontal" Margin="0,5,0,5">
-                                    <Label>半径:（百分比）</Label>
-                                    <TextBox  Width="50" Text="{Binding Path=SelectedRecipe.Layout.RadiusRatio}" Margin="0,0,0,0"></TextBox>
-                                </StackPanel>
-                            </StackPanel>
-                        </GroupBox>
-
-                        <GroupBox Header="其他">
-                            <StackPanel Orientation="Horizontal">
-                                <Label>点分布规律：</Label>
-                                <CheckBox IsChecked="{Binding Path= SelectedRecipe.Layout.IsSquare}"  VerticalAlignment="Center">n*n</CheckBox>
-                            </StackPanel>
-                        </GroupBox>
+                                </Grid>
+                            </TabItem>
+                        </TabControl>
+                        
+                        
 
                     </StackPanel>
 
@@ -203,44 +252,60 @@
 
             </TabItem>
         </TabControl>
-        <Grid Grid.Row="1">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="400"></ColumnDefinition>
-                <ColumnDefinition Width="*"></ColumnDefinition>
-              
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="200"/>
+                <RowDefinition Height="100"/>
+            </Grid.RowDefinitions>
+            <Grid>
                 
-            </Grid.ColumnDefinitions>
-            <StackPanel Orientation="Horizontal">
-                <Label>所有配置：</Label>
-                <ListBox Margin="0,1,0,1" Width="120" Name="lstRecipes" ItemsSource="{Binding Recipes}" SelectedItem="{Binding SelectedRecipe,Mode=TwoWay}">
-                    <ListBox.ItemTemplate>
-                        <DataTemplate>
-                            <Grid>
-                                <TextBlock Text="{Binding Path=Name}"></TextBlock>
-                            </Grid>
-                        </DataTemplate>
-                    </ListBox.ItemTemplate>
-                </ListBox>
-                <StackPanel Margin="3,0,0,1">
-                    <Button Margin="1,1,1,1" Name="btnAddPrimer" Click="btnAddRecipe_Click" Content=" + " ></Button>
-                    <Button Margin="1,1,1,1" Name="btnRemovePrimer" Click="btnRemoveRecipe_Click" Content="  -  " ></Button>
-                </StackPanel>
-                <StackPanel Margin="20,0,0,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="30"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="40"/>
+                        <RowDefinition Height="40"/>
+                    </Grid.RowDefinitions>
+                    <Label>所有配置：</Label>
+                    
+                    <Grid Grid.Row="1">
+                        
+                        <ListBox Margin="0,1,0,1"  Name="lstRecipes" ItemsSource="{Binding VisibleRecipes}" SelectedItem="{Binding SelectedRecipe,Mode=TwoWay}">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid>
+                                        <TextBlock Text="{Binding Path=Name}"></TextBlock>
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </Grid>
+                    <StackPanel Grid.Row="2" Orientation="Horizontal">
+                        <Label>关键字：</Label>
+                        <TextBox VerticalAlignment="Center" Height ="30" Width="120" Text="{Binding Path=TextFilter,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" ></TextBox>
+                    </StackPanel>
+                    <StackPanel Margin="0,5,0,0"  Orientation="Horizontal" Grid.Row="3">
+                            <Button Margin="1,1,1,1" Height="30"  Width="60" Name="btnAddPrimer" Click="btnAddRecipe_Click" Content=" + " ></Button>
+                        <Button Margin="1,1,1,1" Height="30" Width="60" Name="btnRemovePrimer" Click="btnRemoveRecipe_Click" Content="  -  " ></Button>
+                    </StackPanel>
+                </Grid>
+                
+            </Grid>
+            <StackPanel Grid.Row="1">
+                <StackPanel Orientation="Horizontal">
                     <Label>当前配置：</Label>
-                    <TextBox Margin="1,2,0,0" Width="120" Text="{Binding SelectedRecipe.Name,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></TextBox>
-                    <Button Margin="2,2,0,0"  Name="btnRefresh" Click="btnRefresh_Click">刷新</Button>
-                    <Button Margin="2,2,0,0" Name="btnSave" Click="btnSave_Click" >保存</Button>
+                    <TextBox Margin="1,2,0,0" Height="30" Width="120" Text="{Binding SelectedRecipe.Name,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}"></TextBox>
                 </StackPanel>
-                
-                
-                
-
-            </StackPanel>
-            <StackPanel HorizontalAlignment="Stretch" Grid.Column="1">
-                <Label>提示：</Label>
-                <TextBox Name="txtInfo" HorizontalAlignment="Stretch" Height="70"></TextBox>
+                <StackPanel Orientation="Horizontal">
+                    <Button Margin="2,2,0,0" Height="30" Width="60" Name="btnRefresh" Click="btnRefresh_Click">刷新</Button>
+                    <Button Margin="2,2,0,0" Width="60" Name="btnSave" Click="btnSave_Click" >保存</Button>
+                </StackPanel>
             </StackPanel>
 
         </Grid>
+        <StackPanel HorizontalAlignment="Stretch" Grid.Row="1" Grid.ColumnSpan="2">
+            <Label>提示：</Label>
+            <TextBox Name="txtInfo" HorizontalAlignment="Stretch" Height="70"></TextBox>
+        </StackPanel>
     </Grid>
 </Window>

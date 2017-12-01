@@ -122,6 +122,10 @@ namespace BrightMaster.data
     {
         string barcode;
         bool isOk;
+        string sTime;
+        float uniform;
+        float lMax;
+        float lMin;
         public string Barcode
         {
             get
@@ -132,6 +136,71 @@ namespace BrightMaster.data
             {
                 SetProperty(ref barcode, value);
             }
+        }
+
+        public string Time
+        {
+            get
+            {
+                return sTime;
+            }
+            set
+            {
+                SetProperty(ref sTime, value);
+            }
+        }
+
+        public float LMax
+        {
+            get
+            {
+                return lMax;
+            }
+            set
+            {
+                SetProperty(ref lMax, value);
+            }
+        }
+        public float LMin
+        {
+            get
+            {
+                return lMax;
+            }
+            set
+            {
+                SetProperty(ref lMin, value);
+            }
+        }
+
+        public float Uniform
+        {
+            get
+            {
+                return uniform;
+            }
+            set
+            {
+                SetProperty(ref uniform, value);
+            }
+        }
+
+        float Keep4Valid(float num)
+        {
+            if (num == 0)
+                return 0;
+            float value = num;
+            int count = 0;
+            if (num < 1000)
+            {
+                while (num < 1000)
+                {
+                    count++;
+                    num *= 10;
+                }
+            }
+            value = (float)Math.Round(value, count);
+            return value;
         }
 
         public bool IsOk
@@ -150,6 +219,18 @@ namespace BrightMaster.data
         {
             isOk = _isOk;
             barcode = _barcode;
+        }
+
+        public HistoryInfo(string _barcode, List<PixelInfo> results)
+        {
+            // TODO: Complete member initialization
+            barcode = _barcode;
+            isOk = PixelInfo.GetResult(results).IsOk;
+            var LArray = results.Select(x => x.Y).ToList();
+            lMax = Keep4Valid(LArray.Max());
+            lMin = Keep4Valid(LArray.Min());
+            uniform = Keep4Valid(lMin * 100 / lMax);
+            sTime = DateTime.Now.ToString("HHmmss");
         }
     }
 }

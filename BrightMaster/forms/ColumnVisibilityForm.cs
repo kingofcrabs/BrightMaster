@@ -26,6 +26,7 @@ namespace BrightMaster
             chkID.Checked = GlobalVars.Instance.GridColumnWidth.ID != 0;
             chkX.Checked  = GlobalVars.Instance.GridColumnWidth.X  != 0;
             chkY.Checked  = GlobalVars.Instance.GridColumnWidth.Y !=0;
+            chkZ.Checked = GlobalVars.Instance.GridColumnWidth.Z != 0;
             chk_x.Checked = GlobalVars.Instance.GridColumnWidth.x != 0;
             chk_y.Checked = GlobalVars.Instance.GridColumnWidth.y != 0;
             chku.Checked = GlobalVars.Instance.GridColumnWidth.u != 0;

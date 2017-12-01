@@ -36,7 +36,6 @@ namespace BrightMaster
         ObservableCollection<PixelInfo> pixelInfos = new ObservableCollection<PixelInfo>();
         double zoomRatio = 1;
         Point? lastDragPoint;
-        static SerialPort serialPort = new SerialPort();
         ProgressForm progressForm;
         PowerControl powerControl;
         Stopwatch watch = new Stopwatch();
@@ -78,12 +77,12 @@ namespace BrightMaster
         }
         void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            historyPanel.DataContext = GlobalVars.Instance.HistoryInfos;
+            historyPanel.DataContext = GlobalVars.Instance.HistoryInfoCollection;
             SetInfo("初始化，请等待！", false);
             this.IsEnabled = false;
             try
             {
-                cmbRecipes.DataContext = GlobalVars.Instance.RecipeCollection;
+                lblSelectedRecipe.Content = GlobalVars.Instance.RecipeCollection.SelectedRecipe.Name;
                 powerControl = new PowerControl();
                 Initialize();
             }
@@ -208,8 +207,7 @@ namespace BrightMaster
 
         void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            if(serialPort != null && serialPort.IsOpen)
-                serialPort.Close();
+            
             GlobalVars.Instance.UAController.UnInitialize();
         }
 
@@ -233,7 +231,8 @@ namespace BrightMaster
             colorBar.Visibility = isFakeColor ? Visibility.Visible : Visibility.Collapsed;
             if ((bool)btnFakeColor.IsChecked)
             {
-                bmpImage = ImageHelper.CreateImage(brightness.jpgFilePath);
+                brightness.SaveImage();
+                bmpImage = ImageHelper.CreatePseudoColorImage(brightness.jpgFilePath);
             }
             else
             {
@@ -255,7 +254,7 @@ namespace BrightMaster
 
         private void Acquire_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
-            e.CanExecute = cmbRecipes.SelectedItem != null;
+            e.CanExecute = GlobalVars.Instance.RecipeCollection.SelectedRecipe != null;
         }
 
         private void LiveFocus_CanExecute(object sender, CanExecuteRoutedEventArgs e)
@@ -406,6 +405,33 @@ namespace BrightMaster
             curveForm.ShowDialog();
         }
 
+
+        private void btnMoreInfo_Click(object sender, RoutedEventArgs e)
+        {
+            HistoryInfoView historyForm = new HistoryInfoView();
+        }
+
+
+        private async void Acquire_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            if (GlobalVars.Instance.NeedBarcode)
+            {
+                QueryBarcode queryBarcode = new QueryBarcode();
+                queryBarcode.ShowDialog();
+            }
+            progressForm = new ProgressForm();
+            progressForm.Show();
+            CheckPowerSetting();
+            btnSetROI.IsChecked = false;
+            myCanvas.UserSelectROI = false;
+            SetInfo("开始采集。", false);
+            btnFakeColor.IsChecked = false;
+            this.IsEnabled = false;
+            watch.Reset();
+            watch.Start();
+
+            await DoAcquisition();
+        }
 #endregion
 
         async Task  DoAcquisition()
@@ -413,6 +439,8 @@ namespace BrightMaster
             await Task.Run(() =>
             {
                 watch.Restart();
+                if(brightness != null)
+                    brightness.ClearGrayImage();
                 var allPixels = GlobalVars.Instance.UAController.Acquire();
                 try
                 {
@@ -486,7 +514,7 @@ namespace BrightMaster
             {
                 PlaySound.OnError();
             }
-            GlobalVars.Instance.HistoryInfos.AddNew(new HistoryInfo(GlobalVars.Instance.Barcode, result.IsOk));
+            GlobalVars.Instance.HistoryInfoCollection.AddNew(new HistoryInfo(GlobalVars.Instance.Barcode, results));
             
         }
 
@@ -511,26 +539,7 @@ namespace BrightMaster
 
       
 
-        private  async void Acquire_Executed(object sender, ExecutedRoutedEventArgs e)
-        {
-            if(GlobalVars.Instance.NeedBarcode)
-            {
-                QueryBarcode queryBarcode = new QueryBarcode();
-                queryBarcode.ShowDialog();
-            }
-            progressForm = new ProgressForm();
-            progressForm.Show();
-            CheckPowerSetting();
-            btnSetROI.IsChecked = false;
-            myCanvas.UserSelectROI = false;
-            SetInfo("开始采集。",false);
-            btnFakeColor.IsChecked = false;
-            this.IsEnabled = false;
-            watch.Reset();
-            watch.Start();
-
-            await DoAcquisition();
-        }
+     
 
         private void CheckPowerSetting()
         {
@@ -583,6 +592,7 @@ namespace BrightMaster
             InvalidateVisual();
 
         }
+
 
        
 

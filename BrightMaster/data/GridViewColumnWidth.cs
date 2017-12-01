@@ -13,11 +13,13 @@ namespace BrightMaster.data
         public int ID = 40;
         public int X = 60;
         public int Y = 60;
+        public int Z = 60;
         public int x = 60;
         public int y = 60;
         public int u = 60;
         public int v = 60;
         public int L = 60;
+        
 
         public int this[int index]
         {
@@ -30,25 +32,28 @@ namespace BrightMaster.data
                         val = ID;
                         break;
                     case 1:
-                        val = X;
+                        val = L;
                         break;
                     case 2:
-                        val = Y;
+                        val = X;
                         break;
                     case 3:
-                        val = x;
+                        val = Y;
                         break;
                     case 4:
-                        val = y;
+                        val = Z;
                         break;
                     case 5:
-                        val = u;
+                        val = x;
                         break;
                     case 6:
-                        val = v;
+                        val = y;
                         break;
                     case 7:
-                        val = L;
+                        val = u;
+                        break;
+                    case 8:
+                        val = v;
                         break;
                     default:
                         break;

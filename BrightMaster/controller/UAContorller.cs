@@ -185,6 +185,7 @@ namespace BrightMaster
             int width, int height)
         {
             int ID = startY * width +1;
+
             for( int y = startY; y < endY; y++)
             {
                 List<LightPixelInfo> lineInfos = new List<LightPixelInfo>();

@@ -12,11 +12,58 @@ namespace BrightMaster.Settings
     public class RecipeCollection : BindableBase
     {
         private ObservableCollection<Recipe> recipes = new ObservableCollection<Recipe>();
+        private ObservableCollection<Recipe> visibleRecipes = new ObservableCollection<Recipe>();
         private Recipe selectedRecipe;
-        
+        private string txtFilter;
         public RecipeCollection()
         {
+            txtFilter = "";
             EnumRecipes();
+            
+        }
+
+        public string TextFilter
+        {
+            get
+            {
+                return txtFilter;
+            }
+            set
+            {
+                SetProperty(ref txtFilter, value);
+                VisibleRecipes = FilterRecipes();
+            }
+        }
+
+        private ObservableCollection<Recipe> FilterRecipes()
+        {
+
+            ObservableCollection<Recipe> visibleRecipes = new ObservableCollection<Recipe>();
+            foreach(var recipe in recipes)
+            {
+                if(txtFilter == "")
+                {
+                    visibleRecipes.Add(recipe);
+                }
+                else if(recipe.Name.Contains(txtFilter))
+                {
+                    visibleRecipes.Add(recipe);
+                }
+            }
+            return visibleRecipes;
+        }
+
+        public ObservableCollection<Recipe> VisibleRecipes
+        {
+            get
+            {
+                return visibleRecipes;
+            }
+            set
+            {
+                SetProperty(ref visibleRecipes, value);
+            }
+
         }
 
         private void EnumRecipes()
@@ -33,6 +80,7 @@ namespace BrightMaster.Settings
             
             if (recipes.Count > 0)
                 selectedRecipe = recipes[0];
+            VisibleRecipes = FilterRecipes();
         }
 
         public Recipe SelectedRecipe
@@ -74,6 +122,7 @@ namespace BrightMaster.Settings
             }
             Recipe newRecipe = new Recipe(name);
             recipes.Add(newRecipe);
+            VisibleRecipes = FilterRecipes();
             SelectedRecipe = newRecipe;
             
         }
@@ -102,6 +151,7 @@ namespace BrightMaster.Settings
                 }
                 else
                     SelectedRecipe = null;
+                VisibleRecipes = FilterRecipes();
             }
         }
     }

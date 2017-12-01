@@ -17,7 +17,7 @@ namespace BrightMaster
 {
     class ImageHelper
     {
-        static public BitmapImage CreateImage(string fileName)
+        static public BitmapImage CreatePseudoColorImage(string fileName)
         {
             IEngine engineDll = new IEngine();
             DirectoryInfo DirectoryInfo = new DirectoryInfo(fileName);

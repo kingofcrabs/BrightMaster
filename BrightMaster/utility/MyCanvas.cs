@@ -206,20 +206,20 @@ namespace BrightMaster
 
         int Convert2XUIFromReal(float x)
         {
-            return (int)(usableWidth * x / width);
+            return (int)(usableWidth * x / width+0.5);
         }
         int Convert2UIYFromReal(float y)
         {
-            return (int)(usableHeight * y / height);
+            return (int)(usableHeight * y / height+0.5);
         }
 
         int Convert2RealXFromUI(float x)
         {
-            return (int)(width * x / usableWidth);
+            return (int)(width * x / usableWidth+0.5);
         }
         int Convert2RealYFromUI(float y)
         {
-            return (int)(height * y / usableHeight);
+            return (int)(height * y / usableHeight+0.5);
         }
 
 

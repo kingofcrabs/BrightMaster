@@ -2,6 +2,7 @@
 using BrightMaster.settings;
 using BrightMaster.Settings;
 using BrightMaster.Settings;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Configuration;
@@ -26,11 +27,12 @@ namespace BrightMaster
             string miscFolder = FolderHelper.GetMiscFolder();
             string file = miscFolder + "misc.xml";
             MiscSettings = SerializeHelper.Load<Misc>(file);
+            Barcode = "";
             //autoFindRect = bool.Parse(ConfigurationManager.AppSettings["AutoFindRect"]);
         }
 
 
-        public HistoryInfoCollection HistoryInfos
+        public HistoryInfoCollection HistoryInfoCollection
         {
             get
             {
@@ -73,7 +75,10 @@ namespace BrightMaster
         {
             get
             {
-                return @"D:\Projects\BrightMaster\trunk\param";
+                string paramFolder = FolderHelper.GetExeParentFolder() + "param\\";
+                if (!Directory.Exists(paramFolder))
+                    throw new Exception(string.Format("找不到位于{0}param文件夹！", paramFolder));
+                return paramFolder;
             }
         }
         public CameraSettings CameraSettings
@@ -100,6 +105,10 @@ namespace BrightMaster
                 return recipeCollection.SelectedRecipe.Layout;
             }
         }
+
+
+       
+
 
         public RecipeCollection RecipeCollection
         {
@@ -131,7 +140,7 @@ namespace BrightMaster
                 if (instance == null)
                 {
                     instance = new GlobalVars();
-                    
+               
                 }
                 return instance;
             }

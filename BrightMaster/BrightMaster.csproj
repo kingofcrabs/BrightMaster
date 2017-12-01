@@ -85,6 +85,9 @@
       <DependentUpon>ColumnVisibilityForm.cs</DependentUpon>
     </Compile>
     <Compile Include="forms\DiscreteSlider.xaml.cs" />
+    <Compile Include="forms\HistoryInfoView.xaml.cs">
+      <DependentUpon>HistoryInfoView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="forms\ProgressForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -140,6 +143,10 @@
     <Page Include="forms\DiscreteSlider.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="forms\HistoryInfoView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="forms\MainWindow.xaml">
       <Generator>MSBuild:Compile</Generator>
@@ -206,7 +213,9 @@
     <AppDesigner Include="Properties\" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="App.config" />
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\EngineDll\EngineDll.vcxproj">
