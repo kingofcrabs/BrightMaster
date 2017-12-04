@@ -90,5 +90,10 @@ namespace BrightMaster
         {
             canvas.SetBoundRect(new System.Drawing.SizeF((float)canvas.ActualWidth, (float)canvas.ActualHeight));
         }
+
+        private void btnOk_Click(object sender, RoutedEventArgs e)
+        {
+            this.Close();
+        }
     }
 }

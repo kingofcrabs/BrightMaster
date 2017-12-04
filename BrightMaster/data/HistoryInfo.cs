@@ -225,12 +225,18 @@ namespace BrightMaster.data
         {
             // TODO: Complete member initialization
             barcode = _barcode;
+         
+
             isOk = PixelInfo.GetResult(results).IsOk;
             var LArray = results.Select(x => x.Y).ToList();
             lMax = Keep4Valid(LArray.Max());
             lMin = Keep4Valid(LArray.Min());
             uniform = Keep4Valid(lMin * 100 / lMax);
             sTime = DateTime.Now.ToString("HHmmss");
+            if (barcode == "")
+            {
+                barcode = (GlobalVars.Instance.HistoryInfoCollection.AllInfos.Count + 1).ToString();
+            }
         }
     }
 }

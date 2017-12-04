@@ -71,8 +71,7 @@ namespace BrightMaster
                     if (Min > minArray[i])
                         Min = minArray[i];
                 }
-                Max *= GlobalVars.Instance.RecipeCollection.SelectedRecipe.AdjustRatio.YRatio;
-                Min *= GlobalVars.Instance.RecipeCollection.SelectedRecipe.AdjustRatio.YRatio;
+        
             }
             Debug.WriteLine(string.Format("Brightness find max min elapsed:{0}", watch.ElapsedMilliseconds));
             grayVals = Convert2Gray();
@@ -136,9 +135,9 @@ namespace BrightMaster
           
             float X,Y,Z;
 
-            X = vals.Average(val => val.X) * GlobalVars.Instance.RecipeCollection.SelectedRecipe.AdjustRatio.XRatio;
-            Y = vals.Average(val => val.Y) * GlobalVars.Instance.RecipeCollection.SelectedRecipe.AdjustRatio.YRatio;
-            Z = vals.Average(val => val.Z) * GlobalVars.Instance.RecipeCollection.SelectedRecipe.AdjustRatio.ZRatio;
+            X = vals.Average(val => val.X);
+            Y = vals.Average(val => val.Y);
+            Z = vals.Average(val => val.Z);
             return new PixelInfo(ID,X, Y, Z);
         }
 
@@ -225,7 +224,7 @@ namespace BrightMaster
             int Height)
         {
 
-            double k = GlobalVars.Instance.RecipeCollection.SelectedRecipe.AdjustRatio.YRatio * grayValsPerLevel / grayUnit;
+            double k = grayValsPerLevel / grayUnit;
             for (int y = yStart; y < yEnd; y++)
             {
                 for (int x = 0; x < Width; x++)
@@ -240,7 +239,7 @@ namespace BrightMaster
         {
             List<float> vals = new List<float>();
             for (int x = 0; x < Width; x++)
-                vals.Add(_allPixels[y, x].Y * GlobalVars.Instance.RecipeCollection.SelectedRecipe.AdjustRatio.YRatio);
+                vals.Add(_allPixels[y, x].Y);
             return vals;
         }
 
@@ -248,7 +247,7 @@ namespace BrightMaster
         {
             List<float> vals = new List<float>();
             for (int y = 0; y < Height; y++)
-                vals.Add(_allPixels[y, x].Y * GlobalVars.Instance.RecipeCollection.SelectedRecipe.AdjustRatio.YRatio);
+                vals.Add(_allPixels[y, x].Y );
             return vals;
         }
 

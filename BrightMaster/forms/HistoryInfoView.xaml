@@ -1,0 +1,37 @@
+﻿<Window x:Class="BrightMaster.forms.HistoryInfoView"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="HistoryInfoView" Height="400" Width="600">
+    <Grid>
+        <Grid>
+            <ScrollViewer x:Name="scrollViewerResult" VerticalScrollBarVisibility="Auto"
+                   HorizontalScrollBarVisibility="Auto" >
+                <ListView Name="lstHistory"  FontFamily="SimSun">
+
+                    <ListView.View>
+                        <GridView x:Name="gridView1">
+                            <GridViewColumn  Header="ID" Width="40"  DisplayMemberBinding="{Binding Path = Barcode}"></GridViewColumn>
+                            <GridViewColumn  Header="时间" Width="80"  DisplayMemberBinding="{Binding Path = Time}"></GridViewColumn>
+                            <GridViewColumn Header="LMax"  Width="60" DisplayMemberBinding="{Binding Path = LMax}"></GridViewColumn>
+                            <GridViewColumn Header="LMin"  Width="60" DisplayMemberBinding="{Binding Path = LMin}"></GridViewColumn>
+                            <GridViewColumn Header="Uniform"  Width="60" DisplayMemberBinding="{Binding Path = Uniform}"></GridViewColumn>
+                            <GridViewColumn Header="是否合格"  Width="60"  DisplayMemberBinding="{Binding Path = IsOk}"></GridViewColumn>
+
+                        </GridView>
+
+                    </ListView.View>
+                    <ListView.ItemContainerStyle>
+                        <Style TargetType="ListViewItem">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsOk}"  Value="False">
+                                    <Setter Property="Background"   Value="Red" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </ListView.ItemContainerStyle>
+                </ListView>
+
+            </ScrollViewer>
+        </Grid>
+    </Grid>
+</Window>

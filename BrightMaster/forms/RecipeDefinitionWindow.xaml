@@ -254,7 +254,7 @@
         </TabControl>
         <Grid>
             <Grid.RowDefinitions>
-                <RowDefinition Height="200"/>
+                <RowDefinition Height="*"/>
                 <RowDefinition Height="100"/>
             </Grid.RowDefinitions>
             <Grid>
@@ -303,9 +303,18 @@
             </StackPanel>
 
         </Grid>
-        <StackPanel HorizontalAlignment="Stretch" Grid.Row="1" Grid.ColumnSpan="2">
-            <Label>提示：</Label>
-            <TextBox Name="txtInfo" HorizontalAlignment="Stretch" Height="70"></TextBox>
-        </StackPanel>
+        <Grid  Grid.Row="1" Grid.ColumnSpan="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"></ColumnDefinition>
+                <ColumnDefinition Width="120"></ColumnDefinition>
+            </Grid.ColumnDefinitions>
+            <StackPanel HorizontalAlignment="Stretch">
+
+                <Label>提示：</Label>
+                <TextBox Name="txtInfo" HorizontalAlignment="Stretch" Height="70"></TextBox>
+            </StackPanel>
+            <Button Grid.Column="1" Name="btnOk" Margin="2,0,2,0" Content="确认" Width="100" Height="35" HorizontalAlignment="Right" VerticalAlignment="Bottom" Click="btnOk_Click"></Button>
+        </Grid>
+       
     </Grid>
 </Window>

@@ -96,6 +96,14 @@ namespace BrightMaster
             }
         }
 
+        public AdjustRatio AdjustRatio
+        {
+            get
+            {
+                return recipeCollection.SelectedRecipe.AdjustRatio;
+            }
+        }
+
         public Layout Layout
         {
             get

@@ -35,21 +35,22 @@ namespace BrightMaster
             string fileName = GlobalVars.Instance.Barcode;
             if (fileName == "")
                 fileName = DateTime.Now.ToString("yyyyMMddHHmmss");
-            string sFile = GlobalVars.Instance.MiscSettings.SaveFolder + fileName + ".csv";
-            string sHeader = "X,Y,Z,x,y,u',v',ok";
+            string sFile = GlobalVars.Instance.MiscSettings.SaveFolder + "\\" + fileName + ".csv";
+            string sHeader = "ID,L,x,y,u',v',ok";
             List<string> contents = new List<string>();
             contents.Add(sHeader);
+            int ID = 1;
             foreach(var pixelInfo in pixelInfos)
             {
                 bool valid = pixelInfo.xValid && pixelInfo.yValid && pixelInfo.LValid;
-                string sLine = string.Format("{0},{1},{2},{3},{4},{5},{6},{7}",
-                    pixelInfo._X,
+                string sLine = string.Format("{0},{1},{2},{3},{4},{5},{6}",
+                    ID++,
                     pixelInfo._Y,
-                    pixelInfo._Z,
                     pixelInfo._x,
                     pixelInfo._y,
                     pixelInfo._u,
-                    pixelInfo._v,valid);
+                    pixelInfo._v,
+                    valid);
                 contents.Add(sLine);
             }
             File.WriteAllLines(sFile, contents);

@@ -212,7 +212,18 @@ namespace BrightMaster
                 ref device, cond, ref device_property);
             
             device_property.capture_mode = Ua.CaptureMode.UA_CAPTURE_MANUAL;
+            
             //set distance & exposure time
+            
+            //uaCore.uaGetOptimumAverageCount(
+            //    ref device, 0, 40, ref average_count);
+            if (!GlobalVars.Instance.CameraSettings.AutoExposure)
+            {
+                for (int i = 0; i < device_property.exposure_time.Count(); i++)
+                    device_property.exposure_time[i] = GlobalVars.Instance.CameraSettings.ExposureTime;
+            }
+
+            device_property.measurement_distance = GlobalVars.Instance.CameraSettings.WorkingDistance;
 
             // Console.WriteLine("uaSetDeviceProperty");
             uaCore.uaSetDeviceProperty(ref device, ref device_property);
@@ -231,19 +242,11 @@ namespace BrightMaster
                 throw new Exception("Not initialized!");
 
             SetMannualMode();
-            int average_count = 1;
-            //uaCore.uaGetOptimumAverageCount(
-            //    ref device, 0, 40, ref average_count);
-            if (!GlobalVars.Instance.CameraSettings.AutoExposure)
-            {
-                for (int i = 0; i < device_property.exposure_time.Count(); i++)
-                    device_property.exposure_time[i] = GlobalVars.Instance.CameraSettings.ExposureTime;
-            }
-
-            device_property.measurement_distance = GlobalVars.Instance.CameraSettings.WorkingDistance;
+         
             Stopwatch watch = new Stopwatch();
             watch.Start();
             uaCore.uaStartCapture(ref device);
+            int average_count = 1;
             double expo = device_property.exposure_time[0];
             uaCore.uaCaptureImage(ref device,
                 Ua.CaptureFilterType.UA_CAPTURE_FILTER_XYZ, 
@@ -253,10 +256,13 @@ namespace BrightMaster
             // Console.WriteLine("uaStopCapture");
             uaCore.uaStopCapture(ref device);
             Debug.WriteLine("used time:" + watch.ElapsedMilliseconds+"ms");
-            //if( xyz_image_ptr != IntPtr.Zero)
-            //    uaCore.uaDestroyXYZImage(xyz_image_ptr);
             
             uaCore.uaToXYZImage(ref device, ref capture_data, ref xyz_image);
+            uaCore.uaCorrectColor(ref device, ref xyz_image, Ua.ColorCorrectionType.UA_COLOR_CORRECTION_LED);
+
+            //User color correction
+            uaCore.uaCorrectXYZImageLevel(ref xyz_image, GlobalVars.Instance.AdjustRatio.XRatio, GlobalVars.Instance.AdjustRatio.YRatio, GlobalVars.Instance.AdjustRatio.ZRatio);
+
             uaCore.uaDestroyCaptureData(capture_data_ptr);
             var allPixels = GetData(xyz_image);
             Debug.WriteLine("used time 2:" + watch.ElapsedMilliseconds + "ms");

@@ -82,7 +82,7 @@ namespace BrightMaster
             this.IsEnabled = false;
             try
             {
-                lblSelectedRecipe.Content = GlobalVars.Instance.RecipeCollection.SelectedRecipe.Name;
+                lblSelectedRecipe.DataContext = GlobalVars.Instance.RecipeCollection;
                 powerControl = new PowerControl();
                 Initialize();
             }
@@ -391,8 +391,6 @@ namespace BrightMaster
             e.CanExecute = true;
         }
 
-     
-
         private void Curve_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
             //e.CanExecute = brightness != null;
@@ -409,8 +407,8 @@ namespace BrightMaster
         private void btnMoreInfo_Click(object sender, RoutedEventArgs e)
         {
             HistoryInfoView historyForm = new HistoryInfoView();
+            historyForm.ShowDialog();
         }
-
 
         private async void Acquire_Executed(object sender, ExecutedRoutedEventArgs e)
         {
