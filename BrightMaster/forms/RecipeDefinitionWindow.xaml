@@ -6,6 +6,7 @@
         Title="RecipeDefinition" Height="750" Width="1000">
     <Window.Resources>
             <Settings:BooleanInverter x:Key="boolInverter" />
+            <local:NegateBooleanConverter x:Key="NegInverter"/>
     </Window.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
@@ -64,7 +65,7 @@
                             </GroupBox>
                         </StackPanel>
                         <TabControl>
-                            <TabItem Header="xy方式">
+                            <TabItem Header="点选">
                                 <StackPanel>
                                     
 
@@ -115,9 +116,24 @@
                                             <CheckBox IsChecked="{Binding Path= SelectedRecipe.Layout.IsSquare}"  VerticalAlignment="Center">n*n</CheckBox>
                                         </StackPanel>
                                     </GroupBox>
+                                    
                                 </StackPanel>
                             </TabItem>
-                            <TabItem Header="单个定义方式" Visibility="Hidden">
+                            <TabItem Header="全面板">
+                                <StackPanel>
+                                        <StackPanel>
+                                            <StackPanel Orientation="Horizontal" Margin="0,1,0,1">
+                                                <Label>X距边:</Label>
+                                                <TextBox Text="{Binding Path= SelectedRecipe.Layout.XMargin}" Width="50"></TextBox>
+                                            </StackPanel>
+                                            <StackPanel Orientation="Horizontal" Margin="0,1,0,1">
+                                                <Label>Y距边:</Label>
+                                                <TextBox Text="{Binding Path= SelectedRecipe.Layout.XMargin}" Width="50"></TextBox>
+                                            </StackPanel>
+                                        </StackPanel>
+                                </StackPanel>
+                            </TabItem>
+                            <TabItem Header="单个定义" Visibility="Hidden">
                                 <Grid>
                                     <Grid.RowDefinitions>
                                         <RowDefinition Height="30"/>
@@ -262,13 +278,16 @@
                 <Grid>
                     <Grid.RowDefinitions>
                         <RowDefinition Height="30"/>
-                        <RowDefinition Height="*"/>
                         <RowDefinition Height="40"/>
+                        <RowDefinition Height="*"/>
                         <RowDefinition Height="40"/>
                     </Grid.RowDefinitions>
                     <Label>所有配置：</Label>
-                    
-                    <Grid Grid.Row="1">
+                    <StackPanel Grid.Row="1" Orientation="Horizontal">
+                        <Label>关键字：</Label>
+                        <TextBox VerticalAlignment="Center" Height ="30" Width="120" Text="{Binding Path=TextFilter,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" ></TextBox>
+                    </StackPanel>
+                    <Grid Grid.Row="2">
                         
                         <ListBox Margin="0,1,0,1"  Name="lstRecipes" ItemsSource="{Binding VisibleRecipes}" SelectedItem="{Binding SelectedRecipe,Mode=TwoWay}">
                             <ListBox.ItemTemplate>
@@ -280,12 +299,9 @@
                             </ListBox.ItemTemplate>
                         </ListBox>
                     </Grid>
-                    <StackPanel Grid.Row="2" Orientation="Horizontal">
-                        <Label>关键字：</Label>
-                        <TextBox VerticalAlignment="Center" Height ="30" Width="120" Text="{Binding Path=TextFilter,Mode=TwoWay,UpdateSourceTrigger=PropertyChanged}" ></TextBox>
-                    </StackPanel>
+                    
                     <StackPanel Margin="0,5,0,0"  Orientation="Horizontal" Grid.Row="3">
-                            <Button Margin="1,1,1,1" Height="30"  Width="60" Name="btnAddPrimer" Click="btnAddRecipe_Click" Content=" + " ></Button>
+                         <Button Margin="1,1,1,1" Height="30"  Width="60" Name="btnAddPrimer" Click="btnAddRecipe_Click" Content=" + " ></Button>
                         <Button Margin="1,1,1,1" Height="30" Width="60" Name="btnRemovePrimer" Click="btnRemoveRecipe_Click" Content="  -  " ></Button>
                     </StackPanel>
                 </Grid>

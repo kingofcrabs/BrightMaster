@@ -77,7 +77,8 @@ namespace BrightMaster
         }
         void MainWindow_Loaded(object sender, RoutedEventArgs e)
         {
-            historyPanel.DataContext = GlobalVars.Instance.HistoryInfoCollection;
+            regionsHistoryPanel.DataContext = GlobalVars.Instance.RegionsHistoryInfoCollection;
+            wholePanelHistoryPanel.DataContext = GlobalVars.Instance.WholePanelHistoryInfoCollection;
             SetInfo("初始化，请等待！", false);
             this.IsEnabled = false;
             try
@@ -404,7 +405,7 @@ namespace BrightMaster
         }
 
 
-        private void btnMoreInfo_Click(object sender, RoutedEventArgs e)
+        private void btnRegionMoreInfo_Click(object sender, RoutedEventArgs e)
         {
             HistoryInfoView historyForm = new HistoryInfoView();
             historyForm.ShowDialog();
@@ -503,16 +504,18 @@ namespace BrightMaster
 
         private void UpdateResults(List<System.Drawing.Point> pts)
         {
-            var results = brightness.GetResults(pts);
-            lstviewResult.ItemsSource = results;
-            PixelInfo.Save2File(results);
-            var result = PixelInfo.GetResult(results);
-            resultPanel.DataContext = result;
-            if(!result.IsOk)
+            var pixelInfos = brightness.GetPixelInfos(pts);
+            lstviewResult.ItemsSource = pixelInfos;
+            PixelInfo.Save2File(pixelInfos);
+            var regionResult = TestResult.GetRegionResult(pixelInfos);
+            var wholePanelResult = TestResult.GetWholePanelResult(brightness);
+            regionsResultPanel.DataContext = regionResult;
+            wholePanelResultPanel.DataContext = wholePanelResult;
+            if (!regionResult.IsOk || !wholePanelResult.IsOk)
             {
                 PlaySound.OnError();
             }
-            GlobalVars.Instance.HistoryInfoCollection.AddNew(new HistoryInfo(GlobalVars.Instance.Barcode, results));
+            GlobalVars.Instance.RegionsHistoryInfoCollection.AddNew(new HistoryInfo(GlobalVars.Instance.Barcode, pixelInfos));
             
         }
 
@@ -534,10 +537,6 @@ namespace BrightMaster
             
             return pts;
         }
-
-      
-
-     
 
         private void CheckPowerSetting()
         {

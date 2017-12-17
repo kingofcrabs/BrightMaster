@@ -71,6 +71,8 @@ namespace BrightMaster
             txtInfo.Text = msg;
             txtInfo.Foreground = isError ? Brushes.Red : Brushes.Black;
         }
+
+       
         private BitmapImage Bitmap2BitmapImage(System.Drawing.Bitmap bitmap)
         {
             BitmapImage bitmapImage = new BitmapImage();
@@ -94,6 +96,18 @@ namespace BrightMaster
         private void btnOk_Click(object sender, RoutedEventArgs e)
         {
             this.Close();
+        }
+    }
+
+    public class NegateBooleanConverter : IValueConverter
+    {
+        public object Convert(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            return !(bool)value;
+        }
+        public object ConvertBack(object value, Type targetType, object parameter, System.Globalization.CultureInfo culture)
+        {
+            return !(bool)value;
         }
     }
 }

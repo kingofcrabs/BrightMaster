@@ -18,7 +18,8 @@ namespace BrightMaster
     {
         static private GlobalVars instance;
         GridViewColumnWidth columnWidths = new GridViewColumnWidth();
-        HistoryInfoCollection histroyInfoCollection = new HistoryInfoCollection();
+        HistoryInfoCollection regionsHistroyInfoCollection = new HistoryInfoCollection();
+        HistoryInfoCollection wholePanelHistroyInfoCollection = new HistoryInfoCollection();
         private RecipeCollection recipeCollection = new RecipeCollection();
         bool needBarcode = false;
         private GlobalVars()
@@ -27,20 +28,28 @@ namespace BrightMaster
             string miscFolder = FolderHelper.GetMiscFolder();
             string file = miscFolder + "misc.xml";
             MiscSettings = SerializeHelper.Load<Misc>(file);
-            Barcode = "";
-            //autoFindRect = bool.Parse(ConfigurationManager.AppSettings["AutoFindRect"]);
         }
-
-
-        public HistoryInfoCollection HistoryInfoCollection
+        public HistoryInfoCollection WholePanelHistoryInfoCollection
         {
             get
             {
-                return histroyInfoCollection;
+                return wholePanelHistroyInfoCollection;
             }
             set
             {
-                histroyInfoCollection = value;
+                wholePanelHistroyInfoCollection = value;
+            }
+        }
+
+        public HistoryInfoCollection RegionsHistoryInfoCollection
+        {
+            get
+            {
+                return regionsHistroyInfoCollection;
+            }
+            set
+            {
+                regionsHistroyInfoCollection = value;
             }
         }
 

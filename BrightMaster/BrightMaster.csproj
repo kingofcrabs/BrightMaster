@@ -109,6 +109,9 @@
     <Compile Include="forms\MiscForm.Designer.cs">
       <DependentUpon>MiscForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="forms\WholePanelHistoryInfoView.xaml.cs">
+      <DependentUpon>WholePanelHistoryInfoView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="forms\XYCurves.xaml.cs">
       <DependentUpon>XYCurves.xaml</DependentUpon>
     </Compile>
@@ -164,6 +167,10 @@
       <SubType>Code</SubType>
     </Compile>
     <Page Include="forms\RecipeDefinitionWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="forms\WholePanelHistoryInfoView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

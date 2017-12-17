@@ -126,6 +126,7 @@ namespace BrightMaster.data
         float uniform;
         float lMax;
         float lMin;
+        PixelInfo pixelInfoCenter;
         public string Barcode
         {
             get
@@ -147,6 +148,14 @@ namespace BrightMaster.data
             set
             {
                 SetProperty(ref sTime, value);
+            }
+        }
+
+        public float LCenter
+        {
+            get
+            {
+                return pixelInfoCenter.Y;
             }
         }
 
@@ -221,21 +230,19 @@ namespace BrightMaster.data
             barcode = _barcode;
         }
 
-        public HistoryInfo(string _barcode, List<PixelInfo> results)
+        public HistoryInfo(string _barcode, List<PixelInfo> pixelInfos)
         {
             // TODO: Complete member initialization
             barcode = _barcode;
-         
-
-            isOk = PixelInfo.GetResult(results).IsOk;
-            var LArray = results.Select(x => x.Y).ToList();
+            isOk = PixelInfo.GetRegionResult(pixelInfos).IsOk;
+            var LArray = pixelInfos.Select(x => x.Y).ToList();
             lMax = Keep4Valid(LArray.Max());
             lMin = Keep4Valid(LArray.Min());
             uniform = Keep4Valid(lMin * 100 / lMax);
             sTime = DateTime.Now.ToString("HHmmss");
             if (barcode == "")
             {
-                barcode = (GlobalVars.Instance.HistoryInfoCollection.AllInfos.Count + 1).ToString();
+                barcode = (GlobalVars.Instance.RegionsHistoryInfoCollection.AllInfos.Count + 1).ToString();
             }
         }
     }

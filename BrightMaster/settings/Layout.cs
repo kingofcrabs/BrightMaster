@@ -20,7 +20,8 @@ namespace BrightMaster.Settings
         private int yCount;
         private float radiusRatio;
         private bool isN_N;
-      
+        private PointF xyMargin;
+        private bool isWholePanel;
         public Layout()
         {
             topLeftRatio = new PointF(10, 10);
@@ -31,7 +32,7 @@ namespace BrightMaster.Settings
             yCount = 5;
             radiusRatio = 2;
             isN_N = true;
-
+            isWholePanel = false;
         }
 
         internal void CheckSetting()
@@ -57,6 +58,42 @@ namespace BrightMaster.Settings
         private void ThrowWithInfo(string s)
         {
             throw new Exception(s);
+        }
+
+        public bool IsWholePanel
+        {
+            get
+            {
+                return isWholePanel;
+            }
+            set
+            {
+                SetProperty(ref isWholePanel, value);
+            }
+        }
+
+        public int XMarginPixel
+        {
+            get
+            {
+                return (int)xyMargin.X;
+            }
+            set
+            {
+                xyMargin.X = value;
+            }
+        }
+
+        public int YMarginPixel
+        {
+            get
+            {
+                return (int)xyMargin.Y;
+            }
+            set
+            {
+                xyMargin.Y = value;
+            }
         }
 
         public bool IsSquare
@@ -133,6 +170,7 @@ namespace BrightMaster.Settings
                 return topLeftRatio.X;
             }
             set{
+
                 topLeftRatio.X = value;
             }
         }

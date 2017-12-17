@@ -24,6 +24,9 @@ namespace BrightMaster
         public double Max { get; set; }
         public double Min { get; set; }
 
+        public double MaxNoMargin { get; set; }
+        public double MinNoMargin { get; set; }
+
         public Brightness(LightPixelInfo[,] pixels)
         {
             Stopwatch watch = new Stopwatch();
@@ -47,23 +50,48 @@ namespace BrightMaster
             }
             unsafe
             {
-
+                int xMargin = GlobalVars.Instance.Layout.XMarginPixel;
+                int yMargin = GlobalVars.Instance.Layout.YMarginPixel;
                 Parallel.Invoke(() =>
                 {
-                    GetMaxMin(0, Height / 4, ref maxArray[0],ref minArray[0]);
+                    GetMaxMin(yMargin, Height / 4,xMargin,yMargin, ref maxArray[0], ref minArray[0]);
                 },
                  () =>
                  {
-                     GetMaxMin(Height / 4,Height/2, ref maxArray[1], ref minArray[1]);
+                     GetMaxMin(Height / 4, Height / 2, xMargin, yMargin, ref maxArray[1], ref minArray[1]);
                  },
                  () =>
                  {
-                     GetMaxMin(Height/2, Height*3/4, ref maxArray[2], ref minArray[2]);
+                     GetMaxMin(Height / 2, Height * 3 / 4, xMargin, yMargin, ref maxArray[2], ref minArray[2]);
                  },
                  () =>
                  {
-                     GetMaxMin(Height*3/4, Height, ref maxArray[3], ref minArray[3]);
+                     GetMaxMin(Height * 3 / 4, Height - yMargin, xMargin, yMargin, ref maxArray[3], ref minArray[3]);
                  });
+                for (int i = 0; i < 4; i++)
+                {
+                    if (MaxNoMargin < maxArray[i])
+                        MaxNoMargin = maxArray[i];
+                    if (MinNoMargin > minArray[i])
+                        MinNoMargin = minArray[i];
+                }
+
+                Parallel.Invoke(() =>
+                {
+                    GetMaxMin(0, yMargin, xMargin, yMargin, ref maxArray[0], ref minArray[0]);
+                },
+                () =>
+                {
+                    GetMaxMin(Height-yMargin, Height, xMargin, yMargin, ref maxArray[1], ref minArray[1]);
+                },
+                () =>
+                {
+                    GetMaxMinFromX(0, xMargin,  ref maxArray[2], ref minArray[2]);
+                },
+                () =>
+                {
+                    GetMaxMinFromX(Width - xMargin, Width, ref maxArray[3], ref minArray[3]);
+                });
                 for (int i = 0; i < 4; i++)
                 {
                     if (Max < maxArray[i])
@@ -71,7 +99,8 @@ namespace BrightMaster
                     if (Min > minArray[i])
                         Min = minArray[i];
                 }
-        
+                Max = Math.Max(Max, MaxNoMargin);
+                Min = Math.Min(Min, MinNoMargin);
             }
             Debug.WriteLine(string.Format("Brightness find max min elapsed:{0}", watch.ElapsedMilliseconds));
             grayVals = Convert2Gray();
@@ -82,12 +111,12 @@ namespace BrightMaster
             watch.Stop();
         }
 
-        private void GetMaxMin(int yStart, int yEnd, ref float max, ref float min)
+        private void GetMaxMin(int yStart, int yEnd,int xMargin, int yMargin, ref float max, ref float min)
         {
-
+           
             for (int y = yStart; y < yEnd; y++)
             {
-                for (int x = 0; x < Width; x++)
+                for (int x = xMargin; x < Width-xMargin; x++)
                 {
                     if (max < _allPixels[y, x].Y)
                         max = _allPixels[y, x].Y;
@@ -97,21 +126,37 @@ namespace BrightMaster
             }
         }
 
-        public List<PixelInfo> GetResults(List<System.Drawing.Point> pts)
+
+        private void GetMaxMinFromX(int xStart, int xEnd, ref float max, ref float min)
+        {
+
+            for (int y = 0; y < Height; y++)
+            {
+                for (int x = xStart; x < xEnd; x++)
+                {
+                    if (max < _allPixels[y, x].Y)
+                        max = _allPixels[y, x].Y;
+                    if (min > _allPixels[y, x].Y)
+                        min = _allPixels[y, x].Y;
+                }
+            }
+        }
+
+        public List<PixelInfo> GetPixelInfos(List<System.Drawing.Point> pts)
         {
             if (pts.Count != 4)
             {
                 return null;
             }
            
-            List<PixelInfo> results = new List<PixelInfo>();
+            List<PixelInfo> pixelInfos = new List<PixelInfo>();
             var circles = GlobalVars.Instance.Layout.GetCircles(pts);
             int id = 1;
             foreach(var circle in circles)
             {
-                results.Add(GetAvgVals(circle.x, circle.y, circle.radius,id++));
+                pixelInfos.Add(GetAvgVals(circle.x, circle.y, circle.radius,id++));
             }
-            return results;
+            return pixelInfos;
         }
 
         private PixelInfo GetAvgVals(float xx, float yy, float radius, int ID)
@@ -254,6 +299,13 @@ namespace BrightMaster
         internal void ClearGrayImage()
         {
             jpgFilePath = "";
+        }
+
+
+
+        internal PixelInfo GetCenterInfo()
+        {
+            return new PixelInfo(1, _allPixels[Height / 2, Width / 2]);
         }
     }
 }

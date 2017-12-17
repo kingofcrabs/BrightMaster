@@ -27,6 +27,10 @@ namespace BrightMaster
         Ua.CaptureData capture_data;
         public  delegate void DelegateInitFinish(bool bok, string errMsg);
         public event DelegateInitFinish onInitialFinished;
+        List<string> validSNs = new List<string>()
+        {
+            "11130020"
+        };
         public async Task Initialize()
         {
             await Task.Run(() =>
@@ -39,6 +43,12 @@ namespace BrightMaster
                     
                 try{
                     uaCore = new Ua.Core();
+                    string keyFolder = GlobalVars.Instance.ParamPath + "UA-10\\SL";
+                    var allSns = Directory.EnumerateDirectories(keyFolder);
+                    if (allSns.Count() == 0 || IsInvalid(validSNs, allSns.First()))
+                        throw new Exception("初始化失败！");
+                    
+                    
                     system_ptr = uaCore.uaInitialize(GlobalVars.Instance.ParamPath);
                     Ua.System ua_system = Ua.Utility.PtrToUaSystem(system_ptr);
                     Ua.Configuration[] configuration = { ua_system.ua_10 };
@@ -78,6 +88,12 @@ namespace BrightMaster
                 }
                 
             });
+        }
+
+        private bool IsInvalid(List<string> validSNs, string curSN)
+        {
+            FileInfo fileInfo = new FileInfo(curSN);
+            return !validSNs.Contains(fileInfo.Name);
         }
 
         private void NotifyInitialFinish(bool bok,string errMsg = "")

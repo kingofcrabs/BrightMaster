@@ -27,7 +27,7 @@ namespace BrightMaster.forms
 
         void HistoryInfoView_Loaded(object sender, RoutedEventArgs e)
         {
-            lstHistory.ItemsSource = GlobalVars.Instance.HistoryInfoCollection.AllInfos;
+            lvHistory.ItemsSource = GlobalVars.Instance.RegionsHistoryInfoCollection.AllInfos;
         }
     }
 }

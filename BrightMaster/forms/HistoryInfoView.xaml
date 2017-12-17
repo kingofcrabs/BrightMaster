@@ -6,7 +6,7 @@
         <Grid>
             <ScrollViewer x:Name="scrollViewerResult" VerticalScrollBarVisibility="Auto"
                    HorizontalScrollBarVisibility="Auto" >
-                <ListView Name="lstHistory"  FontFamily="SimSun">
+                <ListView Name="lvHistory"  FontFamily="SimSun">
 
                     <ListView.View>
                         <GridView x:Name="gridView1">
@@ -16,9 +16,7 @@
                             <GridViewColumn Header="LMin"  Width="60" DisplayMemberBinding="{Binding Path = LMin}"></GridViewColumn>
                             <GridViewColumn Header="Uniform"  Width="60" DisplayMemberBinding="{Binding Path = Uniform}"></GridViewColumn>
                             <GridViewColumn Header="是否合格"  Width="60"  DisplayMemberBinding="{Binding Path = IsOk}"></GridViewColumn>
-
                         </GridView>
-
                     </ListView.View>
                     <ListView.ItemContainerStyle>
                         <Style TargetType="ListViewItem">

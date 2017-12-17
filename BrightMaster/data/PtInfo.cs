@@ -216,7 +216,28 @@ namespace BrightMaster
                 return id;
             }
         }
+        public PixelInfo(int id, LightPixelInfo lightInfo)
+        {
+            this.id = id;
+            _X = Keep4Valid(lightInfo.X);
+            _Y = Keep4Valid(lightInfo.Y);
+            _Z = Keep4Valid(lightInfo.Z);
+            _x = Keep4Valid(_X / (_X + _Y + _Z));
+            _y = Keep4Valid(_Y / (_X + _Y + _Z));
+            _u = Keep4Valid(4 * _X / (_X + 15 * _Y + 3 * _Z));
+            _v = Keep4Valid(9 * _Y / (_X + 15 * _Y + 3 * _Z));
 
+            double max = GlobalVars.Instance.Constrains.Maxx;
+            double min = GlobalVars.Instance.Constrains.Minx;
+            xValid = _x > min && _x < max;
+
+            max = GlobalVars.Instance.Constrains.Maxy;
+            min = GlobalVars.Instance.Constrains.Miny;
+            yValid = _y > min && _y < max;
+
+            min = GlobalVars.Instance.Constrains.MinL;
+            LValid = _Y > min;
+        }
 
         public PixelInfo(int id,float XX, float YY, float ZZ)
         {
@@ -241,11 +262,11 @@ namespace BrightMaster
             LValid = _Y > min;
         }
 
-     
-        internal static TestResult GetResult(List<PixelInfo> results)
+
+        internal static TestResult GetRegionResult(List<PixelInfo> pixelInfos)
         {
-            float maxL = results.Max(x => x.Y);
-            float minL = results.Min(x => x.Y);
+            float maxL = pixelInfos.Max(x => x.Y);
+            float minL = pixelInfos.Min(x => x.Y);
             float minUniform = GlobalVars.Instance.Constrains.MinUniform;
             float uniform = minL / maxL * 100;
             uniform = (float)Math.Round(uniform, 2);
