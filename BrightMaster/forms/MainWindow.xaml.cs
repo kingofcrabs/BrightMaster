@@ -233,7 +233,7 @@ namespace BrightMaster
             if ((bool)btnFakeColor.IsChecked)
             {
                 brightness.SaveImage();
-                bmpImage = ImageHelper.CreatePseudoColorImage(brightness.jpgFilePath);
+                bmpImage = ImageHelper.CreatePseudoColorImage(brightness.ImagePath);
             }
             else
             {
@@ -410,7 +410,11 @@ namespace BrightMaster
             HistoryInfoView historyForm = new HistoryInfoView();
             historyForm.ShowDialog();
         }
-
+        private void btnWholePanelMoreInfo_Click(object sender, RoutedEventArgs e)
+        {
+            WholePanelHistoryInfoView historyForm = new WholePanelHistoryInfoView();
+            historyForm.ShowDialog();
+        }
         private async void Acquire_Executed(object sender, ExecutedRoutedEventArgs e)
         {
             if (GlobalVars.Instance.NeedBarcode)
@@ -515,8 +519,10 @@ namespace BrightMaster
             {
                 PlaySound.OnError();
             }
-            GlobalVars.Instance.RegionsHistoryInfoCollection.AddNew(new HistoryInfo(GlobalVars.Instance.Barcode, pixelInfos));
-            
+            GlobalVars.Instance.RegionsHistoryInfoCollection.AddNew(new HistoryInfo(GlobalVars.Instance.Barcode, regionResult));
+            GlobalVars.Instance.WholePanelHistoryInfoCollection.AddNew(new HistoryInfo(GlobalVars.Instance.Barcode, wholePanelResult));
+            SaveHelper saveHelper = new SaveHelper();
+            saveHelper.Save2Excel(wholePanelResult,brightness);
         }
 
         private List<System.Drawing.Point> AdjustPosition(List<MPoint> mpts)
@@ -589,6 +595,8 @@ namespace BrightMaster
             InvalidateVisual();
 
         }
+
+       
 
 
        

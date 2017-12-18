@@ -335,7 +335,7 @@
                                 <TextBox Text="{Binding TotalCnt,Mode=OneWay}" IsReadOnly="True" Width="50"></TextBox>
                             </StackPanel>
                             <StackPanel  Margin="2,0,0,0">
-                                <!--<Button Name="btnMoreInfo" Click="btnMoreInfo_Click" Width="60" Height="30" Margin="5,20,0,0">更多</Button>-->
+                                <Button Name="btnWholePanelMoreInfo" Click="btnWholePanelMoreInfo_Click" Width="60" Height="30" Margin="5,20,0,0">更多</Button>
                             </StackPanel>
                             
                         </StackPanel>

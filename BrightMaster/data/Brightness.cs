@@ -16,7 +16,8 @@ namespace BrightMaster
         public byte[,] grayVals;
         public byte[,] sparseGrayVals;
         public byte[] grayValsInArray;
-        public string jpgFilePath = "";
+        
+        public string ImagePath { get; set; }
         public int[] GrayLevelCounts = new int[256];
         public int Width { get; set; }
         public int Height { get; set; }
@@ -26,6 +27,7 @@ namespace BrightMaster
 
         public double MaxNoMargin { get; set; }
         public double MinNoMargin { get; set; }
+        public double Avg { get; set; }
 
         public Brightness(LightPixelInfo[,] pixels)
         {
@@ -43,10 +45,13 @@ namespace BrightMaster
 
             float[] maxArray = new float[4];
             float[] minArray = new float[4];
+            float[] avg = new float[4];
+            
             for(int i = 0; i< 4; i++)
             {
                 maxArray[i] = 0;
                 minArray[i] = 999999;
+                avg[i] = 0;
             }
             unsafe
             {
@@ -54,35 +59,38 @@ namespace BrightMaster
                 int yMargin = GlobalVars.Instance.Layout.YMarginPixel;
                 Parallel.Invoke(() =>
                 {
-                    GetMaxMin(yMargin, Height / 4,xMargin,yMargin, ref maxArray[0], ref minArray[0]);
+                    GetMaxMin(yMargin, Height / 4,xMargin,yMargin, ref maxArray[0], ref minArray[0],ref avg[0]);
                 },
                  () =>
                  {
-                     GetMaxMin(Height / 4, Height / 2, xMargin, yMargin, ref maxArray[1], ref minArray[1]);
+                     GetMaxMin(Height / 4, Height / 2, xMargin, yMargin, ref maxArray[1], ref minArray[1],ref avg[1]);
                  },
                  () =>
                  {
-                     GetMaxMin(Height / 2, Height * 3 / 4, xMargin, yMargin, ref maxArray[2], ref minArray[2]);
+                     GetMaxMin(Height / 2, Height * 3 / 4, xMargin, yMargin, ref maxArray[2], ref minArray[2],ref avg[2]);
                  },
                  () =>
                  {
-                     GetMaxMin(Height * 3 / 4, Height - yMargin, xMargin, yMargin, ref maxArray[3], ref minArray[3]);
+                     GetMaxMin(Height * 3 / 4, Height - yMargin, xMargin, yMargin, ref maxArray[3], ref minArray[3],ref avg[3]);
                  });
+                float sum = 0;
                 for (int i = 0; i < 4; i++)
                 {
                     if (MaxNoMargin < maxArray[i])
                         MaxNoMargin = maxArray[i];
                     if (MinNoMargin > minArray[i])
                         MinNoMargin = minArray[i];
+                    sum += avg[i];
                 }
+                Avg = sum / 4;
 
                 Parallel.Invoke(() =>
                 {
-                    GetMaxMin(0, yMargin, xMargin, yMargin, ref maxArray[0], ref minArray[0]);
+                    GetMaxMin(0, yMargin, xMargin, yMargin, ref maxArray[0], ref minArray[0], ref avg[0]);
                 },
                 () =>
                 {
-                    GetMaxMin(Height-yMargin, Height, xMargin, yMargin, ref maxArray[1], ref minArray[1]);
+                    GetMaxMin(Height-yMargin, Height, xMargin, yMargin, ref maxArray[1], ref minArray[1], ref avg[1]);
                 },
                 () =>
                 {
@@ -111,9 +119,10 @@ namespace BrightMaster
             watch.Stop();
         }
 
-        private void GetMaxMin(int yStart, int yEnd,int xMargin, int yMargin, ref float max, ref float min)
+        private void GetMaxMin(int yStart, int yEnd,int xMargin, int yMargin, ref float max, ref float min,ref float avg)
         {
-           
+            int cnt = 0;
+            double sum = 0;
             for (int y = yStart; y < yEnd; y++)
             {
                 for (int x = xMargin; x < Width-xMargin; x++)
@@ -122,8 +131,11 @@ namespace BrightMaster
                         max = _allPixels[y, x].Y;
                     if (min > _allPixels[y, x].Y)
                         min = _allPixels[y, x].Y;
+                    sum += _allPixels[y, x].Y;
+                    cnt++;
                 }
             }
+            avg = (float)(sum / cnt);
         }
 
 
@@ -193,9 +205,29 @@ namespace BrightMaster
             return (float)Math.Sqrt(xDis * xDis + yDis * yDis);
         }
 
+        public Bitmap GetBitmap()
+        {
+            Bitmap bmp = new Bitmap(Width, Height);
+            LockBitmap lockBmp = new LockBitmap(bmp);
+            unsafe
+            {
+                lockBmp.LockBits();
+                for (int y = 0; y < lockBmp.Height; y++)
+                {
+                    List<double> vals = new List<double>();
+                    for (int x = 0; x < lockBmp.Width; x++)
+                    {
+                        byte grayVal = grayVals[y, x];
+                        lockBmp.SetPixel(x, y, Color.FromArgb(grayVal, grayVal, grayVal));
+                    }
+                }
+                lockBmp.UnlockBits();
+            }
+            return bmp;
+        }
         public void SaveImage()
         {
-            if (jpgFilePath != "")
+            if (ImagePath != "")
                 return;
 
             Bitmap bmp = new Bitmap(Width,Height);
@@ -214,8 +246,8 @@ namespace BrightMaster
                 }
                 lockBmp.UnlockBits();
             }
-            jpgFilePath = FolderHelper.GetImageFolder() + "latest.jpg";
-            bmp.Save(jpgFilePath);
+            ImagePath = FolderHelper.GetImageFolder() + "latest.jpg";
+            bmp.Save(ImagePath);
         }
 
 
@@ -298,7 +330,7 @@ namespace BrightMaster
 
         internal void ClearGrayImage()
         {
-            jpgFilePath = "";
+            ImagePath = "";
         }
 
 

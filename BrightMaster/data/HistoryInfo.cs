@@ -121,12 +121,8 @@ namespace BrightMaster.data
     class HistoryInfo:BindableBase
     {
         string barcode;
-        bool isOk;
         string sTime;
-        float uniform;
-        float lMax;
-        float lMin;
-        PixelInfo pixelInfoCenter;
+        TestResult testResult = null;
         public string Barcode
         {
             get
@@ -151,11 +147,18 @@ namespace BrightMaster.data
             }
         }
 
+        public float LAvg
+        {
+            get
+            {
+                return testResult.LAvg;
+            }
+        }
         public float LCenter
         {
             get
             {
-                return pixelInfoCenter.Y;
+                return testResult.LCenter;
             }
         }
 
@@ -163,83 +166,68 @@ namespace BrightMaster.data
         {
             get
             {
-                return lMax;
-            }
-            set
-            {
-                SetProperty(ref lMax, value);
+                return testResult.LMax;
             }
         }
         public float LMin
         {
             get
             {
-                return lMax;
+                return testResult.LMin;
             }
-            set
-            {
-                SetProperty(ref lMin, value);
-            }
+            
         }
 
         public float Uniform
         {
             get
             {
-                return uniform;
+                return testResult.Uniform;
             }
-            set
-            {
-                SetProperty(ref uniform, value);
-            }
+           
         }
 
-        float Keep4Valid(float num)
+
+        public float x
         {
-            if (num == 0)
-                return 0;
-            float value = num;
-            int count = 0;
-            if (num < 1000)
+            get
             {
-                while (num < 1000)
-                {
-                    count++;
-                    num *= 10;
-                }
+                return testResult.x;
             }
-            value = (float)Math.Round(value, count);
-            return value;
         }
 
+        public float y
+        {
+
+            get
+            {
+                return testResult.y;
+            }
+        }
+             
+     
         public bool IsOk
         {
             get
             {
-                return isOk;
-            }
-            set
-            {
-                SetProperty(ref isOk, value);
+                return testResult.IsOk;
             }
         }
 
         public HistoryInfo(string _barcode, bool _isOk)
         {
-            isOk = _isOk;
             barcode = _barcode;
         }
+        public HistoryInfo(string _barcode, Brightness brightness)
+        {
+            barcode = _barcode;
 
-        public HistoryInfo(string _barcode, List<PixelInfo> pixelInfos)
+        }
+        public HistoryInfo(string _barcode, TestResult testResult)
         {
             // TODO: Complete member initialization
-            barcode = _barcode;
-            isOk = PixelInfo.GetRegionResult(pixelInfos).IsOk;
-            var LArray = pixelInfos.Select(x => x.Y).ToList();
-            lMax = Keep4Valid(LArray.Max());
-            lMin = Keep4Valid(LArray.Min());
-            uniform = Keep4Valid(lMin * 100 / lMax);
             sTime = DateTime.Now.ToString("HHmmss");
+            barcode = _barcode;
             if (barcode == "")
             {
                 barcode = (GlobalVars.Instance.RegionsHistoryInfoCollection.AllInfos.Count + 1).ToString();

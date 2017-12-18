@@ -16,7 +16,15 @@ namespace BrightMaster.data
         private bool isOk;
         private string description;
         private string barcode;
+        private float lAvg;
 
+        public float LAvg
+        {
+            get
+            {
+                return lAvg;
+            }
+        }
         public string Label
         {
             get
@@ -104,21 +112,22 @@ namespace BrightMaster.data
             float uniform = minL / maxL * 100;
             uniform = (float)Math.Round(uniform, 2);
             bool isOk = uniform > minUniform;
-            TestResult testResult = new TestResult(maxL, minL, isOk, uniform, brightness.GetCenterInfo());
+            TestResult testResult = new TestResult(maxL, minL, isOk, uniform,(float)brightness.Avg, brightness.GetCenterInfo());
             return testResult;
         }
         internal static TestResult GetRegionResult(List<PixelInfo> pixelInfos)
         {
             float maxL = pixelInfos.Max(x => x.Y);
             float minL = pixelInfos.Min(x => x.Y);
+            float avg = pixelInfos.Average(x => x.Y);
             float minUniform = GlobalVars.Instance.Constrains.MinUniform;
             float uniform = minL / maxL * 100;
             uniform = (float)Math.Round(uniform, 2);
             bool isOk = uniform > minUniform;
-            TestResult testResult = new TestResult(maxL, minL, isOk, uniform);
+            TestResult testResult = new TestResult(maxL, minL, isOk, avg,uniform);
             return testResult;
         }
-        public TestResult(float Lmax, float Lmin, bool isOk, float uniform, PixelInfo pixelInfoCenter = null)
+        public TestResult(float Lmax, float Lmin, bool isOk, float uniform, float avg, PixelInfo pixelInfoCenter = null)
         {
             this.lmax = Lmax;
             this.lmin = Lmin;

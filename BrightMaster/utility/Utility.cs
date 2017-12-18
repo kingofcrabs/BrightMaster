@@ -126,6 +126,17 @@ namespace BrightMaster
                 Directory.CreateDirectory(saveFolder);
             return saveFolder;
         }
+
+        internal static string GetTemplateFile()
+        {
+            string templateFolder = GetExeParentFolder() + "Template\\";
+            if (!Directory.Exists(templateFolder))
+                throw new Exception("No Template folder!");
+            string file = templateFolder + "wholePanel.xls";
+            if(!File.Exists(file))
+                throw new Exception("No Template file!");
+            return file;
+        }
     }
 
 

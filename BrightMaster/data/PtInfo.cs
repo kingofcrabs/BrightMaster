@@ -267,11 +267,12 @@ namespace BrightMaster
         {
             float maxL = pixelInfos.Max(x => x.Y);
             float minL = pixelInfos.Min(x => x.Y);
+            float avg = pixelInfos.Average(x => x.Y);
             float minUniform = GlobalVars.Instance.Constrains.MinUniform;
             float uniform = minL / maxL * 100;
             uniform = (float)Math.Round(uniform, 2);
             bool isOk = uniform > minUniform;
-            TestResult testResult = new TestResult(maxL, minL, isOk, uniform);
+            TestResult testResult = new TestResult(maxL, minL, isOk, uniform, avg);
             return testResult;
         }
     }
