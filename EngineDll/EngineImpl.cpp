@@ -189,14 +189,16 @@ void EngineImpl::FindRectImpl(Mat& img, vector<pair<int, int>>& ptPairs, bool ma
 	convexHull(Mat(allContours[index]), hull, false);
 	int hullcount = (int)hull.size();
 	vector<Point2f> hullPts;
+	cvtColor(img, drawing, CV_GRAY2BGR);
 	Scalar color = Scalar(255, 0, 0);
 	for (int i = 0; i < hullcount; i++)
 	{
 		Point pt = allContours[index][hull[i]];
 		Point ptEnd = allContours[index][hull[(i + 1) % hullcount]];
+		line(drawing, pt, ptEnd, color);
 		hullPts.push_back(pt);
 	}
-
+	
 	double epsilon = 0.1*arcLength(hullPts, true);
 	vector<Point2f> approx;
 	approxPolyDP(hullPts, approx, epsilon, true);
@@ -207,6 +209,8 @@ void EngineImpl::FindRectImpl(Mat& img, vector<pair<int, int>>& ptPairs, bool ma
 		line(drawing, ptStart, ptEnd, color, 1);
 		ptPairs.push_back(make_pair(ptStart.x, ptStart.y));
 	}
+	//imshow("approx", drawing);
+	
 	if (mannualThreshold)
 	{
 		imshow("threshold", drawing);

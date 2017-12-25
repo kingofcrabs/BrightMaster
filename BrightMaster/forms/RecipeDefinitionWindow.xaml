@@ -94,7 +94,7 @@
                                     </GroupBox>
                                     <GroupBox Header="点数量大小">
 
-                                        <StackPanel>
+                                        <StackPanel >
                                             <StackPanel Orientation="Horizontal" Margin="0,10,0,5">
                                                 <Label>X方向数量:</Label>
                                                 <TextBox  Width="50" Text="{Binding Path=SelectedRecipe.Layout.XCount}" Margin="36,0,0,0"></TextBox>
@@ -109,7 +109,7 @@
                                             </StackPanel>
                                         </StackPanel>
                                     </GroupBox>
-
+                                   
                                     <GroupBox Header="其他">
                                         <StackPanel Orientation="Horizontal">
                                             <Label>点分布规律：</Label>
@@ -123,13 +123,17 @@
                                 <StackPanel>
                                         <StackPanel>
                                             <StackPanel Orientation="Horizontal" Margin="0,1,0,1">
-                                                <Label>X距边:</Label>
+                                            <Label>X距边（百分比）:</Label>
                                                 <TextBox Text="{Binding Path= SelectedRecipe.Layout.XMargin}" Width="50"></TextBox>
                                             </StackPanel>
                                             <StackPanel Orientation="Horizontal" Margin="0,1,0,1">
-                                                <Label>Y距边:</Label>
-                                                <TextBox Text="{Binding Path= SelectedRecipe.Layout.XMargin}" Width="50"></TextBox>
+                                            <Label>Y距边（百分比）:</Label>
+                                                <TextBox Text="{Binding Path= SelectedRecipe.Layout.YMargin}" Width="50"></TextBox>
                                             </StackPanel>
+                                            <StackPanel Orientation="Horizontal" Margin="0,1,0,1">
+                                                <Label>中心大小（百分比）：</Label>
+                                            <TextBox Text="{Binding Path= SelectedRecipe.Layout.CenterSizePercent}" Width="50"></TextBox>
+                                        </StackPanel>
                                         </StackPanel>
                                 </StackPanel>
                             </TabItem>
@@ -169,8 +173,13 @@
                                 </Grid>
                             </TabItem>
                         </TabControl>
-                        
-                        
+
+                        <GroupBox Header="信息显示">
+                            <StackPanel Margin="0,5,0,0" Orientation="Horizontal">
+                                <RadioButton IsChecked="{Binding Path=SelectedRecipe.ShowRegions}" Margin="0,0,5,0">点选</RadioButton>
+                                <RadioButton IsChecked="{Binding Path=SelectedRecipe.ShowRegions, Converter={StaticResource boolInverter}}">全屏</RadioButton>
+                            </StackPanel>
+                        </GroupBox>
 
                     </StackPanel>
 

@@ -29,7 +29,7 @@ namespace BrightMaster
         public event DelegateInitFinish onInitialFinished;
         List<string> validSNs = new List<string>()
         {
-            "11130020"
+            "11130020","10770200"
         };
         public async Task Initialize()
         {

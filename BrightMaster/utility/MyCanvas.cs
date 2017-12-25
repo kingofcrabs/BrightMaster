@@ -29,7 +29,9 @@ namespace BrightMaster
         Point ptCalculateCurve = new Point(-1, -1);
         bool validMouseMove = false;
         bool userSelectROI = false;
-    
+
+        Point minPt = new Point(-1, -1);
+        Point maxPt = new Point(-1, -1);
 
         public bool IsValidMove
         {
@@ -42,6 +44,7 @@ namespace BrightMaster
                 validMouseMove = value;
             }
         }
+
         public bool UserSelectROI
         {
             get
@@ -237,29 +240,54 @@ namespace BrightMaster
             
             var boundingRectUICoord = GetBoundingRectInUICoordinate(pts);
             System.Windows.Media.Brush redBrush = System.Windows.Media.Brushes.Red;
+            System.Windows.Media.Brush blueBrush = System.Windows.Media.Brushes.Blue;
             System.Windows.Media.Pen pen = new System.Windows.Media.Pen(redBrush,1);
-            
-
+            System.Windows.Media.Pen dashPen = new System.Windows.Media.Pen(blueBrush, 1);
+            dashPen.DashStyle = DashStyles.Dash;
             bool validPt = pts != null && pts.Count == 4;
             if (validPt)
             {
+                List<PointF> offSetPts = new List<PointF>();
+                float xMargin = layout.XMargin / 100;
+                float yMargin = layout.YMargin / 100;
+                offSetPts.Add(layout.GetPositionInImage(pts, new PointF(xMargin, yMargin)));
+                offSetPts.Add(layout.GetPositionInImage(pts, new PointF(1 - xMargin, yMargin)));
+                offSetPts.Add(layout.GetPositionInImage(pts, new PointF(1 - xMargin, 1 - yMargin)));
+                offSetPts.Add(layout.GetPositionInImage(pts, new PointF(xMargin, 1 - yMargin)));
                 for (int i = 0; i < 4; i++)
                 {
                     int endIndex = (i + 1) % 4;
                     System.Windows.Point startPt = new System.Windows.Point(pts[i].X,pts[i].Y);
                     System.Windows.Point endPt = new System.Windows.Point(pts[endIndex].X, pts[endIndex].Y);
+                    System.Windows.Point startPtOffSet = new System.Windows.Point(offSetPts[i].X, offSetPts[i].Y);
+                    System.Windows.Point endPtOffset = new System.Windows.Point(offSetPts[endIndex].X, offSetPts[endIndex].Y);
                     if(!userSelectROI)
                     {
                         startPt = new System.Windows.Point(Convert2XUIFromReal(pts[i].X), Convert2UIYFromReal(pts[i].Y));
                         endPt = new System.Windows.Point(Convert2XUIFromReal(pts[endIndex].X), Convert2UIYFromReal(pts[endIndex].Y));
+                        startPtOffSet = new System.Windows.Point(Convert2XUIFromReal(offSetPts[i].X), Convert2UIYFromReal(offSetPts[i].Y));
+                        endPtOffset = new System.Windows.Point(Convert2XUIFromReal(offSetPts[endIndex].X), Convert2UIYFromReal(offSetPts[endIndex].Y));
+                    }
+                    drawingContext.DrawLine(pen, startPt, endPt);
+                    
+                    //draw dot line
+                    if (!GlobalVars.Instance.ShowRegions)
+                    {
+                        //System.Windows.Point  startPtShift
+                        //GetPositionInImage
+                        float[] dashValues = { 5, 2 };
+                        
+                        drawingContext.DrawLine(dashPen, startPtOffSet, endPtOffset);
                     }
                     
-                    drawingContext.DrawLine(pen, startPt, endPt);
+                   
                 }
-                if (layout != null)
+                
+                
+                if (GlobalVars.Instance.ShowRegions)
                 {
                     var circles = validPt ? GlobalVars.Instance.Layout.GetCircles(pts) :
-                        GlobalVars.Instance.Layout.GetCircles(boundingRectUICoord);
+                    GlobalVars.Instance.Layout.GetCircles(boundingRectUICoord);
                     int index = 0;
                     if (userSelectROI && ptEnd.X == -1)
                         return;
@@ -267,11 +295,22 @@ namespace BrightMaster
                     {
                         System.Windows.Point uiPt = userSelectROI ? new System.Windows.Point(circle.Position.X, circle.Position.Y) :
                             new System.Windows.Point(Convert2XUIFromReal(circle.Position.X), Convert2UIYFromReal(circle.Position.Y));
-                        DrawCircle(uiPt, circle.Size, drawingContext);
+                        float radiusUI = Convert2XUIFromReal(circle.Size.X);
+                        DrawCircle(uiPt, new PointF(radiusUI, radiusUI), drawingContext);
                         DrawText((index + 1).ToString(), uiPt, drawingContext, 12);
                         index++;
                     }
                 }
+                else
+                {
+                    if(maxPt.X != -1)
+                    {
+                        DrawCircle(new System.Windows.Point(Convert2XUIFromReal(maxPt.X), Convert2XUIFromReal(maxPt.Y)), new PointF(10, 10), drawingContext);
+                        DrawCircle(new System.Windows.Point(Convert2XUIFromReal(minPt.X), Convert2XUIFromReal(minPt.Y)), new PointF(10, 10), drawingContext, false);
+                    }
+                        
+                }
+
             }
             else
             {
@@ -305,12 +344,26 @@ namespace BrightMaster
             drawingContext.DrawText(txt, point);
         }
 
-        private void DrawCircle(System.Windows.Point pt, PointF sz, DrawingContext drawingContext)
+        private void DrawCircle(System.Windows.Point pt, PointF sz, DrawingContext drawingContext,bool red = true)
         {
-            drawingContext.DrawEllipse(null, new System.Windows.Media.Pen(System.Windows.Media.Brushes.Red,1),
+            System.Windows.Media.Brush brush = red ? System.Windows.Media.Brushes.Red : System.Windows.Media.Brushes.Blue;
+            drawingContext.DrawEllipse(null, new System.Windows.Media.Pen(brush, 1),
                 pt, sz.X, sz.Y);
         }
 
+        public void ClearMinMaxPoint()
+        {
+            this.maxPt = new Point(-1, -1);
+            this.minPt = new Point(-1, -1);
+            InvalidateVisual();
+        }
+
+        public void SetMaxMinPosition(Point maxPt, Point minPt)
+        {
+            this.maxPt = maxPt;
+            this.minPt = minPt;
+            InvalidateVisual();
+        }
 
         internal void OnLeftButtonDown(System.Windows.Point mousePos)
         {

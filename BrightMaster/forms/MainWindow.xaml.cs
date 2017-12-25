@@ -208,7 +208,8 @@ namespace BrightMaster
 
         void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
-            
+            SaveHelper saveHelper = new SaveHelper();
+            saveHelper.Save();
             GlobalVars.Instance.UAController.UnInitialize();
         }
 
@@ -397,6 +398,18 @@ namespace BrightMaster
             //e.CanExecute = brightness != null;
             e.CanExecute =true;
         }
+        private void Save2Excel_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = GlobalVars.Instance.AnalysisSuccess;
+        }
+
+        private void Save2Excel_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            SaveHelper saveHelper = new SaveHelper();
+            saveHelper.Save2Excel(brightness);
+        }
+
+
 
         private void Curve_Executed(object sender, ExecutedRoutedEventArgs e)
         {
@@ -422,6 +435,10 @@ namespace BrightMaster
                 QueryBarcode queryBarcode = new QueryBarcode();
                 queryBarcode.ShowDialog();
             }
+            else
+            {
+                GlobalVars.Instance.Barcode = DateTime.Now.ToString("hhmmss");
+            }
             progressForm = new ProgressForm();
             progressForm.Show();
             CheckPowerSetting();
@@ -430,9 +447,10 @@ namespace BrightMaster
             SetInfo("开始采集。", false);
             btnFakeColor.IsChecked = false;
             this.IsEnabled = false;
+            GlobalVars.Instance.AnalysisSuccess = false;
             watch.Reset();
             watch.Start();
-
+            myCanvas.ClearMinMaxPoint();
             await DoAcquisition();
         }
 #endregion
@@ -443,8 +461,13 @@ namespace BrightMaster
             {
                 watch.Restart();
                 if(brightness != null)
+                {
+                    brightness.ClearMinMaxPosition();
                     brightness.ClearGrayImage();
+                }
+                    
                 var allPixels = GlobalVars.Instance.UAController.Acquire();
+
                 try
                 {
                     this.Dispatcher.Invoke(() =>
@@ -499,7 +522,13 @@ namespace BrightMaster
             var mpts = iEngine.FindRect(sImgFile, ref GlobalVars.Instance.MiscSettings.thresholdVal, GlobalVars.Instance.MiscSettings.MannualThreshold);
             if (mpts.Count == 0)
                 return new List<System.Drawing.Point>();
+            if(mpts.Count != 4)
+            {
+                throw new Exception("找不到外框！");
+            }
+
             pts = AdjustPosition(mpts);
+            
             GlobalVars.Instance.MiscSettings.BoundaryPts = pts;
             GlobalVars.Instance.MiscSettings.Save();
             myCanvas.SetBkGroundImage(bmpImage, pts);
@@ -508,6 +537,8 @@ namespace BrightMaster
 
         private void UpdateResults(List<System.Drawing.Point> pts)
         {
+            brightness.UpdateROI(pts);
+            myCanvas.SetMaxMinPosition(brightness.MaxPosition, brightness.MinPosition);
             var pixelInfos = brightness.GetPixelInfos(pts);
             lstviewResult.ItemsSource = pixelInfos;
             PixelInfo.Save2File(pixelInfos);
@@ -522,7 +553,10 @@ namespace BrightMaster
             GlobalVars.Instance.RegionsHistoryInfoCollection.AddNew(new HistoryInfo(GlobalVars.Instance.Barcode, regionResult));
             GlobalVars.Instance.WholePanelHistoryInfoCollection.AddNew(new HistoryInfo(GlobalVars.Instance.Barcode, wholePanelResult));
             SaveHelper saveHelper = new SaveHelper();
-            saveHelper.Save2Excel(wholePanelResult,brightness);
+            saveHelper.Save();
+            GlobalVars.Instance.AnalysisSuccess = true;
+            //SaveHelper saveHelper = new SaveHelper();
+            //saveHelper.Save2Excel(wholePanelResult,brightness);
         }
 
         private List<System.Drawing.Point> AdjustPosition(List<MPoint> mpts)
@@ -595,6 +629,8 @@ namespace BrightMaster
             InvalidateVisual();
 
         }
+
+       
 
        
 

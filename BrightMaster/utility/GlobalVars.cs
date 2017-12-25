@@ -22,12 +22,14 @@ namespace BrightMaster
         HistoryInfoCollection wholePanelHistroyInfoCollection = new HistoryInfoCollection();
         private RecipeCollection recipeCollection = new RecipeCollection();
         bool needBarcode = false;
+        
         private GlobalVars()
         {
             needBarcode = bool.Parse(ConfigurationManager.AppSettings["InputBarcode"]);
             string miscFolder = FolderHelper.GetMiscFolder();
             string file = miscFolder + "misc.xml";
             MiscSettings = SerializeHelper.Load<Misc>(file);
+            StartTime = DateTime.Now.ToString("hhmmss");
         }
         public HistoryInfoCollection WholePanelHistoryInfoCollection
         {
@@ -66,6 +68,7 @@ namespace BrightMaster
         }
 
         public Misc MiscSettings { get; set; }
+        public string StartTime { get; set; }
         public PowerSettings PowerSettings
         {
             get
@@ -123,6 +126,15 @@ namespace BrightMaster
             }
         }
 
+        public bool ShowRegions
+        {
+            get
+            {
+                if (recipeCollection.SelectedRecipe == null)
+                    return true;
+                return recipeCollection.SelectedRecipe.ShowRegions;
+            }
+        }
 
        
 
@@ -163,6 +175,8 @@ namespace BrightMaster
             }
         }
 
+
+        public bool AnalysisSuccess { get; set; }
         public string Barcode { get; set; }
     }
 }

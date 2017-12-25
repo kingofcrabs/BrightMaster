@@ -11,6 +11,7 @@ using System.Linq;
 using System.Windows.Media;
 using System.Windows.Controls;
 using System.Threading.Tasks;
+using System.Windows.Media.Imaging;
 
 namespace BrightMaster
 {
@@ -95,10 +96,15 @@ namespace BrightMaster
         {
             var sparseGrayVals = brightness.GetSparseGrayLevels(grayLevelCnt);
             var bmpImage = ImageHelper.CreateImage(sparseGrayVals);
+#if DEBUG
+            //Save(bmpImage, "d:\\test.png");
+            Save(bmpImage,@"d:\test.png");
+#endif
             myCanvas.SetBkGroundImage(bmpImage);
            
         }
 
+       
         void discreteSlider1_PropertyChanged(object sender, System.ComponentModel.PropertyChangedEventArgs e)
         {
             //discreteSlider1.Value
@@ -116,5 +122,18 @@ namespace BrightMaster
             }
             slider.Reset(values.OrderByDescending(x => x).ToArray());
         }
+
+        public static void Save(BitmapImage image, string filePath)
+        {
+            BitmapEncoder encoder = new PngBitmapEncoder();
+            encoder.Frames.Add(BitmapFrame.Create(image));
+
+            using (var fileStream = new System.IO.FileStream(filePath, System.IO.FileMode.Create))
+            {
+                encoder.Save(fileStream);
+            }
+        }
     }
+
+  
 }

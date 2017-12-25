@@ -22,6 +22,7 @@ namespace BrightMaster.Settings
         private bool isN_N;
         private PointF xyMargin;
         private bool isWholePanel;
+        private float centerSizePercent;
         public Layout()
         {
             topLeftRatio = new PointF(10, 10);
@@ -33,6 +34,7 @@ namespace BrightMaster.Settings
             radiusRatio = 2;
             isN_N = true;
             isWholePanel = false;
+            centerSizePercent = 10;
         }
 
         internal void CheckSetting()
@@ -52,7 +54,8 @@ namespace BrightMaster.Settings
                 ThrowWithInfo("YCount必须大于0！");
             if(radiusRatio <= 0)
                 ThrowWithInfo("RadiusRatio必须大于0！");
-            
+            if (centerSizePercent <= 0)
+                ThrowWithInfo("centerSizePercent必须大于0！");
         }
 
         private void ThrowWithInfo(string s)
@@ -72,11 +75,23 @@ namespace BrightMaster.Settings
             }
         }
 
-        public int XMarginPixel
+        public float CenterSizePercent
         {
             get
             {
-                return (int)xyMargin.X;
+                return centerSizePercent;
+            }
+            set
+            {
+                SetProperty(ref centerSizePercent, value);
+            }
+        }
+
+        public float XMargin
+        {
+            get
+            {
+                return xyMargin.X;
             }
             set
             {
@@ -84,11 +99,11 @@ namespace BrightMaster.Settings
             }
         }
 
-        public int YMarginPixel
+        public float YMargin
         {
             get
             {
-                return (int)xyMargin.Y;
+                return xyMargin.Y;
             }
             set
             {
@@ -272,6 +287,20 @@ namespace BrightMaster.Settings
             RadiusRatio = radius_;
         }
 
+        public CircleF GetCenterCircle(Rect boundingRect)
+        {
+            var layout = GlobalVars.Instance.Layout;
+            float xStart = (float)(boundingRect.X + layout.TopLeftXRatio * boundingRect.Width / 100);
+            float yStart = (float)(boundingRect.Y + layout.TopLeftYRatio * boundingRect.Height / 100);
+            float xEnd = (float)(boundingRect.X + layout.BottomRightXRatio * boundingRect.Width / 100);
+            float yEnd = (float)(boundingRect.Y + layout.BottomRightYRatio * boundingRect.Height / 100);
+            float radius = (float)(layout.RadiusRatio / 100 * boundingRect.Width);
+            float centerRadius = (float)(layout.CenterSizePercent / 100 * boundingRect.Width);
+            CircleF circle = new CircleF((xStart + xEnd) / 2, (yStart + yEnd) / 2, centerRadius);
+            return circle;
+
+        }
+
 
         public List<CircleF> GetCircles(Rect boundingRect)
         {
@@ -300,7 +329,7 @@ namespace BrightMaster.Settings
 
         }
 
-        PointF GetPositionInImage(List<System.Drawing.Point> realPts, PointF ratioInLayout)
+        internal PointF GetPositionInImage(List<System.Drawing.Point> realPts, PointF ratioInLayout)
         {
             PointF leftTop = realPts[0];
             PointF rightTop = realPts[1];

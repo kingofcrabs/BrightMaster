@@ -118,7 +118,7 @@
     <Compile Include="forms\XYCurves.xaml.cs">
       <DependentUpon>XYCurves.xaml</DependentUpon>
     </Compile>
-    <Compile Include="Saver.cs" />
+    <Compile Include="utility\SaveHelper.cs" />
     <Compile Include="settings\AdjustRatio.cs" />
     <Compile Include="settings\BindBase.cs" />
     <Compile Include="settings\Misc.cs" />
@@ -240,9 +240,6 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Resource Include="Images\fakeColor.jpg" />
-  </ItemGroup>
-  <ItemGroup>
     <Resource Include="Images\plug.jpg" />
   </ItemGroup>
   <ItemGroup>
@@ -282,6 +279,12 @@
       <Isolated>False</Isolated>
       <EmbedInteropTypes>True</EmbedInteropTypes>
     </COMReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\excel.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="Images\fakeColor.jpg" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

@@ -228,6 +228,7 @@ namespace BrightMaster.data
             // TODO: Complete member initialization
             sTime = DateTime.Now.ToString("HHmmss");
             barcode = _barcode;
+            this.testResult = testResult;
             if (barcode == "")
             {
                 barcode = (GlobalVars.Instance.RegionsHistoryInfoCollection.AllInfos.Count + 1).ToString();

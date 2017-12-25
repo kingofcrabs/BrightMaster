@@ -105,14 +105,15 @@ namespace BrightMaster.data
         }
         internal static TestResult GetWholePanelResult(Brightness brightness)
         {
-            float maxL = (float)brightness.MaxNoMargin;
-            float minL = (float)brightness.MinNoMargin;
+            float maxL = (float)brightness.MaxROI;
+            float minL = (float)brightness.MinROI;
             
             float minUniform = GlobalVars.Instance.Constrains.MinUniform;
             float uniform = minL / maxL * 100;
             uniform = (float)Math.Round(uniform, 2);
             bool isOk = uniform > minUniform;
-            TestResult testResult = new TestResult(maxL, minL, isOk, uniform,(float)brightness.Avg, brightness.GetCenterInfo());
+            
+            TestResult testResult = new TestResult(maxL, minL, isOk, uniform,(float)brightness.Avg, brightness.Center);
             return testResult;
         }
         internal static TestResult GetRegionResult(List<PixelInfo> pixelInfos)
@@ -124,7 +125,7 @@ namespace BrightMaster.data
             float uniform = minL / maxL * 100;
             uniform = (float)Math.Round(uniform, 2);
             bool isOk = uniform > minUniform;
-            TestResult testResult = new TestResult(maxL, minL, isOk, avg,uniform);
+            TestResult testResult = new TestResult(maxL, minL, isOk, uniform, avg);
             return testResult;
         }
         public TestResult(float Lmax, float Lmin, bool isOk, float uniform, float avg, PixelInfo pixelInfoCenter = null)

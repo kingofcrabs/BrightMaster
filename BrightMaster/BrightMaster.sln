@@ -13,6 +13,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestPowerMeter", "..\TestPo
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestHistoryResult", "..\TestHistoryResult\TestHistoryResult.csproj", "{57E02D1B-7665-43CC-BA25-71896750FC29}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TestExcel", "..\TestExcel\TestExcel.csproj", "{299B836B-88DA-45F5-893E-E49228D9E2FE}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -87,6 +89,18 @@ Global
 		{57E02D1B-7665-43CC-BA25-71896750FC29}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{57E02D1B-7665-43CC-BA25-71896750FC29}.Release|Win32.ActiveCfg = Release|Any CPU
 		{57E02D1B-7665-43CC-BA25-71896750FC29}.Release|x64.ActiveCfg = Release|Any CPU
+		{299B836B-88DA-45F5-893E-E49228D9E2FE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{299B836B-88DA-45F5-893E-E49228D9E2FE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{299B836B-88DA-45F5-893E-E49228D9E2FE}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{299B836B-88DA-45F5-893E-E49228D9E2FE}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{299B836B-88DA-45F5-893E-E49228D9E2FE}.Debug|Win32.ActiveCfg = Debug|Any CPU
+		{299B836B-88DA-45F5-893E-E49228D9E2FE}.Debug|x64.ActiveCfg = Debug|Any CPU
+		{299B836B-88DA-45F5-893E-E49228D9E2FE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{299B836B-88DA-45F5-893E-E49228D9E2FE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{299B836B-88DA-45F5-893E-E49228D9E2FE}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{299B836B-88DA-45F5-893E-E49228D9E2FE}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{299B836B-88DA-45F5-893E-E49228D9E2FE}.Release|Win32.ActiveCfg = Release|Any CPU
+		{299B836B-88DA-45F5-893E-E49228D9E2FE}.Release|x64.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

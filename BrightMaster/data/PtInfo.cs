@@ -29,18 +29,18 @@ namespace BrightMaster
 
         static public void Save2File( List<PixelInfo> pixelInfos)
         {
+            var todayFolder = SaveHelper.CreateTodayFolder();
             if (pixelInfos == null)
                 return;
+            
 
             string fileName = GlobalVars.Instance.Barcode;
-            if (fileName == "")
-                fileName = DateTime.Now.ToString("yyyyMMddHHmmss");
-            string sFile = GlobalVars.Instance.MiscSettings.SaveFolder + "\\" + fileName + ".csv";
+            string sFile = todayFolder + "\\" + fileName + "_Region.csv";
             string sHeader = "ID,L,x,y,u',v',ok";
             List<string> contents = new List<string>();
             contents.Add(sHeader);
             int ID = 1;
-            foreach(var pixelInfo in pixelInfos)
+            foreach (var pixelInfo in pixelInfos)
             {
                 bool valid = pixelInfo.xValid && pixelInfo.yValid && pixelInfo.LValid;
                 string sLine = string.Format("{0},{1},{2},{3},{4},{5},{6}",
@@ -54,6 +54,7 @@ namespace BrightMaster
                 contents.Add(sLine);
             }
             File.WriteAllLines(sFile, contents);
+            
         }
 
         //public bool IsValid()

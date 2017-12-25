@@ -11,11 +11,13 @@
         <RoutedUICommand x:Key="MiscDef" Text="路径设置." />
         <RoutedUICommand x:Key="Curve" Text="XY亮度曲线." />
         <RoutedUICommand x:Key="Power" Text="电源控制." />
+        <RoutedUICommand x:Key="Save2Excel" Text="保存到Excel." />
+        
         <Style x:Key="ToggleButtonStyle1" TargetType="{x:Type ToggleButton}">
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type ToggleButton}">
-                        <Border HorizontalAlignment="Center" VerticalAlignment="Center" x:Name="border" Padding="1,1,1,1"  Background="#FFBFACAC" BorderBrush="#FF000000" BorderThickness="1,1,1,1" SnapsToDevicePixels="True">
+                        <Border HorizontalAlignment="Center" VerticalAlignment="Center" x:Name="border"  Background="#FFBFACAC" BorderBrush="#FF000000" SnapsToDevicePixels="True">
                             <ContentPresenter x:Name="contentPresenter"/>
                         </Border>
                         <ControlTemplate.Triggers>
@@ -46,6 +48,7 @@
         <KeyBinding Modifiers="Ctrl" Key="L" Command="{StaticResource LiveFocus}"/>
         <KeyBinding Modifiers="Ctrl" Key="V" Command="{StaticResource Curve}"/>
         <KeyBinding Modifiers="Ctrl" Key="P" Command="{StaticResource Power}"/>
+        <KeyBinding Modifiers="Ctrl" Key="E" Command="{StaticResource Save2Excel}"/>
     </Window.InputBindings>
     <Window.CommandBindings>
         <CommandBinding Command="{StaticResource StartAcquire}"
@@ -61,6 +64,9 @@
         <CommandBinding Command="{StaticResource Power}"
                     CanExecute="Power_CanExecute"
                     Executed="Power_Executed"/>
+        <CommandBinding Command="{StaticResource Save2Excel}"
+                    CanExecute="Save2Excel_CanExecute"
+                    Executed="Save2Excel_Executed"/>
         <CommandBinding Command="Help" Executed="Help_Executed" CanExecute="Help_CanExecute"/>
         <CommandBinding Command="Save" Executed="Save_Executed" CanExecute="Save_CanExecute"/>
         <CommandBinding Command="Open" Executed="Open_Executed" CanExecute="Open_CanExecute"/>
@@ -83,7 +89,7 @@
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="30"/>
-            <RowDefinition Height="40"/>
+            <RowDefinition Height="50"/>
             <RowDefinition Height="4*"/>
             <RowDefinition Height="200"/>
         </Grid.RowDefinitions>
@@ -103,12 +109,12 @@
         <StackPanel Orientation="Horizontal" Grid.Row="1" Grid.ColumnSpan="4">
             <Button Name="btnOpenFile" Command="Open"  ToolTip="打开文件.">
                 <StackPanel Orientation="Vertical" >
-                    <Image Source="/Images/open.jpg" Height="32"/>
+                    <Image Source="/Images/open.jpg" Height="40"/>
                 </StackPanel>
             </Button>
             <Button Name="btnSaveFile" Command="Save"  ToolTip="保存文件.">
                 <StackPanel Orientation="Vertical" >
-                    <Image Source="/Images/save.png" Height="32"/>
+                    <Image Source="/Images/save.png" Height="40"/>
                 </StackPanel>
             </Button>
             <Label Name="lblSelectedRecipe" Content="{Binding SelectedRecipe.Name}"></Label>
@@ -123,23 +129,27 @@
             </ComboBox>-->
             <Button Command="{StaticResource StartAcquire}"  ToolTip="开始采集.">
                 <StackPanel Orientation="Vertical" >
-                    <Image Source="/Images/start.jpg" Height="32"/>
+                    <Image Source="/Images/start.jpg" Height="40"/>
                 </StackPanel>
             </Button>
-            <ToggleButton Style="{StaticResource ToggleButtonStyle1}" Command="{StaticResource FakeColor}"  Name="btnFakeColor" Width="40">
-                <Image ToolTip="伪彩" Height="32" Width="32" Source="/Images/fakeColor.jpg"/>
+            
+            <Button  Command="{StaticResource RecipeDef}"  Name="btnRecipeDef" >
+                <Image ToolTip="版图"  Source="/Images/setting.png"/>
+            </Button>
+            <ToggleButton Style="{StaticResource ToggleButtonStyle1}" Command="{StaticResource FakeColor}"  Name="btnFakeColor">
+                <Image ToolTip="伪彩" Source="/Images/fakeColor.jpg"/>
             </ToggleButton>
-            <Button  Command="{StaticResource RecipeDef}"  Name="btnRecipeDef" Width="40">
-                <Image ToolTip="版图" Height="32" Width="32" Source="/Images/setting.png"/>
-            </Button>
-            <Button  Command="{StaticResource LiveFocus}"  Name="btnLiveFocus" Width="40">
-                <Image ToolTip="预览" Height="32" Width="32" Source="/Images/camera.jpg"/>
-            </Button>
             <ToggleButton Style="{StaticResource ToggleButtonStyle1}" Click="btnSetROI_Click" Name="btnSetROI" >
                 <Image Source="/Images/roi.jpg"></Image>
             </ToggleButton>
+            <Button  Command="{StaticResource Save2Excel}"  Name="btnSaveToExcel" >
+                <Image Source="/Images/excel.png"></Image>
+            </Button>
             <Button Command="{StaticResource Curve}"  >
                 <Image Source="/Images/curve.png"></Image>
+            </Button>
+            <Button  Command="{StaticResource LiveFocus}"  Name="btnLiveFocus">
+                <Image ToolTip="预览"  Source="/Images/camera.jpg"/>
             </Button>
             <CheckBox Margin="0,5,0,0" Name="chkPower" HorizontalAlignment="Center" Command="{StaticResource Power}">
                 <CheckBox.LayoutTransform>

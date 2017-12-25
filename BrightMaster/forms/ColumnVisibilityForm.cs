@@ -39,6 +39,7 @@ namespace BrightMaster
             GlobalVars.Instance.GridColumnWidth.ID = chkID.Checked ? 40 : 0;
             GlobalVars.Instance.GridColumnWidth.X = chkX.Checked ? 60 : 0;
             GlobalVars.Instance.GridColumnWidth.Y = chkY.Checked ? 60 : 0;
+            GlobalVars.Instance.GridColumnWidth.Z = chkZ.Checked ? 60 : 0;
             GlobalVars.Instance.GridColumnWidth.x = chk_x.Checked ? 60 : 0;
             GlobalVars.Instance.GridColumnWidth.y = chk_y.Checked ? 60 : 0;
             GlobalVars.Instance.GridColumnWidth.u = chku.Checked ? 60 : 0;
