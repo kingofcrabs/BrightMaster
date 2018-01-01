@@ -407,8 +407,8 @@ namespace BrightMaster.Settings
             vecY = new Vector(topRight.X - bottomRight.X, topRight.Y - bottomRight.Y);
             roiPts.Add(CalculateROIPt(bottomRight, new PointF(100 - layout.ROIBottomRightXRatio, 100 - layout.ROIBottomRightYRatio), vecX, vecY));
 
-            vecX = new Vector(topLeft.X - bottomLeft.X ,topLeft.Y - bottomLeft.Y);
-            vecY = new Vector(bottomRight.X - bottomLeft.X, bottomRight.Y - bottomLeft.Y);
+            vecX = new Vector(bottomRight.X - bottomLeft.X, bottomRight.Y - bottomLeft.Y);
+            vecY = new Vector(topLeft.X - bottomLeft.X, topLeft.Y - bottomLeft.Y); 
             roiPts.Add(CalculateROIPt(bottomLeft, new PointF(layout.ROITopLeftXRatio, 100 - layout.ROIBottomRightYRatio), vecX, vecY));
             //roiPts.Add(CalculateROIPt(topLeft, layout.RoiBottomRightRatio, vec1, vec2));
             //roiPts.Add(CalculateROIPt(topLeft, new PointF(layout.ROITopLeftXRatio, layout.ROIBottomRightYRatio), vec1, vec2));

@@ -17,7 +17,7 @@
             <Setter Property="Template">
                 <Setter.Value>
                     <ControlTemplate TargetType="{x:Type ToggleButton}">
-                        <Border HorizontalAlignment="Center" VerticalAlignment="Center" x:Name="border"  Background="#FFBFACAC" BorderBrush="#FF000000" SnapsToDevicePixels="True">
+                        <Border HorizontalAlignment="Center" VerticalAlignment="Center" x:Name="border" Padding="1,1,1,1"  Background="#FFBFACAC" BorderBrush="#FF000000" BorderThickness="1,1,1,1" SnapsToDevicePixels="True">
                             <ContentPresenter x:Name="contentPresenter"/>
                         </Border>
                         <ControlTemplate.Triggers>

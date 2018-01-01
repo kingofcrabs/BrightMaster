@@ -274,6 +274,7 @@ namespace BrightMaster
             Debug.WriteLine("used time:" + watch.ElapsedMilliseconds+"ms");
             
             uaCore.uaToXYZImage(ref device, ref capture_data, ref xyz_image);
+            //double buildInRatio = 0.718;
             uaCore.uaCorrectColor(ref device, ref xyz_image, Ua.ColorCorrectionType.UA_COLOR_CORRECTION_LED);
 
             //User color correction

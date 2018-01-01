@@ -161,6 +161,8 @@ void EngineImpl::FindRectImpl(Mat& img, vector<pair<int, int>>& ptPairs, bool ma
 	Mat drawing;
 	cvtColor(img, drawing, CV_GRAY2BGR);
 	cv::threshold(img, thresholdImg, thresholdVal, 255, CV_THRESH_BINARY);
+	//imshow("threshold", thresholdImg);
+	//cvWaitKey(0);
 	cv::findContours(thresholdImg, allContours, CV_RETR_LIST, CV_CHAIN_APPROX_NONE);
 	int width = img.size().width;
 	int height = img.size().height;
@@ -198,7 +200,8 @@ void EngineImpl::FindRectImpl(Mat& img, vector<pair<int, int>>& ptPairs, bool ma
 		line(drawing, pt, ptEnd, color);
 		hullPts.push_back(pt);
 	}
-	
+	/*imshow("hull", drawing);
+	cvWaitKey(0);*/
 	double epsilon = 0.1*arcLength(hullPts, true);
 	vector<Point2f> approx;
 	approxPolyDP(hullPts, approx, epsilon, true);

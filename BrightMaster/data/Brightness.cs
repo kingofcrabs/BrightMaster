@@ -223,13 +223,13 @@ namespace BrightMaster
                     if (max < _allPixels[y, x].Y)
                     {
                         max = _allPixels[y, x].Y;
-                        MaxPosition = new System.Drawing.Point(x, y);
+                        maxPosition = new System.Drawing.Point(x, y);
                     }
                         
                     if (min > _allPixels[y, x].Y)
                     {
                         min = _allPixels[y, x].Y;
-                        MinPosition = new System.Drawing.Point(x, y);
+                        minPosition = new System.Drawing.Point(x, y);
                     }
                         
                     sum += _allPixels[y, x].Y;
