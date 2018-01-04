@@ -318,7 +318,16 @@ namespace BrightMaster
         {
             e.CanExecute = true;
         }
+        private void PseduoColorDef_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = true;
+        }
 
+        private void PseduoColorDef_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            PseudoColorSetting settingForm = new PseudoColorSetting();
+            settingForm.ShowDialog();
+        }
         private void Save_Executed(object sender, ExecutedRoutedEventArgs e)
         {
             try
@@ -629,6 +638,8 @@ namespace BrightMaster
             InvalidateVisual();
 
         }
+
+      
 
        
 

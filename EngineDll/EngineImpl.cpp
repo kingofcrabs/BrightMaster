@@ -275,6 +275,7 @@ void EngineImpl::Convert2PesudoColor(std::string srcFile, std::string destFile)
 	Mat orgImg = imread(srcFile);
 	Mat color;
 	applyColorMap(orgImg, color, COLORMAP_JET);
+	//LUT()
 	imwrite(destFile,color);
 }
 

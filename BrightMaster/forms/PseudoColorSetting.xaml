@@ -1,0 +1,11 @@
+﻿<Window x:Class="BrightMaster.forms.PseudoColorSetting"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:BrightMaster.data"
+        Title="PseudoColorSetting" Height="600" Width="300">
+    <Grid Name="gridParent">
+        <local:CustomCanvas x:Name="myCanvas" Width="120" Height="512" Background="LightYellow">
+            
+        </local:CustomCanvas>
+    </Grid>
+</Window>

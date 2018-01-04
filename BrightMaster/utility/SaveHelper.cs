@@ -63,7 +63,7 @@ namespace BrightMaster
                 strs.Add(string.Format("{0},{1},{2},{3},{4},{5},{6}", DateTime.Now.ToString("yyMMdd"), seqNo++, info.LCenter, info.x, info.y, info.Uniform,valid));
             }
 
-            File.WriteAllLines(csvFile, strs);
+            File.WriteAllLines(csvFile, strs,Encoding.Default);
         }
 
 

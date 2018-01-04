@@ -76,6 +76,8 @@
     </ApplicationDefinition>
     <Compile Include="data\GridViewColumnWidth.cs" />
     <Compile Include="data\HistoryInfo.cs" />
+    <Compile Include="data\initPosition.cs" />
+    <Compile Include="data\PseudoColorSelection.cs" />
     <Compile Include="data\TestResult.cs" />
     <Compile Include="data\XYCurveModel.cs" />
     <Compile Include="forms\AboutBox.cs">
@@ -99,6 +101,9 @@
     </Compile>
     <Compile Include="forms\ProgressForm.Designer.cs">
       <DependentUpon>ProgressForm.cs</DependentUpon>
+    </Compile>
+    <Compile Include="forms\PseudoColorSetting.xaml.cs">
+      <DependentUpon>PseudoColorSetting.xaml</DependentUpon>
     </Compile>
     <Compile Include="forms\QueryBarcode.cs">
       <SubType>Form</SubType>
@@ -170,6 +175,10 @@
       <DependentUpon>MainWindow.xaml</DependentUpon>
       <SubType>Code</SubType>
     </Compile>
+    <Page Include="forms\PseudoColorSetting.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="forms\RecipeDefinitionWindow.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>

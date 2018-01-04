@@ -9,6 +9,7 @@
         <RoutedUICommand x:Key="RecipeDef" Text="设置定义." />
         <RoutedUICommand x:Key="LiveFocus" Text="对焦预览." />
         <RoutedUICommand x:Key="MiscDef" Text="路径设置." />
+        <RoutedUICommand x:Key="PseduoColorDef" Text="伪彩设置." />
         <RoutedUICommand x:Key="Curve" Text="XY亮度曲线." />
         <RoutedUICommand x:Key="Power" Text="电源控制." />
         <RoutedUICommand x:Key="Save2Excel" Text="保存到Excel." />
@@ -57,7 +58,10 @@
         <CommandBinding Command="{StaticResource FakeColor}"
                     CanExecute="FakeColor_CanExecute"
                     Executed="FakeColor_Executed"/>
-
+        <CommandBinding Command="{StaticResource PseduoColorDef}"
+                    CanExecute="PseduoColorDef_CanExecute"
+                    Executed="PseduoColorDef_Executed"/>
+        
         <CommandBinding Command="{StaticResource Curve}"
                     CanExecute="Curve_CanExecute"
                     Executed="Curve_Executed"/>
@@ -98,6 +102,7 @@
                 <MenuItem Command="Open" Header="打开" />
             </MenuItem>
             <MenuItem Header="工具">
+                <MenuItem Header="伪彩定义" Command="{StaticResource PseduoColorDef}"/>
                 <MenuItem Header="其他设置" Command="{StaticResource MiscDef}"/>
 
             </MenuItem>

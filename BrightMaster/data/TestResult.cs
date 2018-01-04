@@ -133,6 +133,7 @@ namespace BrightMaster.data
             this.lmax = Lmax;
             this.lmin = Lmin;
             this.uniform = uniform;
+            this.lAvg = avg;
             this.pixelInfoCenter = pixelInfoCenter;
             this.isOk = isOk;
             description = isOk ? "Ok" : "NG";
