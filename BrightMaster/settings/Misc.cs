@@ -14,6 +14,7 @@ namespace BrightMaster.Settings
         public bool AutoFindBoundary { get; set; }
         public bool MannualThreshold { get; set; }
         public List<Point> BoundaryPts { get; set; }
+        public List<Point> HullPts { get; set; }
 
         [System.Xml.Serialization.XmlIgnore]
         public int ThresholdVal
@@ -35,6 +36,7 @@ namespace BrightMaster.Settings
             AutoFindBoundary = false;
             MannualThreshold = false;
             BoundaryPts = new List<Point>();
+            HullPts = new List<Point>();
         }
 
         internal void Save()

@@ -115,10 +115,7 @@ namespace BrightMaster
         public void SetBkGroundImage(System.Windows.Media.Imaging.BitmapImage bmpImage, List<Point> newPts = null, bool isFakeColor = false)
         {
             this.isFakeColor = isFakeColor;
-            if (newPts != null && newPts.Count > 0)
-            {
-                pts = SortPoints(newPts);
-            }
+            pts = newPts;
             width = bmpImage.Width;
             height = bmpImage.Height;
             CalcuUsable(out usableWidth, out usableHeight);
@@ -239,49 +236,57 @@ namespace BrightMaster
             System.Windows.Media.Brush redBrush = System.Windows.Media.Brushes.Red;
             System.Windows.Media.Brush blueBrush = System.Windows.Media.Brushes.Blue;
             System.Windows.Media.Pen pen = new System.Windows.Media.Pen(redBrush,1);
+            System.Windows.Media.Pen bluePen = new System.Windows.Media.Pen(blueBrush, 1);
             System.Windows.Media.Pen dashPen = new System.Windows.Media.Pen(blueBrush, 1);
             dashPen.DashStyle = DashStyles.Dash;
             bool validPt = pts != null && pts.Count == 4;
             if (validPt)
             {
-                List<PointF> offSetPts = new List<PointF>();
-                float xMargin = layout.XMargin / 100;
-                float yMargin = layout.YMargin / 100;
-                offSetPts.Add(layout.GetPositionInImage(pts, new PointF(xMargin, yMargin)));
-                offSetPts.Add(layout.GetPositionInImage(pts, new PointF(1 - xMargin, yMargin)));
-                offSetPts.Add(layout.GetPositionInImage(pts, new PointF(1 - xMargin, 1 - yMargin)));
-                offSetPts.Add(layout.GetPositionInImage(pts, new PointF(xMargin, 1 - yMargin)));
-                for (int i = 0; i < 4; i++)
+                //List<PointF> offSetPts = new List<PointF>();
+                //float xMargin = layout.XMargin / 100;
+                //float yMargin = layout.YMargin / 100;
+                //offSetPts.Add(layout.GetPositionInImage(pts, new PointF(xMargin, yMargin)));
+                //offSetPts.Add(layout.GetPositionInImage(pts, new PointF(1 - xMargin, yMargin)));
+                //offSetPts.Add(layout.GetPositionInImage(pts, new PointF(1 - xMargin, 1 - yMargin)));
+                //offSetPts.Add(layout.GetPositionInImage(pts, new PointF(xMargin, 1 - yMargin)));
+                //for (int i = 0; i < 4; i++)
+                //{
+                //    int endIndex = (i + 1) % 4;
+                //    System.Windows.Point startPt = new System.Windows.Point(pts[i].X, pts[i].Y);
+                //    System.Windows.Point endPt = new System.Windows.Point(pts[endIndex].X, pts[endIndex].Y);
+                //    System.Windows.Point startPtOffSet = new System.Windows.Point(offSetPts[i].X, offSetPts[i].Y);
+                //    System.Windows.Point endPtOffset = new System.Windows.Point(offSetPts[endIndex].X, offSetPts[endIndex].Y);
+                //    if (!userSelectROI) //from auto finded pt to UI coordination
+                //    {
+                //        startPt = new System.Windows.Point(Convert2XUIFromReal(pts[i].X), Convert2UIYFromReal(pts[i].Y));
+                //        endPt = new System.Windows.Point(Convert2XUIFromReal(pts[endIndex].X), Convert2UIYFromReal(pts[endIndex].Y));
+                //        startPtOffSet = new System.Windows.Point(Convert2XUIFromReal(offSetPts[i].X), Convert2UIYFromReal(offSetPts[i].Y));
+                //        endPtOffset = new System.Windows.Point(Convert2XUIFromReal(offSetPts[endIndex].X), Convert2UIYFromReal(offSetPts[endIndex].Y));
+                //    }
+                //    drawingContext.DrawLine(pen, startPt, endPt);
+
+                //    //draw dot line
+                //    if (!GlobalVars.Instance.ShowRegions)
+                //    {
+                //        float[] dashValues = { 5, 2 };
+                //        drawingContext.DrawLine(dashPen, startPtOffSet, endPtOffset);
+                //    }
+                //}
+                var hullPts = GlobalVars.Instance.MiscSettings.HullPts;
+                if(hullPts != null && hullPts.Count > 0)
                 {
-                    int endIndex = (i + 1) % 4;
-                    System.Windows.Point startPt = new System.Windows.Point(pts[i].X,pts[i].Y);
-                    System.Windows.Point endPt = new System.Windows.Point(pts[endIndex].X, pts[endIndex].Y);
-                    System.Windows.Point startPtOffSet = new System.Windows.Point(offSetPts[i].X, offSetPts[i].Y);
-                    System.Windows.Point endPtOffset = new System.Windows.Point(offSetPts[endIndex].X, offSetPts[endIndex].Y);
-                    if(!userSelectROI)
+
+                    for (int i = 0; i < hullPts.Count; i++)
                     {
-                        startPt = new System.Windows.Point(Convert2XUIFromReal(pts[i].X), Convert2UIYFromReal(pts[i].Y));
-                        endPt = new System.Windows.Point(Convert2XUIFromReal(pts[endIndex].X), Convert2UIYFromReal(pts[endIndex].Y));
-                        startPtOffSet = new System.Windows.Point(Convert2XUIFromReal(offSetPts[i].X), Convert2UIYFromReal(offSetPts[i].Y));
-                        endPtOffset = new System.Windows.Point(Convert2XUIFromReal(offSetPts[endIndex].X), Convert2UIYFromReal(offSetPts[endIndex].Y));
+                        int endIndex = (i + 1) % hullPts.Count;
+                        var startPt = new System.Windows.Point(Convert2XUIFromReal(hullPts[i].X), Convert2UIYFromReal(hullPts[i].Y));
+                        var endPt = new System.Windows.Point(Convert2XUIFromReal(hullPts[endIndex].X), Convert2UIYFromReal(hullPts[endIndex].Y));
+                        drawingContext.DrawLine(bluePen, startPt, endPt);
                     }
-                    drawingContext.DrawLine(pen, startPt, endPt);
-                    
-                    //draw dot line
-                    if (!GlobalVars.Instance.ShowRegions)
-                    {
-                        //System.Windows.Point  startPtShift
-                        //GetPositionInImage
-                        float[] dashValues = { 5, 2 };
-                        
-                        drawingContext.DrawLine(dashPen, startPtOffSet, endPtOffset);
-                    }
-                    
-                   
                 }
                 
                 
-                if (GlobalVars.Instance.ShowRegions)
+                if (GlobalVars.Instance.ShowRegions) //regions analysis
                 {
                     var circles = validPt ? GlobalVars.Instance.Layout.GetCircles(pts) :
                     GlobalVars.Instance.Layout.GetCircles(boundingRectUICoord);
@@ -298,7 +303,7 @@ namespace BrightMaster
                         index++;
                     }
                 }
-                else
+                else //global analysis
                 {
                     if(maxPt.X != -1)
                     {

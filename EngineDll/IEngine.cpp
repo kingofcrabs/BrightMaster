@@ -32,17 +32,24 @@ namespace EngineDll
 		return cv::Rect2f(ptStart, ptEnd);
 	}
 
-	List<MPoint^>^ IEngine::FindRect(System::String^ sFile, int% threshold, bool mannualThreshold)
+	List<MPoint^>^ IEngine::FindRect(System::String^ sFile, int% threshold, bool mannualThreshold,List<MPoint^>^ hullPts)
 	{
 		std::string nativeFileName = msclr::interop::marshal_as< std::string >(sFile);
 		std::vector<std::pair<int,int>> pts;
+		std::vector<std::pair<int, int>> nativeHullPts;
 		int nativeThreshold = threshold;
-		m_EngineImpl->FindRect(nativeFileName, nativeThreshold, pts, mannualThreshold);
+		m_EngineImpl->FindRect(nativeFileName, nativeThreshold, pts, nativeHullPts, mannualThreshold);
 		threshold = nativeThreshold;
 		List<MPoint^>^ managedPts = gcnew List<MPoint^>(pts.size());
+		
 		for (int i = 0; i < pts.size(); i++)
 		{
 			managedPts->Add(gcnew MPoint(pts[i].first, pts[i].second));
+		}
+		hullPts->Clear();
+		for (int i = 0; i < nativeHullPts.size(); i++)
+		{
+			hullPts->Add(gcnew MPoint(nativeHullPts[i].first, nativeHullPts[i].second));
 		}
 		return managedPts;
 	}

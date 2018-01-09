@@ -33,8 +33,8 @@ public:
 	
 
 	void Convert2PesudoColor(std::string srcFile, std::string destFile);
-	void FindRect(std::string sFile, int& defaultThreshold, std::vector<std::pair<int, int>>& pts, bool mannualThreshold);
-	void FindRectImpl(Mat& img, std::vector<std::pair<int, int>>& ptPairs, bool autoFindBoundary = false);
+	void FindRect(std::string sFile, int& defaultThreshold, std::vector<std::pair<int, int>>& pts, std::vector<std::pair<int,int>>&hullPts, bool mannualThreshold);
+	void FindRectImpl(Mat& img, std::vector<std::pair<int, int>>& ptPairs, std::vector<std::pair<int, int>>&hullPts, bool autoFindBoundary = false);
 	std::vector<std::vector<Point>> contours;
 	int max, min;
 private:

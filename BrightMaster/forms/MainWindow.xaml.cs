@@ -118,6 +118,9 @@ namespace BrightMaster
                 if(myCanvas.IsValidMove)
                 {
                     var pts = myCanvas.GeneratePtsImageCoord();
+                    pts = Layout.Convert2ROI(pts);
+                    GlobalVars.Instance.MiscSettings.BoundaryPts = pts;
+                    GlobalVars.Instance.MiscSettings.Save();
                     try
                     {
                         UpdateResults(pts);
@@ -291,7 +294,9 @@ namespace BrightMaster
                 var allPixels = GlobalVars.Instance.UAController.LoadXYZImage(fileName);
                 this.Dispatcher.Invoke(() =>
                 {
-                    List<System.Drawing.Point> pts = FindBoundingPts(allPixels);
+                    List<System.Drawing.Point> pts = new List<System.Drawing.Point>();
+                    List<System.Drawing.Point> hullPts = new List<System.Drawing.Point>();
+                    FindBoundingPts(allPixels,ref pts,ref hullPts);
                     if (pts == null || pts.Count != 4)
                     {
                         SetInfo("无法找到外框", true);
@@ -487,7 +492,9 @@ namespace BrightMaster
                 {
                     this.Dispatcher.Invoke(() =>
                     {
-                        List<System.Drawing.Point> pts = FindBoundingPts(allPixels);
+                        List<System.Drawing.Point> hullPts = new List<System.Drawing.Point>();
+                        List<System.Drawing.Point> pts = new List<System.Drawing.Point>();
+                            FindBoundingPts(allPixels,ref pts, ref hullPts);
                         watch.Stop();
                         string elapsed = (watch.ElapsedMilliseconds/1000).ToString();
                         if (pts== null || pts.Count != 4)
@@ -520,34 +527,37 @@ namespace BrightMaster
             });
         }
 
-        private List<System.Drawing.Point> FindBoundingPts(LightPixelInfo[,] allPixels)
+        private void FindBoundingPts(LightPixelInfo[,] allPixels,ref List<System.Drawing.Point> pts,ref List<System.Drawing.Point> hullPts)
         {
             brightness = new Brightness(allPixels);
             var bmpImage = ImageHelper.CreateImage(brightness.grayVals);
+            
             if(!GlobalVars.Instance.MiscSettings.AutoFindBoundary)
             {
-                var boundPts = GlobalVars.Instance.MiscSettings.BoundaryPts;
-                myCanvas.SetBkGroundImage(bmpImage, boundPts);
-                return boundPts;
+                pts = GlobalVars.Instance.MiscSettings.BoundaryPts;
+                myCanvas.SetBkGroundImage(bmpImage, pts);
             }
             string sImgFile = FolderHelper.GetImageFolder() + "latest.jpg";
             ImageHelper.SaveBitmapImageIntoFile(bmpImage, sImgFile);
-            List<System.Drawing.Point> pts = new List<System.Drawing.Point>();
+            
+            List<MPoint> hullMPts = new List<MPoint>();
             IEngine iEngine = new IEngine();
-            var mpts = iEngine.FindRect(sImgFile, ref GlobalVars.Instance.MiscSettings.thresholdVal, GlobalVars.Instance.MiscSettings.MannualThreshold);
+            var mpts = iEngine.FindRect(sImgFile, ref GlobalVars.Instance.MiscSettings.thresholdVal, GlobalVars.Instance.MiscSettings.MannualThreshold, hullMPts);
             if (mpts.Count == 0)
-                return new List<System.Drawing.Point>();
-            if(mpts.Count != 4)
+                return;
+            if (mpts.Count != 4)
             {
                 throw new Exception("找不到外框！");
             }
-
-            pts = AdjustPosition(mpts);
-            
+            pts = AdjustPosition2ROI(mpts);
+            foreach(var mpt in hullMPts)
+            {
+                hullPts.Add(new System.Drawing.Point(mpt.x, mpt.y));
+            }
             GlobalVars.Instance.MiscSettings.BoundaryPts = pts;
+            GlobalVars.Instance.MiscSettings.HullPts = hullPts;
             GlobalVars.Instance.MiscSettings.Save();
             myCanvas.SetBkGroundImage(bmpImage, pts);
-            return pts;
         }
 
         private void UpdateResults(List<System.Drawing.Point> pts)
@@ -574,7 +584,7 @@ namespace BrightMaster
             //saveHelper.Save2Excel(wholePanelResult,brightness);
         }
 
-        private List<System.Drawing.Point> AdjustPosition(List<MPoint> mpts)
+        private List<System.Drawing.Point> AdjustPosition2ROI(List<MPoint> mpts)
         {
             List<System.Drawing.Point> pts = new List<System.Drawing.Point>();
             int avgX = mpts.Sum(pt => pt.x) / 4;
