@@ -228,7 +228,7 @@ namespace BrightMaster
                 ref device, cond, ref device_property);
             
             device_property.capture_mode = Ua.CaptureMode.UA_CAPTURE_MANUAL;
-            
+           
             //set distance & exposure time
             
             //uaCore.uaGetOptimumAverageCount(
@@ -262,7 +262,8 @@ namespace BrightMaster
             Stopwatch watch = new Stopwatch();
             watch.Start();
             uaCore.uaStartCapture(ref device);
-            int average_count = 1;
+            string sAvgCnt = ConfigurationManager.AppSettings["AvgCount"];
+            int average_count = int.Parse(sAvgCnt);
             double expo = device_property.exposure_time[0];
             uaCore.uaCaptureImage(ref device,
                 Ua.CaptureFilterType.UA_CAPTURE_FILTER_XYZ, 

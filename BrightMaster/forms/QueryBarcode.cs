@@ -19,11 +19,6 @@ namespace BrightMaster
 
         private void btnOk_Click(object sender, EventArgs e)
         {
-            if(txtBarcode.Text == "")
-            {
-                MessageBox.Show("条码不能为空！");
-                return;
-            }
             GlobalVars.Instance.Barcode = txtBarcode.Text;
             this.Close();
         }

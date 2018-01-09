@@ -119,14 +119,12 @@ namespace BrightMaster
             {
                 pts = SortPoints(newPts);
             }
-         
             width = bmpImage.Width;
             height = bmpImage.Height;
             CalcuUsable(out usableWidth, out usableHeight);
             System.Windows.Media.ImageBrush imageBrush = new System.Windows.Media.ImageBrush();
             double xRatio = usableWidth/width ;
             double yRatio = usableHeight/height ;
-            
             imageBrush.ImageSource = bmpImage;
             imageBrush.Stretch = Stretch.Fill;
             imageBrush.AlignmentX = AlignmentX.Left;
@@ -186,7 +184,6 @@ namespace BrightMaster
                     rightUICoord = (int)(usableWidth * right / width);
                     bottomUICoord = (int)(usableHeight * bottom / height);
                 }
-                
             }
             return new System.Windows.Rect(leftUICoord, topUICoord, rightUICoord - leftUICoord, bottomUICoord - topUICoord);
         }
@@ -305,8 +302,9 @@ namespace BrightMaster
                 {
                     if(maxPt.X != -1)
                     {
-                        DrawCircle(new System.Windows.Point(Convert2XUIFromReal(maxPt.X), Convert2XUIFromReal(maxPt.Y)), new PointF(10, 10), drawingContext);
-                        DrawCircle(new System.Windows.Point(Convert2XUIFromReal(minPt.X), Convert2XUIFromReal(minPt.Y)), new PointF(10, 10), drawingContext, false);
+
+                        DrawCross(new System.Windows.Point(Convert2XUIFromReal(maxPt.X), Convert2XUIFromReal(maxPt.Y)), new PointF(10, 10), drawingContext);
+                        DrawCross(new System.Windows.Point(Convert2XUIFromReal(minPt.X), Convert2XUIFromReal(minPt.Y)), new PointF(10, 10), drawingContext, false);
                     }
                         
                 }
@@ -344,6 +342,17 @@ namespace BrightMaster
             drawingContext.DrawText(txt, point);
         }
 
+        private void DrawCross(System.Windows.Point pt, PointF sz, DrawingContext drawingContext, bool red = true)
+        {
+            System.Windows.Media.Brush brush = red ? System.Windows.Media.Brushes.Red : System.Windows.Media.Brushes.Green;
+            System.Windows.Media.Pen pen = new System.Windows.Media.Pen(brush,1);
+            var ptUp = new System.Windows.Point(pt.X,pt.Y+5);
+            var ptDown = new System.Windows.Point(pt.X,pt.Y-5);
+            drawingContext.DrawLine(pen, ptUp, ptDown);
+            var ptLeft = new System.Windows.Point(pt.X-5, pt.Y);
+            var ptRight = new System.Windows.Point(pt.X+5, pt.Y);
+            drawingContext.DrawLine(pen, ptLeft, ptRight);
+        }
         private void DrawCircle(System.Windows.Point pt, PointF sz, DrawingContext drawingContext,bool red = true)
         {
             System.Windows.Media.Brush brush = red ? System.Windows.Media.Brushes.Red : System.Windows.Media.Brushes.Blue;

@@ -443,10 +443,16 @@ namespace BrightMaster
             {
                 QueryBarcode queryBarcode = new QueryBarcode();
                 queryBarcode.ShowDialog();
+                
             }
             else
             {
                 GlobalVars.Instance.Barcode = DateTime.Now.ToString("hhmmss");
+            }
+            if (GlobalVars.Instance.Barcode == "")
+            {
+                SetInfo("条码为空", true);
+                return;
             }
             progressForm = new ProgressForm();
             progressForm.Show();

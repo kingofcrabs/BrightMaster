@@ -11,7 +11,7 @@ namespace BrightMaster.Settings
     public class CameraSettings:BindableBase
     {
         int workingDistance;
-        int exposureTime;
+        double exposureTime;
         bool autoExposure;
 
         public CameraSettings()
@@ -51,7 +51,7 @@ namespace BrightMaster.Settings
             }
         }
 
-        public int ExposureTime
+        public double ExposureTime
         {
             get
             {

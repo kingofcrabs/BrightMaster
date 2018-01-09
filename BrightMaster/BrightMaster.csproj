@@ -76,7 +76,6 @@
     </ApplicationDefinition>
     <Compile Include="data\GridViewColumnWidth.cs" />
     <Compile Include="data\HistoryInfo.cs" />
-    <Compile Include="data\initPosition.cs" />
     <Compile Include="data\PseudoColorSelection.cs" />
     <Compile Include="data\TestResult.cs" />
     <Compile Include="data\XYCurveModel.cs" />

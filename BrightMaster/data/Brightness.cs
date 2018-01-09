@@ -370,6 +370,7 @@ namespace BrightMaster
             //each gray level count
          
             int grayUnit = (int)((Max - Min) / grayLevelCnt);
+            grayUnit = Math.Max(grayUnit, 1);
             grayValsInArray = new byte[Height * Width];
             int grayValsPerLevel = 256 / grayLevelCnt;
             unsafe
@@ -406,7 +407,7 @@ namespace BrightMaster
             {
                 for (int x = 0; x < Width; x++)
                 {
-                    int grayLevels = ((int)(lightPixels[y, x].Y - Min))/grayUnit;
+                    int grayLevels = ((int)(lightPixels[y, x].Y - Min)) / grayUnit;
                     int val = (int)(grayLevels * grayValsPerLevel);
                     if (val > 255)
                         val = 255;
