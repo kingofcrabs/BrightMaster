@@ -20,7 +20,7 @@ namespace BrightMaster.Settings
         private int yCount;
         private float radiusRatio;
         private bool isN_N;
-        private PointF xyMargin;
+        private float margin;
         private bool isWholePanel;
         private float centerSizePercent;
         public Layout()
@@ -87,29 +87,29 @@ namespace BrightMaster.Settings
             }
         }
 
-        public float XMargin
+        public float Margin
         {
             get
             {
-                return xyMargin.X;
+                return margin;
             }
             set
             {
-                xyMargin.X = value;
+                margin = value;
             }
         }
 
-        public float YMargin
-        {
-            get
-            {
-                return xyMargin.Y;
-            }
-            set
-            {
-                xyMargin.Y = value;
-            }
-        }
+        //public float YMargin
+        //{
+        //    get
+        //    {
+        //        return xyMargin.Y;
+        //    }
+        //    set
+        //    {
+        //        xyMargin.Y = value;
+        //    }
+        //}
 
         public bool IsSquare
         {
@@ -290,14 +290,37 @@ namespace BrightMaster.Settings
         public CircleF GetCenterCircle(Rect boundingRect)
         {
             var layout = GlobalVars.Instance.Layout;
+            PointF ptCenter = GetCenter(boundingRect);
+            float centerRadius = (float)(layout.CenterSizePercent / 100 * boundingRect.Width);
+            CircleF circle = new CircleF(ptCenter.X,ptCenter.Y, centerRadius);
+            return circle;
+        }
+
+        public CircleF GetCenterCircle(List<System.Drawing.PointF> pts)
+        {
+            var layout = GlobalVars.Instance.Layout;
+            PointF ptCenter = GetCenter(pts);
+            float width = pts.Max(pt => pt.X) - pts.Min(pt => pt.X);
+            float centerRadius = (float)(layout.CenterSizePercent / 100 * width);
+            CircleF circle = new CircleF(ptCenter.X, ptCenter.Y, centerRadius);
+            return circle;
+        }
+
+        System.Drawing.PointF GetCenter(Rect boundingRect)
+        {
+            var layout = GlobalVars.Instance.Layout;
             float xStart = (float)(boundingRect.X + layout.TopLeftXRatio * boundingRect.Width / 100);
             float yStart = (float)(boundingRect.Y + layout.TopLeftYRatio * boundingRect.Height / 100);
             float xEnd = (float)(boundingRect.X + layout.BottomRightXRatio * boundingRect.Width / 100);
             float yEnd = (float)(boundingRect.Y + layout.BottomRightYRatio * boundingRect.Height / 100);
-            float radius = (float)(layout.RadiusRatio / 100 * boundingRect.Width);
-            float centerRadius = (float)(layout.CenterSizePercent / 100 * boundingRect.Width);
-            CircleF circle = new CircleF((xStart + xEnd) / 2, (yStart + yEnd) / 2, centerRadius);
-            return circle;
+            return new PointF((xStart + xEnd) / 2, (yStart + yEnd) / 2);
+
+        }
+
+
+         System.Drawing.PointF GetCenter(List<System.Drawing.PointF> pts)
+        {
+            return new PointF(pts.Average(pt => pt.X), pts.Average(pt => pt.Y));
 
         }
 
@@ -329,7 +352,7 @@ namespace BrightMaster.Settings
 
         }
 
-        internal PointF GetPositionInImage(List<System.Drawing.Point> realPts, PointF ratioInLayout)
+        internal PointF GetPositionInImage(List<System.Drawing.PointF> realPts, PointF ratioInLayout)
         {
             PointF leftTop = realPts[0];
             PointF rightTop = realPts[1];
@@ -353,7 +376,7 @@ namespace BrightMaster.Settings
             float yy = pt2.Y - pt1.Y;
             return Math.Sqrt(xx * xx + yy * yy);
         }
-        internal List<CircleF> GetCircles(List<System.Drawing.Point> pts)
+        internal List<CircleF> GetCircles(List<System.Drawing.PointF> pts)
         {
             var layout = GlobalVars.Instance.Layout;
             List<CircleF> circles = new List<CircleF>();
@@ -380,9 +403,9 @@ namespace BrightMaster.Settings
 
 
 
-        internal static List<System.Drawing.Point> Convert2ROI(List<System.Drawing.Point> pts)
+        internal static List<System.Drawing.PointF> Convert2ROI(List<System.Drawing.PointF> pts)
         {
-            List<System.Drawing.Point> roiPts = new List<System.Drawing.Point>();
+            List<System.Drawing.PointF> roiPts = new List<System.Drawing.PointF>();
            
             var topLeft = pts[0];
             var topRight = pts[1];
@@ -415,12 +438,12 @@ namespace BrightMaster.Settings
             return roiPts;
         }
 
-        private static System.Drawing.Point CalculateROIPt(System.Drawing.Point pt, PointF ratioXY, Vector vec1, Vector vec2)
+        private static System.Drawing.PointF CalculateROIPt(System.Drawing.PointF pt, PointF ratioXY, Vector vec1, Vector vec2)
         {
-            pt.X += (int)(vec1.X * ratioXY.X/100);
-            pt.Y += (int)(vec1.Y * ratioXY.X/100);
-            pt.X += (int)(vec2.X * ratioXY.Y/100);
-            pt.Y += (int)(vec2.Y * ratioXY.Y/100);
+            pt.X += (float)(vec1.X * ratioXY.X/100);
+            pt.Y += (float)(vec1.Y * ratioXY.X / 100);
+            pt.X += (float)(vec2.X * ratioXY.Y / 100);
+            pt.Y += (float)(vec2.Y * ratioXY.Y / 100);
             return pt;
         }
 

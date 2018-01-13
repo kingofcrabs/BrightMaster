@@ -1,4 +1,5 @@
-﻿using EngineDll;
+﻿using BrightMaster.utility;
+using EngineDll;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -27,8 +28,8 @@ namespace BrightMaster
         public double MinROI { get; set; }
         public double Avg { get; set; }
         public PixelInfo Center { get; set; }
-        public System.Drawing.Point MaxPosition { get; set; }
-        public System.Drawing.Point MinPosition { get; set; }
+        public System.Drawing.PointF MaxPosition { get; set; }
+        public System.Drawing.PointF MinPosition { get; set; }
         public Brightness(LightPixelInfo[,] pixels)
         {
             Stopwatch watch = new Stopwatch();
@@ -55,8 +56,8 @@ namespace BrightMaster
             }
             unsafe
             {
-                System.Drawing.Point maxPos = new System.Drawing.Point(-1,-1);
-                System.Drawing.Point minPos = new System.Drawing.Point(-1,-1);
+                System.Drawing.PointF maxPos = new System.Drawing.PointF(-1,-1);
+                System.Drawing.PointF minPos = new System.Drawing.PointF(-1,-1);
                 Parallel.Invoke(() =>
                 {
                     GetMaxMin(0, Height / 4,0,Width, ref maxArray[0], ref minArray[0],ref avg[0],ref maxPos,ref minPos);
@@ -91,9 +92,174 @@ namespace BrightMaster
             //Debug.WriteLine(string.Format("Brightness save image elapsed:{0}", watch.ElapsedMilliseconds));
             watch.Stop();
         }
+        internal void UpdateConvexHull(List<System.Drawing.PointF> hullPts)
+        {
+            MinROI = 999999;
+            MaxROI = 0;
+            float[] maxArray = new float[4];
+            float[] minArray = new float[4];
+            float[] avg = new float[4];
+            ShrinkHelper shrinkHelper = new ShrinkHelper();
+            var hullPtsShrinked = shrinkHelper.ShrinkConvexHull(hullPts);
 
+            float xStart = hullPts.Min(pt => pt.X);
+            float xEnd = hullPts.Max(pt => pt.X);
+            float yStart = hullPts.Min(pt => pt.Y);
+            float yEnd = hullPts.Max(pt => pt.Y);
 
-        internal void UpdateROI(List<System.Drawing.Point> pts)
+            double height = yEnd - yStart;
+            double width = xEnd - xStart;
+            var circle = GlobalVars.Instance.Layout.GetCenterCircle(hullPts);
+            Center = GetAvgVals(circle.x, circle.y, circle.radius, 0);
+
+            for (int i = 0; i < 4; i++)
+            {
+                maxArray[i] = 0;
+                minArray[i] = 999999;
+                avg[i] = 0;
+            }
+            unsafe
+            {
+                
+                System.Drawing.PointF[] maxPts = new System.Drawing.PointF[4];
+                System.Drawing.PointF[] minPts = new System.Drawing.PointF[4];
+                
+                Parallel.Invoke(() =>
+                {
+                    GetMaxMin((int)yStart, (int)(yStart + height / 4), ref maxArray[0], ref minArray[0], ref avg[0], ref minPts[0], ref maxPts[0], hullPtsShrinked);
+                },
+                () =>
+                {
+                    GetMaxMin((int)(yStart + height / 4), (int)(yStart + height / 2), ref maxArray[0], ref minArray[0], ref avg[0], ref minPts[0], ref maxPts[0], hullPtsShrinked);
+                },
+                () =>
+                {
+                    GetMaxMin((int)(yStart + height / 2), (int)(yStart + height * 3 / 4), ref maxArray[0], ref minArray[0], ref avg[0], ref minPts[0], ref maxPts[0], hullPtsShrinked);
+                },
+                () =>
+                {
+                    GetMaxMin((int)(yStart + height * 3 / 4), (int)yEnd, ref maxArray[0], ref minArray[0], ref avg[0], ref minPts[0], ref maxPts[0],  hullPtsShrinked);
+                });
+                float sum = 0;
+                for (int i = 0; i < 4; i++)
+                {
+                    if (MaxROI < maxArray[i])
+                    {
+                        MaxROI = maxArray[i];
+                        MaxPosition = maxPts[i];
+                    }
+
+                    if (MinROI > minArray[i])
+                    {
+                        MinROI = minArray[i];
+                        MinPosition = minPts[i];
+                    }
+
+                    sum += avg[i];
+                }
+                Avg = sum / 4;
+
+            }
+        }
+
+      
+
+        
+
+        private void GetMaxMin(int yStart, int yEnd, int xStart, int xEnd, ref float max, ref float min, ref float avg,
+            ref System.Drawing.PointF minPosition, ref PointF maxPosition, List<PointF> pts = null)
+        {
+            int cnt = 0;
+            double sum = 0;
+            PointF[] polygon = new PointF[4];
+            if (pts != null)
+            {
+                float top = pts.Min(pt => pt.Y);
+                float bottom = pts.Max(pt => pt.Y);
+                float left = pts.Min(pt => pt.X);
+                float right = pts.Max(pt => pt.X);
+                //var polygon = pts.ToArray();
+
+                for (int i = 0; i < 4; i++)
+                    polygon[i] = pts[i];
+
+                if (yStart < top)
+                    yStart = (int)top;
+                if (yEnd > bottom)
+                    yEnd = (int)bottom;
+                if (xStart < left)
+                    xStart = (int)left;
+                if (xEnd > right)
+                    xEnd = (int)right;
+            }
+
+            for (int y = yStart; y < yEnd; y++)
+            {
+                for (int x = xStart; x < xEnd; x++)
+                {
+                    if (pts != null)
+                    {
+                        if (!IsPointInPolygon(polygon, new PointF(x, y)))
+                            continue;
+                    }
+
+                    if (max < _allPixels[y, x].Y)
+                    {
+                        max = _allPixels[y, x].Y;
+                        maxPosition = new System.Drawing.Point(x, y);
+                    }
+
+                    if (min > _allPixels[y, x].Y)
+                    {
+                        min = _allPixels[y, x].Y;
+                        minPosition = new System.Drawing.Point(x, y);
+                    }
+
+                    sum += _allPixels[y, x].Y;
+                    cnt++;
+                }
+            }
+            avg = (float)(sum / cnt);
+        }
+        private void GetMaxMin(int yStart, int yEnd, 
+            ref float max, ref float min, ref float avg, 
+            ref System.Drawing.PointF minPosition, 
+            ref System.Drawing.PointF maxPosition,
+            List<System.Drawing.PointF> hullPts)
+        {
+            int cnt = 0;
+            double sum = 0;
+            PointF[] polygon = hullPts.ToArray();
+
+            for (int y = yStart; y < yEnd; y++)
+            {
+                for (int x = 0; x < this.Width; x++)
+                {
+                    if (!IsPointInPolygon(polygon, new PointF(x, y)))
+                    {
+                        continue;
+                    }
+
+                    if (max < _allPixels[y, x].Y)
+                    {
+                        max = _allPixels[y, x].Y;
+                        maxPosition = new System.Drawing.Point(x, y);
+                    }
+                    
+                    if (min > _allPixels[y, x].Y)
+                    {
+                        min = _allPixels[y, x].Y;
+                        minPosition = new System.Drawing.Point(x, y);
+                    }
+
+                    sum += _allPixels[y, x].Y;
+                    cnt++;
+                }
+            }
+            avg = (float)(sum / cnt);
+        }
+
+        internal void UpdateROI(List<System.Drawing.PointF> pts)
         {
             MinROI = 999999;
             MaxROI = 0;
@@ -117,15 +283,15 @@ namespace BrightMaster
             }
             unsafe
             {
-                double xMargin = GlobalVars.Instance.Layout.XMargin * width /100;
-                double yMargin = GlobalVars.Instance.Layout.YMargin * height / 100;
-                int xStart = (int)(topLeft.X + xMargin);
-                int xEnd = (int)(topRight.X - xMargin);
-                int yStart = (int)(topLeft.Y + yMargin);
-                int yEnd = (int)(bottomRight.Y - yMargin);
+                double xMargin = GlobalVars.Instance.Layout.Margin * width /100;
+                //double yMargin = GlobalVars.Instance.Layout.YMargin * height / 100;
+                int xStart = (int)Math.Ceiling(topLeft.X + xMargin);
+                int xEnd = (int)Math.Floor(topRight.X - xMargin);
+                int yStart = (int)Math.Ceiling(topLeft.Y + xMargin);
+                int yEnd = (int)Math.Floor(bottomRight.Y - xMargin);
                 double roiHeight = yEnd - yStart;
-                System.Drawing.Point[] maxPts = new System.Drawing.Point[4];
-                System.Drawing.Point[] minPts = new System.Drawing.Point[4];
+                System.Drawing.PointF[] maxPts = new System.Drawing.PointF[4];
+                System.Drawing.PointF[] minPts = new System.Drawing.PointF[4];
                 Parallel.Invoke(() =>
                 {
                     GetMaxMin(yStart, (int)(yStart + roiHeight / 4), xStart, xEnd, ref maxArray[0], ref minArray[0], ref avg[0], ref minPts[0],ref maxPts[0],pts);
@@ -164,7 +330,7 @@ namespace BrightMaster
             }
         }
 
-        public static bool IsPointInPolygon4(PointF[] polygon, PointF testPoint)
+        public static bool IsPointInPolygon(PointF[] polygon, PointF testPoint)
         {
             bool result = false;
             int j = polygon.Count() - 1;
@@ -182,80 +348,10 @@ namespace BrightMaster
             return result;
         }
 
-        private void GetMaxMin(int yStart, int yEnd, int xStart, int xEnd, ref float max, ref float min, ref float avg, 
-            ref System.Drawing.Point minPosition , ref System.Drawing.Point maxPosition,List<System.Drawing.Point> pts = null)
-        {
-            int cnt = 0;
-            double sum = 0;
-            PointF[] polygon = new PointF[4];
-            if(pts != null)
-            {
-                float top = pts.Min(pt => pt.Y);
-                float bottom = pts.Max(pt => pt.Y);
-                float left = pts.Min(pt => pt.X);
-                float right = pts.Max(pt => pt.X);
-                //var polygon = pts.ToArray();
-                
-                for (int i = 0; i < 4; i++)
-                    polygon[i] = pts[i];
-
-                if (yStart < top)
-                    yStart = (int)top;
-                if (yEnd > bottom)
-                    yEnd = (int)bottom;
-                if (xStart < left)
-                    xStart = (int)left;
-                if (xEnd > right)
-                    xEnd = (int)right;
-            }
-            
-
-            for (int y = yStart; y < yEnd; y++)
-            {
-                for (int x = xStart; x <xEnd; x++)
-                {
-                    if(pts != null)
-                    {
-                        if (!IsPointInPolygon4(polygon, new PointF(x, y)))
-                            continue;
-                    }
-                    
-                    if (max < _allPixels[y, x].Y)
-                    {
-                        max = _allPixels[y, x].Y;
-                        maxPosition = new System.Drawing.Point(x, y);
-                    }
-                        
-                    if (min > _allPixels[y, x].Y)
-                    {
-                        min = _allPixels[y, x].Y;
-                        minPosition = new System.Drawing.Point(x, y);
-                    }
-                        
-                    sum += _allPixels[y, x].Y;
-                    cnt++;
-                }
-            }
-            avg = (float)(sum / cnt);
-        }
+        
 
 
-        //private void GetMaxMinFromX(int xStart, int xEnd, ref float max, ref float min)
-        //{
-
-        //    for (int y = 0; y < Height; y++)
-        //    {
-        //        for (int x = xStart; x < xEnd; x++)
-        //        {
-        //            if (max < _allPixels[y, x].Y)
-        //                max = _allPixels[y, x].Y;
-        //            if (min > _allPixels[y, x].Y)
-        //                min = _allPixels[y, x].Y;
-        //        }
-        //    }
-        //}
-
-        public List<PixelInfo> GetPixelInfos(List<System.Drawing.Point> pts)
+        public List<PixelInfo> GetPixelInfos(List<System.Drawing.PointF> pts)
         {
             if (pts.Count != 4)
             {
@@ -290,7 +386,6 @@ namespace BrightMaster
                     }
                 }
             }
-          
             float X,Y,Z;
 
             X = vals.Average(val => val.X);
@@ -442,5 +537,7 @@ namespace BrightMaster
             MinPosition = new System.Drawing.Point(-1, -1);
             MaxPosition = new System.Drawing.Point(-1, -1);
         }
+
+      
     }
 }

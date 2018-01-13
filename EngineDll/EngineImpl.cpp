@@ -69,7 +69,7 @@ static void on_trackbar(int val, void* parent)
 }
 
 
-void EngineImpl::FindRectImpl(Mat& img, vector<pair<int, int>>& ptPairs, std::vector<std::pair<int, int>>&hullPairs, bool mannualThreshold)
+void EngineImpl::FindRectImpl(Mat& img, vector<pair<int, int>>& ptPairs, std::vector<std::pair<int, int>>&hullPairs, bool autoFindBoundary)
 {
 	std::vector< std::vector<cv::Point> > allContours;
 	Mat thresholdImg;
@@ -128,10 +128,9 @@ void EngineImpl::FindRectImpl(Mat& img, vector<pair<int, int>>& ptPairs, std::ve
 		line(drawing, ptStart, ptEnd, color, 1);
 		hullPairs.push_back(make_pair(ptStart.x, ptStart.y));
 	}
-	if (!mannualThreshold)
+	if (!autoFindBoundary)
 	{
 		imshow("threshold", drawing);
-		//imwrite("d:\\test.jpg", drawing);
 	}
 	
 	//cvWaitKey(0);
@@ -168,7 +167,7 @@ void EngineImpl::FindRect(std::string sFile, int& defaultThreshold, vector<pair<
 	string sliderName = "slider";
 	namedWindow(winName, WINDOW_NORMAL);
 	imshow(winName, thresholdImg);
-	//resizeWindow(winName, 800, 800 * img.rows / img.cols);
+	//resizeWindow(winName, 800, 900 * img.rows / img.cols);
 	createTrackbar(sliderName, winName, &thresholdVal, 255, on_trackbar, this);
 	FindRectImpl(img, ptPairs, hullPts);
 	globalPts = ptPairs;

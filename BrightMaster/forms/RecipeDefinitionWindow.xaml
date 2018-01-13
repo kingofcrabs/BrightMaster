@@ -123,13 +123,13 @@
                                 <StackPanel>
                                         <StackPanel>
                                             <StackPanel Orientation="Horizontal" Margin="0,1,0,1">
-                                            <Label>X距边（百分比）:</Label>
-                                                <TextBox Text="{Binding Path= SelectedRecipe.Layout.XMargin}" Width="50"></TextBox>
+                                            <Label>距边（百分比）:</Label>
+                                                <TextBox Text="{Binding Path= SelectedRecipe.Layout.Margin}" Width="50"></TextBox>
                                             </StackPanel>
-                                            <StackPanel Orientation="Horizontal" Margin="0,1,0,1">
+                                            <!--<StackPanel Orientation="Horizontal" Margin="0,1,0,1">
                                             <Label>Y距边（百分比）:</Label>
                                                 <TextBox Text="{Binding Path= SelectedRecipe.Layout.YMargin}" Width="50"></TextBox>
-                                            </StackPanel>
+                                            </StackPanel>-->
                                             <StackPanel Orientation="Horizontal" Margin="0,1,0,1">
                                                 <Label>中心大小（百分比）：</Label>
                                             <TextBox Text="{Binding Path= SelectedRecipe.Layout.CenterSizePercent}" Width="50"></TextBox>

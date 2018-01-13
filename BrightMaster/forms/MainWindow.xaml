@@ -95,6 +95,7 @@
             <RowDefinition Height="30"/>
             <RowDefinition Height="50"/>
             <RowDefinition Height="4*"/>
+            <RowDefinition Height="5"/>
             <RowDefinition Height="200"/>
         </Grid.RowDefinitions>
         <Menu>
@@ -168,15 +169,17 @@
                 <ColumnDefinition></ColumnDefinition>
                 <ColumnDefinition Width="60"></ColumnDefinition>
             </Grid.ColumnDefinitions>
-            <ScrollViewer x:Name="scrollViewer" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Auto">
-                <local:BrightCanvas x:Name="myCanvas"   Background="LightBlue" Width="800" Height="600" >
+              <Grid Name="canvasParent">
+                <local:BrightCanvas x:Name="myCanvas" Width="{Binding ElementName= canvasParent,Path=ActualWidth}" Height="{Binding ElementName=canvasParent,Path=ActualHeight}" >
                 </local:BrightCanvas>
-            </ScrollViewer>
+              </Grid>
+            
             <local:ColorCanvas x:Name="colorBar" Visibility="Collapsed" Grid.Column="1">
             </local:ColorCanvas>
         </Grid>
-
-        <GridSplitter Grid.Column="1" Width="5" Grid.Row="2" Grid.RowSpan="1" HorizontalAlignment="Stretch" />
+        <GridSplitter Grid.Column="0" Height="5" Grid.Row="3" Grid.RowSpan="1"  HorizontalAlignment="Stretch" Background="LightGray"/>
+        
+        <GridSplitter Grid.Column="1" Width="5" Grid.Row="2" Grid.RowSpan="1"  HorizontalAlignment="Stretch" Background="LightGray"/>
         <Grid  Grid.Row="2" Grid.Column="2" Grid.ColumnSpan="2" Grid.RowSpan="2">
             <Grid.RowDefinitions>
                 
@@ -240,7 +243,7 @@
 
         </Grid>
 
-        <Grid Grid.Row="3" Grid.ColumnSpan="2">
+        <Grid Grid.Row="4" Grid.ColumnSpan="2">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="300"></ColumnDefinition>
                 <ColumnDefinition Width="5"/>

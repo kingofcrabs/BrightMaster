@@ -44,17 +44,9 @@ namespace BrightMaster
             InitializeComponent();
             this.Loaded += MainWindow_Loaded;
             this.Closing += MainWindow_Closing;
-            scrollViewer.PreviewMouseWheel += scrollViewer_PreviewMouseWheel;
-            scrollViewer.PreviewMouseLeftButtonDown += scrollViewer_PreviewMouseLeftButtonDown;
-            scrollViewer.PreviewMouseMove += scrollViewer_PreviewMouseMove;
-            scrollViewer.PreviewMouseLeftButtonUp += scrollViewer_PreviewMouseLeftButtonUp;
-            scrollViewer.ScrollChanged += scrollViewer_ScrollChanged;
-            
-        }
-
-        void scrollViewer_ScrollChanged(object sender, ScrollChangedEventArgs e)
-        {
-            myCanvas.InvalidateVisual();
+            myCanvas.PreviewMouseLeftButtonDown += myCanvas_PreviewMouseLeftButtonDown;
+            myCanvas.PreviewMouseMove += myCanvas_PreviewMouseMove;
+            myCanvas.PreviewMouseLeftButtonUp += myCanvas_PreviewMouseLeftButtonUp;
         }
 
         async void Initialize()
@@ -111,13 +103,13 @@ namespace BrightMaster
        
         #region commands & events
 
-        void scrollViewer_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
+        void myCanvas_PreviewMouseLeftButtonUp(object sender, MouseButtonEventArgs e)
         {
             if ((bool)btnSetROI.IsChecked)
             { 
                 if(myCanvas.IsValidMove)
                 {
-                    var pts = myCanvas.GeneratePtsImageCoord();
+                    var pts = myCanvas.GeneratePtsRealImageCoord();
                     pts = Layout.Convert2ROI(pts);
                     GlobalVars.Instance.MiscSettings.BoundaryPts = pts;
                     GlobalVars.Instance.MiscSettings.Save();
@@ -135,7 +127,7 @@ namespace BrightMaster
                 return;
             }
 
-            scrollViewer.Cursor = Cursors.Arrow;
+            //myCanvas.Cursor = Cursors.Arrow;
             //scrollViewer.ReleaseMouseCapture();
             lastDragPoint = null;
         }
@@ -149,18 +141,18 @@ namespace BrightMaster
             }
             return parent as parentItem;
         }
-        void scrollViewer_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        void myCanvas_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             var mousePos = e.GetPosition(myCanvas);
-            object original = e.OriginalSource;
+            //object original = e.OriginalSource;
 
-            if (!original.GetType().Equals(typeof(ScrollViewer)))
-            {
-                if (FindVisualParent<System.Windows.Controls.Primitives.ScrollBar>(original as DependencyObject) != null)
-                {
-                    return;
-                }
-            }
+            //if (!original.GetType().Equals(typeof(ScrollViewer)))
+            //{
+            //    if (FindVisualParent<System.Windows.Controls.Primitives.ScrollBar>(original as DependencyObject) != null)
+            //    {
+            //        return;
+            //    }
+            //}
 
             if ((bool)btnSetROI.IsChecked)
             {
@@ -168,16 +160,16 @@ namespace BrightMaster
                 return;
             }
 
-            if (mousePos.X <= scrollViewer.ViewportWidth && mousePos.Y <
-                scrollViewer.ViewportHeight) //make sure we still can use the scrollbars
-            {
-                scrollViewer.Cursor = Cursors.SizeAll;
-                lastDragPoint = mousePos;
-                //Mouse.Capture(scrollViewer);
-            }
+            //if (mousePos.X <= scrollViewer.ViewportWidth && mousePos.Y <
+            //    scrollViewer.ViewportHeight) //make sure we still can use the scrollbars
+            //{
+            //    scrollViewer.Cursor = Cursors.SizeAll;
+            //    lastDragPoint = mousePos;
+            //    //Mouse.Capture(scrollViewer);
+            //}
         }
 
-        void scrollViewer_PreviewMouseMove(object sender, MouseEventArgs e)
+        void myCanvas_PreviewMouseMove(object sender, MouseEventArgs e)
         {
             Point posNow = e.GetPosition(myCanvas);
             if ((bool)btnSetROI.IsChecked && myCanvas.IsValidMove)
@@ -191,23 +183,23 @@ namespace BrightMaster
                 double dX = posNow.X - lastDragPoint.Value.X;
                 double dY = posNow.Y - lastDragPoint.Value.Y;
                 lastDragPoint = posNow;
-                scrollViewer.ScrollToHorizontalOffset(scrollViewer.HorizontalOffset - dX);
-                scrollViewer.ScrollToVerticalOffset(scrollViewer.VerticalOffset - dY);
+                //scrollViewer.ScrollToHorizontalOffset(scrollViewer.HorizontalOffset - dX);
+                //scrollViewer.ScrollToVerticalOffset(scrollViewer.VerticalOffset - dY);
             }
         }
 
-        private void scrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
-        {
-            if (e.Delta > 0)
-            {
-                zoomRatio *= 1.2;
-            }
-            else
-            {
-                zoomRatio /= 1.2;
-            }
-            Zoom();
-        }
+        //private void scrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
+        //{
+        //    if (e.Delta > 0)
+        //    {
+        //        zoomRatio *= 1.2;
+        //    }
+        //    else
+        //    {
+        //        zoomRatio /= 1.2;
+        //    }
+        //    Zoom();
+        //}
 
         void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
@@ -223,17 +215,26 @@ namespace BrightMaster
         private void btnSetROI_Click(object sender, RoutedEventArgs e)
         {
             myCanvas.UserSelectROI = (bool)btnSetROI.IsChecked;
+            if (myCanvas.UserSelectROI)
+                GlobalVars.Instance.MiscSettings.HullPts.Clear();
         }
 
+
+        void  AdjustLayoutForFakeColor()
+        {
+            
+            bool isFakeColor = (bool)btnFakeColor.IsChecked;
+            int columnSpan = isFakeColor ? 1 : 2;
+            Grid.SetColumnSpan(myCanvas, columnSpan);
+            colorBar.SetMinMax(brightness.Min, brightness.Max);
+            colorBar.Visibility = isFakeColor ? Visibility.Visible : Visibility.Collapsed;
+            
+        }
      
         private void FakeColor_Executed(object sender, ExecutedRoutedEventArgs e)
         {
+            AdjustLayoutForFakeColor();
             BitmapImage bmpImage;
-            bool isFakeColor = (bool)btnFakeColor.IsChecked;
-            int columnSpan = isFakeColor ? 1 : 2;
-            Grid.SetColumnSpan(scrollViewer, columnSpan);
-            colorBar.SetMinMax(brightness.Min, brightness.Max);
-            colorBar.Visibility = isFakeColor ? Visibility.Visible : Visibility.Collapsed;
             if ((bool)btnFakeColor.IsChecked)
             {
                 brightness.SaveImage();
@@ -243,7 +244,7 @@ namespace BrightMaster
             {
                 bmpImage = ImageHelper.CreateImage(brightness.grayVals);
             }
-            myCanvas.SetBkGroundImage(bmpImage,null,true);            
+            myCanvas.SetBkGroundImage(bmpImage, null,true);    
         }
 
         private void RecipeDef_Executed(object sender, ExecutedRoutedEventArgs e)
@@ -294,8 +295,8 @@ namespace BrightMaster
                 var allPixels = GlobalVars.Instance.UAController.LoadXYZImage(fileName);
                 this.Dispatcher.Invoke(() =>
                 {
-                    List<System.Drawing.Point> pts = new List<System.Drawing.Point>();
-                    List<System.Drawing.Point> hullPts = new List<System.Drawing.Point>();
+                    List<System.Drawing.PointF> pts = new List<System.Drawing.PointF>();
+                    List<System.Drawing.PointF> hullPts = new List<System.Drawing.PointF>();
                     FindBoundingPts(allPixels,ref pts,ref hullPts);
                     if (pts == null || pts.Count != 4)
                     {
@@ -304,7 +305,7 @@ namespace BrightMaster
                     else
                     {
                         SetInfo("采集完成。", false);
-                        UpdateResults(pts);
+                        UpdateResults(pts,hullPts);
                     }
                     InvalidateVisual();
                 });
@@ -465,7 +466,7 @@ namespace BrightMaster
             btnSetROI.IsChecked = false;
             myCanvas.UserSelectROI = false;
             SetInfo("开始采集。", false);
-            btnFakeColor.IsChecked = false;
+            //btnFakeColor.IsChecked = false;
             this.IsEnabled = false;
             GlobalVars.Instance.AnalysisSuccess = false;
             watch.Reset();
@@ -492,8 +493,8 @@ namespace BrightMaster
                 {
                     this.Dispatcher.Invoke(() =>
                     {
-                        List<System.Drawing.Point> hullPts = new List<System.Drawing.Point>();
-                        List<System.Drawing.Point> pts = new List<System.Drawing.Point>();
+                        List<System.Drawing.PointF> hullPts = new List<System.Drawing.PointF>();
+                        List<System.Drawing.PointF> pts = new List<System.Drawing.PointF>();
                             FindBoundingPts(allPixels,ref pts, ref hullPts);
                         watch.Stop();
                         string elapsed = (watch.ElapsedMilliseconds/1000).ToString();
@@ -504,7 +505,7 @@ namespace BrightMaster
                         else
                         {
                             SetInfo(string.Format("采集完成，用时:{0}秒",elapsed), false);
-                            UpdateResults(pts);
+                            UpdateResults(pts,hullPts);
                         }
                         this.IsEnabled = true;
                         progressForm.Close();
@@ -527,22 +528,40 @@ namespace BrightMaster
             });
         }
 
-        private void FindBoundingPts(LightPixelInfo[,] allPixels,ref List<System.Drawing.Point> pts,ref List<System.Drawing.Point> hullPts)
+        private void FindBoundingPts(LightPixelInfo[,] allPixels,ref List<System.Drawing.PointF> pts,ref List<System.Drawing.PointF> hullPts)
         {
             brightness = new Brightness(allPixels);
             var bmpImage = ImageHelper.CreateImage(brightness.grayVals);
-            
+            bool isFakeColor = (bool)btnFakeColor.IsChecked;
+            if (isFakeColor)
+            {
+                AdjustLayoutForFakeColor();
+                brightness.SaveImage();
+                bmpImage = ImageHelper.CreatePseudoColorImage(brightness.ImagePath);
+            }
+            if((bool)btnSetROI.IsChecked)
+            {
+                pts = GlobalVars.Instance.MiscSettings.BoundaryPts;
+                myCanvas.SetBkGroundImage(bmpImage, pts);
+                return;
+            }
+
             if(!GlobalVars.Instance.MiscSettings.AutoFindBoundary)
             {
                 pts = GlobalVars.Instance.MiscSettings.BoundaryPts;
                 myCanvas.SetBkGroundImage(bmpImage, pts);
+                return;
             }
-            string sImgFile = FolderHelper.GetImageFolder() + "latest.jpg";
-            ImageHelper.SaveBitmapImageIntoFile(bmpImage, sImgFile);
+            
+            if(!isFakeColor) //we save image for auto find boundary
+            {
+                brightness.SaveImage();
+            }
+
             
             List<MPoint> hullMPts = new List<MPoint>();
             IEngine iEngine = new IEngine();
-            var mpts = iEngine.FindRect(sImgFile, ref GlobalVars.Instance.MiscSettings.thresholdVal, GlobalVars.Instance.MiscSettings.MannualThreshold, hullMPts);
+            var mpts = iEngine.FindRect(brightness.ImagePath, ref GlobalVars.Instance.MiscSettings.thresholdVal, GlobalVars.Instance.MiscSettings.MannualThreshold, hullMPts);
             if (mpts.Count == 0)
                 return;
             if (mpts.Count != 4)
@@ -560,9 +579,14 @@ namespace BrightMaster
             myCanvas.SetBkGroundImage(bmpImage, pts);
         }
 
-        private void UpdateResults(List<System.Drawing.Point> pts)
+        private void UpdateResults(List<System.Drawing.PointF> pts,List<System.Drawing.PointF> hullPts = null)
         {
-            brightness.UpdateROI(pts);
+
+            if (hullPts == null || hullPts.Count == 0)
+                brightness.UpdateROI(pts);
+            else
+                brightness.UpdateConvexHull(hullPts);
+                
             myCanvas.SetMaxMinPosition(brightness.MaxPosition, brightness.MinPosition);
             var pixelInfos = brightness.GetPixelInfos(pts);
             lstviewResult.ItemsSource = pixelInfos;
@@ -584,9 +608,9 @@ namespace BrightMaster
             //saveHelper.Save2Excel(wholePanelResult,brightness);
         }
 
-        private List<System.Drawing.Point> AdjustPosition2ROI(List<MPoint> mpts)
+        private List<System.Drawing.PointF> AdjustPosition2ROI(List<MPoint> mpts)
         {
-            List<System.Drawing.Point> pts = new List<System.Drawing.Point>();
+            List<System.Drawing.PointF> pts = new List<System.Drawing.PointF>();
             int avgX = mpts.Sum(pt => pt.x) / 4;
             int avgY = mpts.Sum(pt => pt.y) / 4;
             Point ptMassCenter = new Point(avgX, avgY);

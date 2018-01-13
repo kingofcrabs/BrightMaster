@@ -1,4 +1,5 @@
 ﻿using BrightMaster.Settings;
+using BrightMaster.utility;
 using EngineDll;
 using System;
 using System.Collections.Generic;
@@ -21,9 +22,8 @@ namespace BrightMaster
         double height;
         double usableWidth;
         double usableHeight; 
-        bool isFakeColor = false;
         
-        List<Point> pts = null;
+        List<PointF> pts = null;
         Point ptStart = new Point(-1,-1);
         Point ptEnd = new Point(-1,-1);
         Point ptCalculateCurve = new Point(-1, -1);
@@ -53,22 +53,28 @@ namespace BrightMaster
             }
             set
             {
-                pts = new List<Point>();
+                pts = new List<PointF>();
                 userSelectROI = value;
                 InvalidateVisual();
             }
         }
 
-        //public MyCanvas()
-        //{
-        //    //this.SizeChanged += MyCanvas_SizeChanged;
-        //}
+        public BrightCanvas()
+        {
+            this.SizeChanged += MyCanvas_SizeChanged;
+        }
 
         void MyCanvas_SizeChanged(object sender, System.Windows.SizeChangedEventArgs e)
         {
             if (IsInDesignMode())
                 return;
             CalcuUsable(out usableWidth, out usableHeight);
+            if(this.Background is ImageBrush)
+            {
+                ImageBrush imgBrush = (ImageBrush)this.Background;
+                imgBrush.Viewport = new System.Windows.Rect(0, 0, usableWidth, usableHeight);
+            }
+            InvalidateVisual();
         }
 
 
@@ -92,19 +98,19 @@ namespace BrightMaster
             }
         }
 
-        Point PointF2Point(PointF ptF,double xRatio, double yRatio)
+        PointF PointFMulRatio(PointF ptF,float xRatio, float yRatio)
         {
-            return new Point((int)(ptF.X*xRatio), (int)(ptF.Y*yRatio));
+            return new PointF(ptF.X*xRatio, ptF.Y*yRatio);
         }
 
         public void SetBoundRect(SizeF boundRectSize)
         {
             Layout layout = GlobalVars.Instance.Layout;
-            pts = new List<Point>();
-            pts.Add(PointF2Point(boundRectSize.ToPointF(), layout.ROITopLeftXRatio / 100, layout.ROITopLeftYRatio / 100));
-            pts.Add(PointF2Point(boundRectSize.ToPointF(), layout.ROIBottomRightXRatio / 100, layout.ROITopLeftYRatio / 100));
-            pts.Add(PointF2Point(boundRectSize.ToPointF(), layout.ROIBottomRightXRatio / 100, layout.ROIBottomRightYRatio / 100));
-            pts.Add(PointF2Point(boundRectSize.ToPointF(), layout.ROITopLeftXRatio / 100, layout.ROIBottomRightYRatio / 100));
+            pts = new List<PointF>();
+            pts.Add(PointFMulRatio(boundRectSize.ToPointF(), layout.ROITopLeftXRatio / 100, layout.ROITopLeftYRatio / 100));
+            pts.Add(PointFMulRatio(boundRectSize.ToPointF(), layout.ROIBottomRightXRatio / 100, layout.ROITopLeftYRatio / 100));
+            pts.Add(PointFMulRatio(boundRectSize.ToPointF(), layout.ROIBottomRightXRatio / 100, layout.ROIBottomRightYRatio / 100));
+            pts.Add(PointFMulRatio(boundRectSize.ToPointF(), layout.ROITopLeftXRatio / 100, layout.ROIBottomRightYRatio / 100));
             width = boundRectSize.Width;
             height = boundRectSize.Height;
             CalcuUsable(out usableWidth, out usableHeight);
@@ -112,10 +118,10 @@ namespace BrightMaster
         }
 
 
-        public void SetBkGroundImage(System.Windows.Media.Imaging.BitmapImage bmpImage, List<Point> newPts = null, bool isFakeColor = false)
+        public void SetBkGroundImage(System.Windows.Media.Imaging.BitmapImage bmpImage, List<PointF> newPts = null, bool isFakeColor = false)
         {
-            this.isFakeColor = isFakeColor;
-            pts = newPts;
+            if(!isFakeColor) //for fake color, we don't change the points
+                pts = newPts;
             width = bmpImage.Width;
             height = bmpImage.Height;
             CalcuUsable(out usableWidth, out usableHeight);
@@ -133,24 +139,9 @@ namespace BrightMaster
         
        
 
-        internal List<Point> SortPoints(List<Point> orgPts)
-        {
-            List<Point> pts = new List<Point>();
-            int avgX = orgPts.Sum(pt=>pt.X)/4;
-            int avgY = orgPts.Sum(pt=>pt.Y)/4;
-            Point ptMassCenter = new Point(avgX, avgY);
-            Point topLeft = orgPts.Where(pt => pt.X < avgX && pt.Y < avgY).First();
-            Point topRight = orgPts.Where(pt => pt.X > avgX && pt.Y < avgY).First();
-            Point bottomRight = orgPts.Where(pt => pt.X > avgX && pt.Y > avgY).First();
-            Point bottomLeft = orgPts.Where(pt => pt.X < avgX && pt.Y > avgY).First();
-            pts.Add(topLeft);
-            pts.Add(topRight);
-            pts.Add(bottomRight);
-            pts.Add(bottomLeft);
-            return pts;
-        }
+      
 
-        private System.Windows.Rect GetBoundingRectInUICoordinate(List<Point> pts)
+        private System.Windows.Rect GetBoundingRectInUICoordinate(List<PointF> pts)
         {
             double left, top, right, bottom;
             int leftUICoord, topUICoord, rightUICoord, bottomUICoord;
@@ -165,10 +156,10 @@ namespace BrightMaster
             {
                 if( userSelectROI)
                 {
-                    leftUICoord = pts.Min(pt => pt.X);
-                    topUICoord = pts.Min(pt => pt.Y);
-                    rightUICoord = pts.Max(pt => pt.X);
-                    bottomUICoord = pts.Max(pt => pt.Y);
+                    leftUICoord = (int)(pts.Min(pt => pt.X)+0.5);
+                    topUICoord = (int)(pts.Min(pt => pt.Y)+0.5);
+                    rightUICoord = (int)(pts.Max(pt => pt.X)+0.5);
+                    bottomUICoord = (int)(pts.Max(pt => pt.Y)+0.5);
                 }
                 else
                 {
@@ -242,49 +233,15 @@ namespace BrightMaster
             bool validPt = pts != null && pts.Count == 4;
             if (validPt)
             {
-                //List<PointF> offSetPts = new List<PointF>();
-                //float xMargin = layout.XMargin / 100;
-                //float yMargin = layout.YMargin / 100;
-                //offSetPts.Add(layout.GetPositionInImage(pts, new PointF(xMargin, yMargin)));
-                //offSetPts.Add(layout.GetPositionInImage(pts, new PointF(1 - xMargin, yMargin)));
-                //offSetPts.Add(layout.GetPositionInImage(pts, new PointF(1 - xMargin, 1 - yMargin)));
-                //offSetPts.Add(layout.GetPositionInImage(pts, new PointF(xMargin, 1 - yMargin)));
-                //for (int i = 0; i < 4; i++)
-                //{
-                //    int endIndex = (i + 1) % 4;
-                //    System.Windows.Point startPt = new System.Windows.Point(pts[i].X, pts[i].Y);
-                //    System.Windows.Point endPt = new System.Windows.Point(pts[endIndex].X, pts[endIndex].Y);
-                //    System.Windows.Point startPtOffSet = new System.Windows.Point(offSetPts[i].X, offSetPts[i].Y);
-                //    System.Windows.Point endPtOffset = new System.Windows.Point(offSetPts[endIndex].X, offSetPts[endIndex].Y);
-                //    if (!userSelectROI) //from auto finded pt to UI coordination
-                //    {
-                //        startPt = new System.Windows.Point(Convert2XUIFromReal(pts[i].X), Convert2UIYFromReal(pts[i].Y));
-                //        endPt = new System.Windows.Point(Convert2XUIFromReal(pts[endIndex].X), Convert2UIYFromReal(pts[endIndex].Y));
-                //        startPtOffSet = new System.Windows.Point(Convert2XUIFromReal(offSetPts[i].X), Convert2UIYFromReal(offSetPts[i].Y));
-                //        endPtOffset = new System.Windows.Point(Convert2XUIFromReal(offSetPts[endIndex].X), Convert2UIYFromReal(offSetPts[endIndex].Y));
-                //    }
-                //    drawingContext.DrawLine(pen, startPt, endPt);
-
-                //    //draw dot line
-                //    if (!GlobalVars.Instance.ShowRegions)
-                //    {
-                //        float[] dashValues = { 5, 2 };
-                //        drawingContext.DrawLine(dashPen, startPtOffSet, endPtOffset);
-                //    }
-                //}
                 var hullPts = GlobalVars.Instance.MiscSettings.HullPts;
                 if(hullPts != null && hullPts.Count > 0)
                 {
-
-                    for (int i = 0; i < hullPts.Count; i++)
-                    {
-                        int endIndex = (i + 1) % hullPts.Count;
-                        var startPt = new System.Windows.Point(Convert2XUIFromReal(hullPts[i].X), Convert2UIYFromReal(hullPts[i].Y));
-                        var endPt = new System.Windows.Point(Convert2XUIFromReal(hullPts[endIndex].X), Convert2UIYFromReal(hullPts[endIndex].Y));
-                        drawingContext.DrawLine(bluePen, startPt, endPt);
-                    }
+                    DrawConvexHull(hullPts, drawingContext);
                 }
-                
+                else //user selected roi
+                {
+                    DrawUserSelectedROI(pts, drawingContext);
+                }
                 
                 if (GlobalVars.Instance.ShowRegions) //regions analysis
                 {
@@ -307,13 +264,10 @@ namespace BrightMaster
                 {
                     if(maxPt.X != -1)
                     {
-
                         DrawCross(new System.Windows.Point(Convert2XUIFromReal(maxPt.X), Convert2XUIFromReal(maxPt.Y)), new PointF(10, 10), drawingContext);
                         DrawCross(new System.Windows.Point(Convert2XUIFromReal(minPt.X), Convert2XUIFromReal(minPt.Y)), new PointF(10, 10), drawingContext, false);
                     }
-                        
                 }
-
             }
             else
             {
@@ -328,6 +282,58 @@ namespace BrightMaster
             }
 
             
+        }
+
+        private void DrawConvexHull(List<PointF> hullPts, DrawingContext drawingContext)
+        {
+            System.Windows.Media.Brush redBrush = System.Windows.Media.Brushes.Red;
+            System.Windows.Media.Brush blueBrush = System.Windows.Media.Brushes.Blue;
+            System.Windows.Media.Pen pen = new System.Windows.Media.Pen(redBrush, 1);
+            System.Windows.Media.Pen bluePen = new System.Windows.Media.Pen(blueBrush, 1);
+            for (int i = 0; i < hullPts.Count; i++)
+            {
+                int endIndex = (i + 1) % hullPts.Count;
+                var startPt = new System.Windows.Point(Convert2XUIFromReal(hullPts[i].X), Convert2UIYFromReal(hullPts[i].Y));
+                var endPt = new System.Windows.Point(Convert2XUIFromReal(hullPts[endIndex].X), Convert2UIYFromReal(hullPts[endIndex].Y));
+                drawingContext.DrawLine(pen, startPt, endPt);
+            }
+            ShrinkHelper shrinkHelper = new ShrinkHelper();
+            var shrinkedHullPts = shrinkHelper.ShrinkConvexHull(hullPts);
+            for (int i = 0; i < shrinkedHullPts.Count; i++)
+            {
+                int endIndex = (i + 1) % shrinkedHullPts.Count;
+                var startPt = new System.Windows.Point(Convert2XUIFromReal(shrinkedHullPts[i].X), Convert2UIYFromReal(shrinkedHullPts[i].Y));
+                var endPt = new System.Windows.Point(Convert2XUIFromReal(shrinkedHullPts[endIndex].X), Convert2UIYFromReal(shrinkedHullPts[endIndex].Y));
+                drawingContext.DrawLine(bluePen, startPt, endPt);
+            }
+        }
+
+        private void DrawUserSelectedROI(List<PointF> pts, DrawingContext drawingContext)
+        {
+            System.Windows.Media.Brush redBrush = System.Windows.Media.Brushes.Red;
+            System.Windows.Media.Brush blueBrush = System.Windows.Media.Brushes.Blue;
+            System.Windows.Media.Pen pen = new System.Windows.Media.Pen(redBrush, 1);
+            System.Windows.Media.Pen bluePen = new System.Windows.Media.Pen(blueBrush, 1);
+            System.Windows.Media.Pen dashPen = new System.Windows.Media.Pen(blueBrush, 1);
+            ShrinkHelper shrinkHelper = new ShrinkHelper();
+            var shrinkPts = shrinkHelper.ShrinkConvexHull(pts);
+            for (int i = 0; i < 4; i++)
+            {
+                int endIndex = (i + 1) % 4;
+                var startPt = new System.Windows.Point(Convert2XUIFromReal(pts[i].X), Convert2UIYFromReal(pts[i].Y));
+                var endPt = new System.Windows.Point(Convert2XUIFromReal(pts[endIndex].X), Convert2UIYFromReal(pts[endIndex].Y));
+                var startPtOffSet = new System.Windows.Point(Convert2XUIFromReal(shrinkPts[i].X), Convert2UIYFromReal(shrinkPts[i].Y));
+                var endPtOffset = new System.Windows.Point(Convert2XUIFromReal(shrinkPts[endIndex].X), Convert2UIYFromReal(shrinkPts[endIndex].Y));
+                drawingContext.DrawLine(pen, startPt, endPt);
+
+                //draw dot line
+                if (!GlobalVars.Instance.ShowRegions)
+                {
+                    double[] dashValues = { 5, 2 };
+                    dashPen.DashStyle = new DashStyle(dashValues, 1);
+                    drawingContext.DrawLine(dashPen, startPtOffSet, endPtOffset);
+                }
+            }
         }
 
 
@@ -372,15 +378,16 @@ namespace BrightMaster
             InvalidateVisual();
         }
 
-        public void SetMaxMinPosition(Point maxPt, Point minPt)
+        public void SetMaxMinPosition(PointF maxPt, PointF minPt)
         {
-            this.maxPt = maxPt;
-            this.minPt = minPt;
+            this.maxPt = new Point((int)maxPt.X, (int)maxPt.Y);
+            this.minPt = new Point((int)minPt.X, (int)minPt.Y);
             InvalidateVisual();
         }
 
         internal void OnLeftButtonDown(System.Windows.Point mousePos)
         {
+            ptEnd.X = -1;
             validMouseMove = true;
             ptStart = new Point((int)mousePos.X, (int)mousePos.Y);
             InvalidateVisual();
@@ -391,46 +398,39 @@ namespace BrightMaster
             if (!validMouseMove)
                 return;
             ptEnd = new Point((int)mousePos.X, (int)mousePos.Y);
-            pts = GeneratePts(ptStart, ptEnd);
+            pts = GeneratePtsRealImageCoord();
             InvalidateVisual();
         }
 
         internal void OnLeftButtonUp()
         {
-            pts = GeneratePts(ptStart, ptEnd);
-            Point ptTopRight = new Point(ptEnd.X, ptStart.Y);
-            Point ptBottomLeft = new Point(ptStart.X, ptEnd.Y);
-
-            //GlobalVars.Instance.MiscSettings.BoundaryPts = new List<Point>() { ptStart, ptTopRight, ptEnd, ptBottomLeft };
-            List<Point> uiPts = new List<Point>() { ptStart, ptTopRight, ptEnd, ptBottomLeft };
-            List<Point> tmpRealPts = new List<Point>();
-            uiPts.ForEach(pt => tmpRealPts.Add(new Point(Convert2RealXFromUI(pt.X), Convert2RealYFromUI(pt.Y))));
+            List<PointF> tmpRealPts = GeneratePtsRealImageCoord();
             GlobalVars.Instance.MiscSettings.BoundaryPts = tmpRealPts;
             InvalidateVisual();
             validMouseMove = false;
         }
 
-        private List<Point> GeneratePts(Point ptStart, Point ptEnd)
+        private List<PointF> GeneratePts(PointF ptStart, PointF ptEnd)
         {
-            List<Point> tmpPts = new List<Point>();
+            List<PointF> tmpPts = new List<PointF>();
             tmpPts.Add(ptStart);
-            tmpPts.Add(new Point(ptEnd.X,ptStart.Y));
+            tmpPts.Add(new PointF(ptEnd.X,ptStart.Y));
             tmpPts.Add(ptEnd);
-            tmpPts.Add(new Point(ptStart.X, ptEnd.Y));
+            tmpPts.Add(new PointF(ptStart.X, ptEnd.Y));
             return tmpPts;
         }
 
 
-        public List<Point> GeneratePtsImageCoord()
+        public List<PointF> GeneratePtsRealImageCoord()
         {
-            List<Point> tmpPts = new List<Point>();
+            List<PointF> tmpPts = new List<PointF>();
             tmpPts.Add(ptStart);
-            tmpPts.Add(new Point(ptEnd.X, ptStart.Y));
+            tmpPts.Add(new PointF(ptEnd.X, ptStart.Y));
             tmpPts.Add(ptEnd);
-            tmpPts.Add(new Point(ptStart.X, ptEnd.Y));
+            tmpPts.Add(new PointF(ptStart.X, ptEnd.Y));
 
-            List<Point> tmpRealPts = new List<Point>();
-            tmpPts.ForEach(pt => tmpRealPts.Add(new Point(Convert2RealXFromUI(pt.X), Convert2RealYFromUI(pt.Y))));
+            List<PointF> tmpRealPts = new List<PointF>();
+            tmpPts.ForEach(pt => tmpRealPts.Add(new PointF(Convert2RealXFromUI(pt.X), Convert2RealYFromUI(pt.Y))));
             return tmpRealPts;
         }
 

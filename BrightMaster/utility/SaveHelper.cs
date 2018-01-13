@@ -53,7 +53,6 @@ namespace BrightMaster
 
         private void SaveWholePanelInfosCSV(string csvFile)
         {
-          
             string header = "年月日,流水号,中心亮度,x,y,全屏扫描数据,合格";
             int seqNo = 1;
             List<string> strs = new List<string>() { header };
@@ -65,8 +64,6 @@ namespace BrightMaster
 
             File.WriteAllLines(csvFile, strs,Encoding.Default);
         }
-
-
 
         internal void Save2Excel(Brightness brightness)
         {

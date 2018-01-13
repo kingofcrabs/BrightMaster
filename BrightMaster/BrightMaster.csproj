@@ -153,6 +153,7 @@
     <Compile Include="settings\RecipeCollection.cs" />
     <Compile Include="controller\UAContorller.cs" />
     <Compile Include="utility\PlaySound.cs" />
+    <Compile Include="utility\ShrinkHelper.cs" />
     <Compile Include="utility\Utility.cs" />
     <Page Include="forms\DiscreteSlider.xaml">
       <Generator>MSBuild:Compile</Generator>

@@ -13,8 +13,8 @@ namespace BrightMaster.Settings
         public string SaveFolder { get; set; }
         public bool AutoFindBoundary { get; set; }
         public bool MannualThreshold { get; set; }
-        public List<Point> BoundaryPts { get; set; }
-        public List<Point> HullPts { get; set; }
+        public List<PointF> BoundaryPts { get; set; }
+        public List<PointF> HullPts { get; set; }
 
         [System.Xml.Serialization.XmlIgnore]
         public int ThresholdVal
@@ -35,8 +35,8 @@ namespace BrightMaster.Settings
             thresholdVal = 40;
             AutoFindBoundary = false;
             MannualThreshold = false;
-            BoundaryPts = new List<Point>();
-            HullPts = new List<Point>();
+            BoundaryPts = new List<PointF>();
+            HullPts = new List<PointF>();
         }
 
         internal void Save()
