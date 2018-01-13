@@ -78,8 +78,8 @@ namespace BrightMaster.Settings
                 recipes.Add(recipe);
             }
             
-            if (recipes.Count > 0)
-                selectedRecipe = recipes[0];
+            //if (recipes.Count > 0)
+            //    selectedRecipe = recipes[0];
             VisibleRecipes = FilterRecipes();
         }
 

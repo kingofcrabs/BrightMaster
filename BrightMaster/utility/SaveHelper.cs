@@ -15,7 +15,7 @@ namespace BrightMaster
 {
     class SaveHelper
     {
-
+        public static string newFilePath = "";
         public static string CreateTodayFolder()
         {
             string todayFolder = FolderHelper.GetDefaultSaveFolder() + DateTime.Now.ToString("yyyyMMdd") + "\\";
@@ -37,7 +37,12 @@ namespace BrightMaster
             string sFile = FolderHelper.GetTemplateFile();
             File.Copy(sFile, excelFile,true);
             Excel.Workbook xlWorkBook = xlApp.Workbooks.Open(excelFile);
-            Excel.Worksheet xlWorkSheet = xlWorkBook.Sheets[1];
+            //xlWorkBook.Sheets.Count
+            var xlWorkSheet = (Microsoft.Office.Interop.Excel.Worksheet)xlWorkBook.Worksheets.Add
+    (System.Reflection.Missing.Value,
+     xlWorkBook.Worksheets[xlWorkBook.Worksheets.Count],
+     System.Reflection.Missing.Value,
+     System.Reflection.Missing.Value);
             xlWorkSheet.Cells[29, 1].Value = wholePanelResult.LAvg;
             xlWorkSheet.Cells[29, 2].Value = wholePanelResult.LMax;
             xlWorkSheet.Cells[29, 3].Value = wholePanelResult.LMin;
@@ -68,15 +73,13 @@ namespace BrightMaster
         internal void Save2Excel(Brightness brightness)
         {
             var wholePanelResult = TestResult.GetWholePanelResult(brightness);
-            var todayFolder = CreateTodayFolder();
-            string excelFile = todayFolder + GlobalVars.Instance.Barcode + ".xls";
             brightness.SaveImage();
-            SaveWholePanelInfosExcel(excelFile, wholePanelResult, brightness.ImagePath);
+            SaveWholePanelInfosExcel(newFilePath, wholePanelResult, brightness.ImagePath);
         }
 
-        internal void SaveRegionInfo(List<PixelInfo> pixelInfos)
+        internal static void CreateNewFile(string newFile)
         {
-            
+            newFilePath = newFile;
         }
     }
 }

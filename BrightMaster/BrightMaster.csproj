@@ -122,6 +122,7 @@
     <Compile Include="forms\XYCurves.xaml.cs">
       <DependentUpon>XYCurves.xaml</DependentUpon>
     </Compile>
+    <Compile Include="utility\IntersectionHelper.cs" />
     <Compile Include="utility\SaveHelper.cs" />
     <Compile Include="settings\AdjustRatio.cs" />
     <Compile Include="settings\BindBase.cs" />
@@ -243,6 +244,10 @@
     </None>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\clipper_library\clipper_library.csproj">
+      <Project>{9b062971-a88e-4a3d-b3c9-12b78d15fa66}</Project>
+      <Name>clipper_library</Name>
+    </ProjectReference>
     <ProjectReference Include="..\EngineDll\EngineDll.vcxproj">
       <Project>{9f46951f-d766-4801-9aed-44dc5f017eb9}</Project>
       <Name>EngineDll</Name>

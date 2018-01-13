@@ -233,6 +233,8 @@ namespace BrightMaster
             bool validPt = pts != null && pts.Count == 4;
             if (validPt)
             {
+
+                //draw bound rect
                 var hullPts = GlobalVars.Instance.MiscSettings.HullPts;
                 if(hullPts != null && hullPts.Count > 0)
                 {
@@ -243,17 +245,19 @@ namespace BrightMaster
                     DrawUserSelectedROI(pts, drawingContext);
                 }
                 
-                if (GlobalVars.Instance.ShowRegions) //regions analysis
+                //draw circles or marks
+                if (GlobalVars.Instance.AnalysisRegions) //regions analysis
                 {
-                    var circles = validPt ? GlobalVars.Instance.Layout.GetCircles(pts) :
+                    var roiPts = Layout.Convert2ROI(pts);
+                    var circles = validPt ? GlobalVars.Instance.Layout.GetCircles(roiPts) :
                     GlobalVars.Instance.Layout.GetCircles(boundingRectUICoord);
+                    
                     int index = 0;
                     if (userSelectROI && ptEnd.X == -1)
                         return;
                     foreach (var circle in circles)
                     {
-                        System.Windows.Point uiPt = userSelectROI ? new System.Windows.Point(circle.Position.X, circle.Position.Y) :
-                            new System.Windows.Point(Convert2XUIFromReal(circle.Position.X), Convert2UIYFromReal(circle.Position.Y));
+                        System.Windows.Point uiPt = new System.Windows.Point(Convert2XUIFromReal(circle.Position.X), Convert2UIYFromReal(circle.Position.Y));
                         float radiusUI = Convert2XUIFromReal(circle.Size.X);
                         DrawCircle(uiPt, new PointF(radiusUI, radiusUI), drawingContext);
                         DrawText((index + 1).ToString(), uiPt, drawingContext, 12);
@@ -315,25 +319,45 @@ namespace BrightMaster
             System.Windows.Media.Pen pen = new System.Windows.Media.Pen(redBrush, 1);
             System.Windows.Media.Pen bluePen = new System.Windows.Media.Pen(blueBrush, 1);
             System.Windows.Media.Pen dashPen = new System.Windows.Media.Pen(blueBrush, 1);
-            ShrinkHelper shrinkHelper = new ShrinkHelper();
-            var shrinkPts = shrinkHelper.ShrinkConvexHull(pts);
-            for (int i = 0; i < 4; i++)
+            if(GlobalVars.Instance.AnalysisRegions)//no shrink for regions analysis
             {
-                int endIndex = (i + 1) % 4;
-                var startPt = new System.Windows.Point(Convert2XUIFromReal(pts[i].X), Convert2UIYFromReal(pts[i].Y));
-                var endPt = new System.Windows.Point(Convert2XUIFromReal(pts[endIndex].X), Convert2UIYFromReal(pts[endIndex].Y));
-                var startPtOffSet = new System.Windows.Point(Convert2XUIFromReal(shrinkPts[i].X), Convert2UIYFromReal(shrinkPts[i].Y));
-                var endPtOffset = new System.Windows.Point(Convert2XUIFromReal(shrinkPts[endIndex].X), Convert2UIYFromReal(shrinkPts[endIndex].Y));
-                drawingContext.DrawLine(pen, startPt, endPt);
-
-                //draw dot line
-                if (!GlobalVars.Instance.ShowRegions)
+                //draw org select boundary
+                for (int i = 0; i < 4; i++)
                 {
+                    int endIndex = (i + 1) % 4;
+                    var startPt = new System.Windows.Point(Convert2XUIFromReal(pts[i].X), Convert2UIYFromReal(pts[i].Y));
+                    var endPt = new System.Windows.Point(Convert2XUIFromReal(pts[endIndex].X), Convert2UIYFromReal(pts[endIndex].Y));
+                    drawingContext.DrawLine(bluePen, startPt, endPt);
+                }
+                var roiPts = Layout.Convert2ROI(pts);
+                for (int i = 0; i < 4; i++)
+                {
+                    int endIndex = (i + 1) % 4;
+                    var startPt = new System.Windows.Point(Convert2XUIFromReal(roiPts[i].X), Convert2UIYFromReal(roiPts[i].Y));
+                    var endPt = new System.Windows.Point(Convert2XUIFromReal(roiPts[endIndex].X), Convert2UIYFromReal(roiPts[endIndex].Y));
+                    drawingContext.DrawLine(pen, startPt, endPt);
+                }
+            }
+            else
+            {
+                ShrinkHelper shrinkHelper = new ShrinkHelper();
+                var shrinkPts = shrinkHelper.ShrinkRect(pts);
+                for (int i = 0; i < 4; i++)
+                {
+                    int endIndex = (i + 1) % 4;
+                    var startPt = new System.Windows.Point(Convert2XUIFromReal(pts[i].X), Convert2UIYFromReal(pts[i].Y));
+                    var endPt = new System.Windows.Point(Convert2XUIFromReal(pts[endIndex].X), Convert2UIYFromReal(pts[endIndex].Y));
+                    var startPtOffSet = new System.Windows.Point(Convert2XUIFromReal(shrinkPts[i].X), Convert2UIYFromReal(shrinkPts[i].Y));
+                    var endPtOffset = new System.Windows.Point(Convert2XUIFromReal(shrinkPts[endIndex].X), Convert2UIYFromReal(shrinkPts[endIndex].Y));
+                    drawingContext.DrawLine(pen, startPt, endPt);
+
+                    //draw dot line
                     double[] dashValues = { 5, 2 };
                     dashPen.DashStyle = new DashStyle(dashValues, 1);
                     drawingContext.DrawLine(dashPen, startPtOffSet, endPtOffset);
                 }
             }
+       
         }
 
 
@@ -398,16 +422,22 @@ namespace BrightMaster
             if (!validMouseMove)
                 return;
             ptEnd = new Point((int)mousePos.X, (int)mousePos.Y);
+            if (ptEnd.X == ptStart.X || ptEnd.Y == ptStart.Y)
+                return;
             pts = GeneratePtsRealImageCoord();
             InvalidateVisual();
         }
 
-        internal void OnLeftButtonUp()
+        internal List<PointF> OnLeftButtonUp()
         {
-            List<PointF> tmpRealPts = GeneratePtsRealImageCoord();
-            GlobalVars.Instance.MiscSettings.BoundaryPts = tmpRealPts;
+            if (ptEnd.X == ptStart.X || ptEnd.Y == ptStart.Y)
+                return null;
+
+            pts = GeneratePtsRealImageCoord();
+            GlobalVars.Instance.MiscSettings.BoundaryPts = pts;
             InvalidateVisual();
             validMouseMove = false;
+            return pts;
         }
 
         private List<PointF> GeneratePts(PointF ptStart, PointF ptEnd)

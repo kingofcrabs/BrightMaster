@@ -69,8 +69,11 @@ static void on_trackbar(int val, void* parent)
 }
 
 
-void EngineImpl::FindRectImpl(Mat& img, vector<pair<int, int>>& ptPairs, std::vector<std::pair<int, int>>&hullPairs, bool autoFindBoundary)
+
+
+void EngineImpl::FindRectImpl(Mat& img, vector<pair<int, int>>& ptPairs, std::vector<std::pair<int, int>>&hullPairs, bool mannualFindThreshold)
 {
+	
 	std::vector< std::vector<cv::Point> > allContours;
 	Mat thresholdImg;
 	Mat drawing;
@@ -128,9 +131,13 @@ void EngineImpl::FindRectImpl(Mat& img, vector<pair<int, int>>& ptPairs, std::ve
 		line(drawing, ptStart, ptEnd, color, 1);
 		hullPairs.push_back(make_pair(ptStart.x, ptStart.y));
 	}
-	if (!autoFindBoundary)
+	if (mannualFindThreshold)
 	{
 		imshow("threshold", drawing);
+	}
+	if (this->savePath != "")
+	{
+		imwrite(savePath, drawing);
 	}
 	
 	//cvWaitKey(0);
@@ -151,9 +158,10 @@ void EngineImpl::FindRectImpl(Mat& img, vector<pair<int, int>>& ptPairs, std::ve
 }
 
 void EngineImpl::FindRect(std::string sFile, int& defaultThreshold, vector<pair<int, int>>& ptPairs,
-	std::vector<std::pair<int, int>>&hullPts,bool mannualThreshold)
+	std::vector<std::pair<int, int>>&hullPts, bool mannualThreshold, string hullImageSavePath)
 {
 	thresholdVal = defaultThreshold;
+	this->savePath = hullImageSavePath;
 	auto img = cv::imread(sFile, 0);
 	Mat thresholdImg;
 	globalImg = img.clone();

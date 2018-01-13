@@ -17,7 +17,7 @@ namespace BrightMaster.Settings
         private AdjustRatio adjustRatio;
         private PowerSettings powerSettings = new PowerSettings();
         private string name;
-        private bool showRegions;
+        private bool analysisRegions;
         public Recipe()
         {
 
@@ -30,18 +30,18 @@ namespace BrightMaster.Settings
             cameraSettings = new CameraSettings();
             adjustRatio = new AdjustRatio();
             powerSettings = new PowerSettings(12f,0.1f);
-            showRegions = true;
+            analysisRegions = true;
         }
 
-        public bool ShowRegions
+        public bool AnalysisRegions
         {
             get
             {
-                return showRegions;
+                return analysisRegions;
             }
             set
             {
-                SetProperty(ref showRegions, value);
+                SetProperty(ref analysisRegions, value);
             }
         }
 

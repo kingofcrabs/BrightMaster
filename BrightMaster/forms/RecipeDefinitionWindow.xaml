@@ -176,8 +176,8 @@
 
                         <GroupBox Header="信息显示">
                             <StackPanel Margin="0,5,0,0" Orientation="Horizontal">
-                                <RadioButton IsChecked="{Binding Path=SelectedRecipe.ShowRegions}" Margin="0,0,5,0">点选</RadioButton>
-                                <RadioButton IsChecked="{Binding Path=SelectedRecipe.ShowRegions, Converter={StaticResource boolInverter}}">全屏</RadioButton>
+                                <RadioButton IsChecked="{Binding Path=SelectedRecipe.AnalysisRegions}" Margin="0,0,5,0">点选</RadioButton>
+                                <RadioButton IsChecked="{Binding Path=SelectedRecipe.AnalysisRegions, Converter={StaticResource boolInverter}}">全屏</RadioButton>
                             </StackPanel>
                         </GroupBox>
 
@@ -338,7 +338,7 @@
                 <Label>提示：</Label>
                 <TextBox Name="txtInfo" HorizontalAlignment="Stretch" Height="70"></TextBox>
             </StackPanel>
-            <Button Grid.Column="1" Name="btnOk" Margin="2,0,2,0" Content="确认" Width="100" Height="35" HorizontalAlignment="Right" VerticalAlignment="Bottom" Click="btnOk_Click"></Button>
+            <Button Grid.Column="1" Name="btnOk" Margin="2,0,2,0" Content="确认" Width="100" Height="35" HorizontalAlignment="Right" VerticalAlignment="Bottom" IsDefault="True" Click="btnOk_Click"></Button>
         </Grid>
        
     </Grid>

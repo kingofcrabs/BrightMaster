@@ -3,6 +3,7 @@ using BrightMaster.forms;
 using BrightMaster.Settings;
 using BrightMaster.utility;
 using EngineDll;
+using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -109,10 +110,7 @@ namespace BrightMaster
             { 
                 if(myCanvas.IsValidMove)
                 {
-                    var pts = myCanvas.GeneratePtsRealImageCoord();
-                    pts = Layout.Convert2ROI(pts);
-                    GlobalVars.Instance.MiscSettings.BoundaryPts = pts;
-                    GlobalVars.Instance.MiscSettings.Save();
+                    var pts = myCanvas.OnLeftButtonUp();
                     try
                     {
                         UpdateResults(pts);
@@ -123,7 +121,7 @@ namespace BrightMaster
                     }
                     SetInfo("", false);
                 }
-                myCanvas.OnLeftButtonUp();
+                
                 return;
             }
 
@@ -144,29 +142,11 @@ namespace BrightMaster
         void myCanvas_PreviewMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
             var mousePos = e.GetPosition(myCanvas);
-            //object original = e.OriginalSource;
-
-            //if (!original.GetType().Equals(typeof(ScrollViewer)))
-            //{
-            //    if (FindVisualParent<System.Windows.Controls.Primitives.ScrollBar>(original as DependencyObject) != null)
-            //    {
-            //        return;
-            //    }
-            //}
-
             if ((bool)btnSetROI.IsChecked)
             {
                 myCanvas.OnLeftButtonDown(mousePos);
                 return;
             }
-
-            //if (mousePos.X <= scrollViewer.ViewportWidth && mousePos.Y <
-            //    scrollViewer.ViewportHeight) //make sure we still can use the scrollbars
-            //{
-            //    scrollViewer.Cursor = Cursors.SizeAll;
-            //    lastDragPoint = mousePos;
-            //    //Mouse.Capture(scrollViewer);
-            //}
         }
 
         void myCanvas_PreviewMouseMove(object sender, MouseEventArgs e)
@@ -187,19 +167,6 @@ namespace BrightMaster
                 //scrollViewer.ScrollToVerticalOffset(scrollViewer.VerticalOffset - dY);
             }
         }
-
-        //private void scrollViewer_PreviewMouseWheel(object sender, MouseWheelEventArgs e)
-        //{
-        //    if (e.Delta > 0)
-        //    {
-        //        zoomRatio *= 1.2;
-        //    }
-        //    else
-        //    {
-        //        zoomRatio /= 1.2;
-        //    }
-        //    Zoom();
-        //}
 
         void MainWindow_Closing(object sender, System.ComponentModel.CancelEventArgs e)
         {
@@ -405,7 +372,7 @@ namespace BrightMaster
 
         private void Open_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
-            e.CanExecute = true;
+            e.CanExecute = GlobalVars.Instance.RecipeCollection.SelectedRecipe != null;
         }
 
         private void Curve_CanExecute(object sender, CanExecuteRoutedEventArgs e)
@@ -415,16 +382,42 @@ namespace BrightMaster
         }
         private void Save2Excel_CanExecute(object sender, CanExecuteRoutedEventArgs e)
         {
-            e.CanExecute = GlobalVars.Instance.AnalysisSuccess;
+            e.CanExecute = GlobalVars.Instance.AnalysisSuccess && SaveHelper.newFilePath != "";
         }
 
         private void Save2Excel_Executed(object sender, ExecutedRoutedEventArgs e)
         {
             SaveHelper saveHelper = new SaveHelper();
-            saveHelper.Save2Excel(brightness);
+            this.IsEnabled = false;
+            try
+            {
+                saveHelper.Save2Excel(brightness);
+            }
+            catch(Exception ex)
+            {
+                SetInfo(ex.Message, true);
+                return;
+            }
+            SetInfo("保存Excel成功！", false);
+            this.IsEnabled = true;
         }
 
+        private void NewCommand_CanExecute(object sender, CanExecuteRoutedEventArgs e)
+        {
+            e.CanExecute = GlobalVars.Instance.AnalysisSuccess ;
+        }
 
+        private void NewCommand_Executed(object sender, ExecutedRoutedEventArgs e)
+        {
+            SaveFileDialog saveFileDialog = new SaveFileDialog();
+            saveFileDialog.InitialDirectory = FolderHelper.GetDefaultSaveFolder();
+            saveFileDialog.Filter = "Excel 97 file (*.xls)|*.xls|Excel 2003 file (*.xlsx)|*.xlsx";
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                SaveHelper.CreateNewFile(saveFileDialog.FileName);
+            }
+                
+        }
 
         private void Curve_Executed(object sender, ExecutedRoutedEventArgs e)
         {
@@ -495,7 +488,7 @@ namespace BrightMaster
                     {
                         List<System.Drawing.PointF> hullPts = new List<System.Drawing.PointF>();
                         List<System.Drawing.PointF> pts = new List<System.Drawing.PointF>();
-                            FindBoundingPts(allPixels,ref pts, ref hullPts);
+                        FindBoundingPts(allPixels,ref pts, ref hullPts);
                         watch.Stop();
                         string elapsed = (watch.ElapsedMilliseconds/1000).ToString();
                         if (pts== null || pts.Count != 4)
@@ -561,14 +554,21 @@ namespace BrightMaster
             
             List<MPoint> hullMPts = new List<MPoint>();
             IEngine iEngine = new IEngine();
-            var mpts = iEngine.FindRect(brightness.ImagePath, ref GlobalVars.Instance.MiscSettings.thresholdVal, GlobalVars.Instance.MiscSettings.MannualThreshold, hullMPts);
+            bool first = GlobalVars.Instance.IsFirst;
+            string savePath = first ? FolderHelper.GetImageFolder() + "first.jpg" : "";
+
+
+            var mpts = iEngine.FindRect(brightness.ImagePath,
+                ref GlobalVars.Instance.MiscSettings.thresholdVal, 
+                GlobalVars.Instance.MiscSettings.MannualThreshold,
+                hullMPts,savePath);
             if (mpts.Count == 0)
                 return;
             if (mpts.Count != 4)
             {
                 throw new Exception("找不到外框！");
             }
-            pts = AdjustPosition2ROI(mpts);
+            pts = Layout.SortPosition(mpts);
             foreach(var mpt in hullMPts)
             {
                 hullPts.Add(new System.Drawing.Point(mpt.x, mpt.y));
@@ -581,6 +581,8 @@ namespace BrightMaster
 
         private void UpdateResults(List<System.Drawing.PointF> pts,List<System.Drawing.PointF> hullPts = null)
         {
+            if (pts == null || pts.Count == 0)
+                return;
 
             if (hullPts == null || hullPts.Count == 0)
                 brightness.UpdateROI(pts);
@@ -588,6 +590,7 @@ namespace BrightMaster
                 brightness.UpdateConvexHull(hullPts);
                 
             myCanvas.SetMaxMinPosition(brightness.MaxPosition, brightness.MinPosition);
+            pts = Layout.Convert2ROI(pts);
             var pixelInfos = brightness.GetPixelInfos(pts);
             lstviewResult.ItemsSource = pixelInfos;
             PixelInfo.Save2File(pixelInfos);
@@ -608,24 +611,7 @@ namespace BrightMaster
             //saveHelper.Save2Excel(wholePanelResult,brightness);
         }
 
-        private List<System.Drawing.PointF> AdjustPosition2ROI(List<MPoint> mpts)
-        {
-            List<System.Drawing.PointF> pts = new List<System.Drawing.PointF>();
-            int avgX = mpts.Sum(pt => pt.x) / 4;
-            int avgY = mpts.Sum(pt => pt.y) / 4;
-            Point ptMassCenter = new Point(avgX, avgY);
-            MPoint topLeft = mpts.Where(pt => pt.x < avgX && pt.y < avgY).First();
-            MPoint topRight = mpts.Where(pt => pt.x > avgX && pt.y < avgY).First();
-            MPoint bottomRight = mpts.Where(pt => pt.x > avgX && pt.y > avgY).First();
-            MPoint bottomLeft = mpts.Where(pt => pt.x < avgX && pt.y > avgY).First();
-            pts.Add(new System.Drawing.Point(topLeft.x, topLeft.y));
-            pts.Add(new System.Drawing.Point(topRight.x, topRight.y));
-            pts.Add(new System.Drawing.Point(bottomRight.x, bottomRight.y));
-            pts.Add(new System.Drawing.Point(bottomLeft.x, bottomLeft.y));
-            pts = Layout.Convert2ROI(pts);
-            
-            return pts;
-        }
+       
 
         private void CheckPowerSetting()
         {
@@ -653,12 +639,16 @@ namespace BrightMaster
                 {
                     if (x < 50 || y < 50 || x > 250 || y > 250)
                     {
-                        linePixelInfos.Add(new PixelInfo(ID++,0, 0, 0));
+                        string sID = ID.ToString();
+                        ID++;
+                        linePixelInfos.Add(new PixelInfo(sID, 0, 0, 0));
                     }
                     else
                     {
                         float tVal = 800 + rnd.Next(1,200);
-                        linePixelInfos.Add(new PixelInfo(ID++,tVal, tVal, tVal));
+                        string sID = ID.ToString();
+                        ID++;
+                        linePixelInfos.Add(new PixelInfo(sID, tVal, tVal, tVal));
                     }
                         
                     
@@ -679,15 +669,9 @@ namespace BrightMaster
 
         }
 
+       
+
       
-
-       
-
-       
-
-
-       
-
      
     }
 

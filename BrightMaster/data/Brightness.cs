@@ -110,7 +110,7 @@ namespace BrightMaster
             double height = yEnd - yStart;
             double width = xEnd - xStart;
             var circle = GlobalVars.Instance.Layout.GetCenterCircle(hullPts);
-            Center = GetAvgVals(circle.x, circle.y, circle.radius, 0);
+            Center = GetAvgVals(circle.x, circle.y, circle.radius, "Center");
 
             for (int i = 0; i < 4; i++)
             {
@@ -273,7 +273,7 @@ namespace BrightMaster
             double height = bottomLeft.Y - topLeft.Y;
             double width = topRight.X - topLeft.X;
             var circle = GlobalVars.Instance.Layout.GetCenterCircle(new Rect(topLeft.X,topLeft.Y,bottomRight.X - topLeft.X,bottomRight.Y - topLeft.Y));
-            Center = GetAvgVals(circle.x, circle.y, circle.radius, 0);
+            Center = GetAvgVals(circle.x, circle.y, circle.radius, "Center");
 
             for(int i = 0; i< 4; i++)
             {
@@ -361,14 +361,28 @@ namespace BrightMaster
             List<PixelInfo> pixelInfos = new List<PixelInfo>();
             var circles = GlobalVars.Instance.Layout.GetCircles(pts);
             int id = 1;
-            foreach(var circle in circles)
+            if(GlobalVars.Instance.AnalysisRegions)
             {
-                pixelInfos.Add(GetAvgVals(circle.x, circle.y, circle.radius,id++));
+                foreach (var circle in circles)
+                {
+                    pixelInfos.Add(GetAvgVals(circle.x, circle.y, circle.radius, id++.ToString()));
+                }
+            }
+            else
+            {
+                var lightPixel = _allPixels[(int)MaxPosition.Y,(int)MaxPosition.X];
+                var pInfoMax = new PixelInfo("Max",lightPixel);
+                pixelInfos.Add(pInfoMax);
+                
+                lightPixel = _allPixels[(int)MinPosition.Y, (int)MinPosition.X];
+                var pInfoMin = new PixelInfo("Min", lightPixel);
+                pixelInfos.Add(pInfoMin);
+                pixelInfos.Add(Center);
             }
             return pixelInfos;
         }
 
-        private PixelInfo GetAvgVals(float xx, float yy, float radius, int ID)
+        private PixelInfo GetAvgVals(float xx, float yy, float radius, string ID)
         {
             List<LightPixelInfo> vals = new List<LightPixelInfo>();
             int xStart = (int)(xx - radius);

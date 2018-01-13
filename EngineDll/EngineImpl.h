@@ -33,13 +33,13 @@ public:
 	
 
 	void Convert2PesudoColor(std::string srcFile, std::string destFile);
-	void FindRect(std::string sFile, int& defaultThreshold, std::vector<std::pair<int, int>>& pts, std::vector<std::pair<int,int>>&hullPts, bool mannualThreshold);
-	void FindRectImpl(Mat& img, std::vector<std::pair<int, int>>& ptPairs, std::vector<std::pair<int, int>>&hullPts, bool autoFindBoundary = false);
+	void FindRect(std::string sFile, int& defaultThreshold, std::vector<std::pair<int, int>>& pts, std::vector<std::pair<int,int>>&hullPts, bool mannualThreshold,std::string savePath);
+	void FindRectImpl(Mat& img, std::vector<std::pair<int, int>>& ptPairs, std::vector<std::pair<int, int>>&hullPts, bool mannualFindThreshold = true);
 	std::vector<std::vector<Point>> contours;
 	int max, min;
 private:
 	int FindThreshold(Mat& img);
-	
+	std::string savePath;
 	double  GetDistance(double x1, double y1, double x2, double y2);
 	void GothroughImage(Mat& src);
 	void SaveHistogram(Mat& src);

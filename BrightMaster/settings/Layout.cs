@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EngineDll;
+using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
@@ -401,7 +402,24 @@ namespace BrightMaster.Settings
             return circles;
         }
 
+        static public List<System.Drawing.PointF> SortPosition(List<MPoint> mpts)
+        {
+            List<System.Drawing.PointF> pts = new List<System.Drawing.PointF>();
+            float avgX = mpts.Sum(pt => pt.x) / 4;
+            float avgY = mpts.Sum(pt => pt.y) / 4;
+            PointF ptMassCenter = new PointF(avgX, avgY);
+            MPoint topLeft = mpts.Where(pt => pt.x < avgX && pt.y < avgY).First();
+            MPoint topRight = mpts.Where(pt => pt.x > avgX && pt.y < avgY).First();
+            MPoint bottomRight = mpts.Where(pt => pt.x > avgX && pt.y > avgY).First();
+            MPoint bottomLeft = mpts.Where(pt => pt.x < avgX && pt.y > avgY).First();
+            pts.Add(new System.Drawing.Point(topLeft.x, topLeft.y));
+            pts.Add(new System.Drawing.Point(topRight.x, topRight.y));
+            pts.Add(new System.Drawing.Point(bottomRight.x, bottomRight.y));
+            pts.Add(new System.Drawing.Point(bottomLeft.x, bottomLeft.y));
+            //pts = Layout.Convert2ROI(pts);
 
+            return pts;
+        }
 
         internal static List<System.Drawing.PointF> Convert2ROI(List<System.Drawing.PointF> pts)
         {
@@ -411,10 +429,7 @@ namespace BrightMaster.Settings
             var topRight = pts[1];
             var bottomRight = pts[2];
             var bottomLeft = pts[3];
-            //double topWidth = topRight.X - topLeft.X;
-            //double bottomWidth = bottomRight.X - bottomLeft.X;
-            //double 
-
+           
            
             var layout = GlobalVars.Instance.Layout;
             

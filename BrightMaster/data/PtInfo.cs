@@ -209,15 +209,15 @@ namespace BrightMaster
 
        
 
-        private int id;
-        public int ID
+        private string id;
+        public string ID
         {
             get
             {
                 return id;
             }
         }
-        public PixelInfo(int id, LightPixelInfo lightInfo)
+        public PixelInfo(string id, LightPixelInfo lightInfo)
         {
             this.id = id;
             _X = Keep4Valid(lightInfo.X);
@@ -240,7 +240,7 @@ namespace BrightMaster
             LValid = _Y > min;
         }
 
-        public PixelInfo(int id,float XX, float YY, float ZZ)
+        public PixelInfo(string id,float XX, float YY, float ZZ)
         {
             this.id = id;
             _X = Keep4Valid(XX);

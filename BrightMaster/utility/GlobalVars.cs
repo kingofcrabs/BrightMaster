@@ -1,7 +1,6 @@
 ﻿using BrightMaster.data;
 using BrightMaster.settings;
 using BrightMaster.Settings;
-using BrightMaster.Settings;
 using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
@@ -22,7 +21,7 @@ namespace BrightMaster
         HistoryInfoCollection wholePanelHistroyInfoCollection = new HistoryInfoCollection();
         private RecipeCollection recipeCollection = new RecipeCollection();
         bool needBarcode = false;
-        
+        bool isFirst = true;
         private GlobalVars()
         {
             needBarcode = bool.Parse(ConfigurationManager.AppSettings["InputBarcode"]);
@@ -126,13 +125,13 @@ namespace BrightMaster
             }
         }
 
-        public bool ShowRegions
+        public bool AnalysisRegions
         {
             get
             {
                 if (recipeCollection.SelectedRecipe == null)
                     return true;
-                return recipeCollection.SelectedRecipe.ShowRegions;
+                return recipeCollection.SelectedRecipe.AnalysisRegions;
             }
         }
 
@@ -178,5 +177,18 @@ namespace BrightMaster
 
         public bool AnalysisSuccess { get; set; }
         public string Barcode { get; set; }
+
+        public bool IsFirst
+        {
+            get
+            {
+                if(isFirst)
+                {
+                    isFirst = false;
+                    return true;
+                }
+                return isFirst;
+            }
+        }
     }
 }
