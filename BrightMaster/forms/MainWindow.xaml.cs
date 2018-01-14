@@ -259,6 +259,7 @@ namespace BrightMaster
         {
             await Task.Run(() =>
             {
+                GlobalVars.Instance.Barcode = DateTime.Now.ToString("hhmmss");
                 var allPixels = GlobalVars.Instance.UAController.LoadXYZImage(fileName);
                 this.Dispatcher.Invoke(() =>
                 {
@@ -274,7 +275,7 @@ namespace BrightMaster
                         SetInfo("采集完成。", false);
                         UpdateResults(pts,hullPts);
                     }
-                    InvalidateVisual();
+                   
                 });
             });
         }
@@ -350,6 +351,7 @@ namespace BrightMaster
             }
             this.IsEnabled = true;
             SetInfo("打开成功", false);
+            CommandManager.InvalidateRequerySuggested();
         }
 
         private void Power_CanExecute(object sender, CanExecuteRoutedEventArgs e)
@@ -388,7 +390,9 @@ namespace BrightMaster
         private void Save2Excel_Executed(object sender, ExecutedRoutedEventArgs e)
         {
             SaveHelper saveHelper = new SaveHelper();
+            SetInfo("正在保存Excel！", false);
             this.IsEnabled = false;
+            this.Refresh();
             try
             {
                 saveHelper.Save2Excel(brightness);
@@ -396,6 +400,7 @@ namespace BrightMaster
             catch(Exception ex)
             {
                 SetInfo(ex.Message, true);
+                this.IsEnabled = true;
                 return;
             }
             SetInfo("保存Excel成功！", false);
@@ -411,10 +416,11 @@ namespace BrightMaster
         {
             SaveFileDialog saveFileDialog = new SaveFileDialog();
             saveFileDialog.InitialDirectory = FolderHelper.GetDefaultSaveFolder();
-            saveFileDialog.Filter = "Excel 97 file (*.xls)|*.xls|Excel 2003 file (*.xlsx)|*.xlsx";
+            saveFileDialog.Filter = "Excel file (*.xls)|*.xls";
             if (saveFileDialog.ShowDialog() == true)
             {
                 SaveHelper.CreateNewFile(saveFileDialog.FileName);
+                SetInfo("新建excel成功！",false);
             }
                 
         }
@@ -590,7 +596,8 @@ namespace BrightMaster
                 brightness.UpdateConvexHull(hullPts);
                 
             myCanvas.SetMaxMinPosition(brightness.MaxPosition, brightness.MinPosition);
-            pts = Layout.Convert2ROI(pts);
+            if(GlobalVars.Instance.AnalysisRegions)
+                pts = Layout.Convert2ROI(pts);
             var pixelInfos = brightness.GetPixelInfos(pts);
             lstviewResult.ItemsSource = pixelInfos;
             PixelInfo.Save2File(pixelInfos);
@@ -607,8 +614,7 @@ namespace BrightMaster
             SaveHelper saveHelper = new SaveHelper();
             saveHelper.Save();
             GlobalVars.Instance.AnalysisSuccess = true;
-            //SaveHelper saveHelper = new SaveHelper();
-            //saveHelper.Save2Excel(wholePanelResult,brightness);
+            
         }
 
        
@@ -622,10 +628,6 @@ namespace BrightMaster
             }
             powerControl.PowerOn();
         }
-
-    
-
-      
 
         private List<List<PixelInfo>> GenerateTestData()
         {
@@ -656,7 +658,6 @@ namespace BrightMaster
                 allPixelInfos.Add(linePixelInfos);
             }
             return allPixelInfos;
-            
         }
 
         private void SetColumnsVisibility(object sender, RoutedEventArgs e)
@@ -668,11 +669,6 @@ namespace BrightMaster
             InvalidateVisual();
 
         }
-
-       
-
-      
-     
     }
 
     public static class ExtensionMethods
@@ -681,9 +677,7 @@ namespace BrightMaster
 
         public static void Refresh(this UIElement uiElement)
         {
-
             uiElement.Dispatcher.Invoke(DispatcherPriority.ContextIdle, EmptyDelegate);
-
         }
 
     }

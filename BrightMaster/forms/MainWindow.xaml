@@ -52,7 +52,7 @@
         <KeyBinding Modifiers="Ctrl" Key="E" Command="{StaticResource Save2Excel}"/>
     </Window.InputBindings>
     <Window.CommandBindings>
-        <CommandBinding Command="ApplicationCommands.New" Executed="NewCommand_Executed" CanExecute="NewCommand_CanExecute" />
+        
         <CommandBinding Command="{StaticResource StartAcquire}"
                     CanExecute="Acquire_CanExecute"
                     Executed="Acquire_Executed"/>
@@ -75,6 +75,7 @@
         <CommandBinding Command="Help" Executed="Help_Executed" CanExecute="Help_CanExecute"/>
         <CommandBinding Command="Save" Executed="Save_Executed" CanExecute="Save_CanExecute"/>
         <CommandBinding Command="Open" Executed="Open_Executed" CanExecute="Open_CanExecute"/>
+        <CommandBinding Command="New" Executed="NewCommand_Executed" CanExecute="NewCommand_CanExecute" />
         <CommandBinding Command="{StaticResource RecipeDef}"
                     CanExecute="RecipeDef_CanExecute"
                     Executed="RecipeDef_Executed"/>
@@ -149,12 +150,16 @@
             <ToggleButton Style="{StaticResource ToggleButtonStyle1}" Click="btnSetROI_Click" Name="btnSetROI" >
                 <Image Source="/Images/roi.jpg"></Image>
             </ToggleButton>
+            <Button Command="New"  >
+                <Image Source="/Images/new.jpg"></Image>
+            </Button>
             <Button  Command="{StaticResource Save2Excel}"  Name="btnSaveToExcel" >
                 <Image Source="/Images/excel.png"></Image>
             </Button>
             <Button Command="{StaticResource Curve}"  >
-                <Image Source="/Images/curve.png"></Image>
+                <Image Source="/Images/curve.jpg"></Image>
             </Button>
+            
             <Button  Command="{StaticResource LiveFocus}"  Name="btnLiveFocus">
                 <Image ToolTip="预览"  Source="/Images/camera.jpg"/>
             </Button>
