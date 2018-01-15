@@ -416,7 +416,7 @@ namespace BrightMaster
         {
             SaveFileDialog saveFileDialog = new SaveFileDialog();
             saveFileDialog.InitialDirectory = FolderHelper.GetDefaultSaveFolder();
-            saveFileDialog.Filter = "Excel file (*.xls)|*.xls";
+            saveFileDialog.Filter = "Excel file (*.xlsx)|*.xlsx";
             if (saveFileDialog.ShowDialog() == true)
             {
                 SaveHelper.CreateNewFile(saveFileDialog.FileName);

@@ -132,7 +132,7 @@ namespace BrightMaster
             string templateFolder = GetExeParentFolder() + "Template\\";
             if (!Directory.Exists(templateFolder))
                 throw new Exception("No Template folder!");
-            string file = templateFolder + "wholePanel.xls";
+            string file = templateFolder + "wholePanel.xlsx";
             if(!File.Exists(file))
                 throw new Exception("No Template file!");
             return file;

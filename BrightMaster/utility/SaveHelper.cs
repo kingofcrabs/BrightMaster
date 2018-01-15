@@ -33,32 +33,46 @@ namespace BrightMaster
             
         }
 
-        private void SaveWholePanelInfosExcel(string excelFile, TestResult wholePanelResult,string imagePath)
+        private Boolean IsEmptySheet(Worksheet wksheet)
+        {
+            int row;
+            int col;
+            row = wksheet.UsedRange.Rows.Count; //xlWorkSheet is Excel.Worksheet object
+            col = wksheet.UsedRange.Columns.Count;
+            return row == 1 && col == 1;
+        }
+
+        private void SaveWholePanelInfosExcel(string dstExcelFile, TestResult wholePanelResult,string imagePath)
         {
             var xlApp = new Excel.Application();
-            string sFile = FolderHelper.GetTemplateFile();
+            string srcFile = FolderHelper.GetTemplateFile();
             Worksheet wkSheet;
-            Excel.Workbook xlWorkBook;
-            if (isFirst)
+            Excel.Workbook dstWorkBook;
+            Excel.Workbook templateWorkBook;
+             bool isCopied = false;
+            if (isFirst) //find whether need to copy
             {
                 isFirst = false;
-                File.Copy(sFile, excelFile, true);
-                xlWorkBook = xlApp.Workbooks.Open(excelFile);
+                FileInfo fileInfo = new FileInfo(dstExcelFile);
+                if (!File.Exists(dstExcelFile))
+                {
+                    File.Copy(srcFile, dstExcelFile);
+                    isCopied = true;
+                }
+                else if(fileInfo.Length < 9*1000)
+                {
+                    File.Copy(srcFile, dstExcelFile,true);
+                    isCopied = true;
+                }
             }
-            else
+            templateWorkBook = xlApp.Workbooks.Open(srcFile);
+            dstWorkBook = xlApp.Workbooks.Open(dstExcelFile);
+            if(!isCopied) //append new worksheet
             {
-                xlWorkBook = xlApp.Workbooks.Open(excelFile);
-                xlWorkBook.Sheets.Add(After: xlWorkBook.Sheets[xlWorkBook.Sheets.Count]);
-                Excel.Range from = xlWorkBook.Worksheets[1].Range("A1:L5");
-                Excel.Range to = xlWorkBook.Worksheets[xlWorkBook.Sheets.Count].Range("A1:L5");
-                from.Copy(to);
-
-                from = xlWorkBook.Worksheets[1].Range("A27:G28");
-                to = xlWorkBook.Worksheets[xlWorkBook.Sheets.Count].Range("A27:G28");
-                from.Copy(to);
+                AddNewSheetThenCopy(templateWorkBook, dstWorkBook);
             }
-            wkSheet = xlWorkBook.Worksheets[xlWorkBook.Sheets.Count];
-            wkSheet.Name = GetSheetName(xlWorkBook);
+            wkSheet = dstWorkBook.Worksheets[dstWorkBook.Sheets.Count];
+            wkSheet.Name = GetSheetName(dstWorkBook);
             wkSheet.Cells[29, 1].Value = wholePanelResult.LAvg;
             wkSheet.Cells[29, 2].Value = wholePanelResult.LMax;
             wkSheet.Cells[29, 3].Value = wholePanelResult.LMin;
@@ -67,9 +81,22 @@ namespace BrightMaster
             wkSheet.Cells[29, 6].Value = wholePanelResult.y;
             wkSheet.Cells[29, 7].Value = wholePanelResult.Uniform;
             wkSheet.Shapes.AddPicture(imagePath, MsoTriState.msoFalse, MsoTriState.msoCTrue, 0, 120, 320, 240);
-            xlWorkBook.Close(true);
+            templateWorkBook.Close(true);
+            dstWorkBook.Close(true);
             xlApp.Quit();
             Marshal.ReleaseComObject(xlApp);
+        }
+
+        private void AddNewSheetThenCopy(Workbook templateWorkBook, Workbook dstWorkBook)
+        {
+            dstWorkBook.Sheets.Add(After: dstWorkBook.Sheets[dstWorkBook.Sheets.Count]);
+            Excel.Range from = templateWorkBook.Worksheets[1].Range("A1:L5");
+            Excel.Range to = dstWorkBook.Worksheets[dstWorkBook.Sheets.Count].Range("A1:L5");
+            from.Copy(to);
+
+            from = templateWorkBook.Worksheets[1].Range("A27:G28");
+            to = dstWorkBook.Worksheets[dstWorkBook.Sheets.Count].Range("A27:G28");
+            from.Copy(to);
         }
 
         private string GetSheetName(Workbook xlWorkBook)
@@ -95,13 +122,12 @@ namespace BrightMaster
 
         private void SaveWholePanelInfosCSV(string csvFile)
         {
-            string header = "年月日,流水号,中心亮度,x,y,全屏扫描数据,合格";
-            int seqNo = 1;
+            string header = "年月日,条码,中心亮度,x,y,全屏扫描数据,合格";
             List<string> strs = new List<string>() { header };
             foreach (var info in GlobalVars.Instance.WholePanelHistoryInfoCollection.AllInfos)
             {
                 string valid = info.IsOk ? "是" :"否";
-                strs.Add(string.Format("{0},{1},{2},{3},{4},{5},{6}", DateTime.Now.ToString("yyMMdd"), seqNo++, info.LCenter, info.x, info.y, info.Uniform,valid));
+                strs.Add(string.Format("{0},{1},{2},{3},{4},{5},{6}", DateTime.Now.ToString("yyMMdd"), info.Barcode, info.LCenter, info.x, info.y, info.Uniform,valid));
             }
 
             File.WriteAllLines(csvFile, strs,Encoding.Default);
@@ -111,6 +137,8 @@ namespace BrightMaster
         {
             var wholePanelResult = TestResult.GetWholePanelResult(brightness);
             brightness.SaveImage();
+            if (newFilePath == "")
+                throw new Exception("未设置保存路径！");
             SaveWholePanelInfosExcel(newFilePath, wholePanelResult, brightness.ImagePath);
         }
 
