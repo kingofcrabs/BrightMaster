@@ -130,15 +130,15 @@ namespace BrightMaster
                 },
                 () =>
                 {
-                    GetMaxMin((int)(yStart + height / 4), (int)(yStart + height / 2), ref maxArray[0], ref minArray[0], ref avg[0], ref minPts[0], ref maxPts[0], hullPtsShrinked);
+                    GetMaxMin((int)(yStart + height / 4), (int)(yStart + height / 2), ref maxArray[1], ref minArray[1], ref avg[1], ref minPts[1], ref maxPts[1], hullPtsShrinked);
                 },
                 () =>
                 {
-                    GetMaxMin((int)(yStart + height / 2), (int)(yStart + height * 3 / 4), ref maxArray[0], ref minArray[0], ref avg[0], ref minPts[0], ref maxPts[0], hullPtsShrinked);
+                    GetMaxMin((int)(yStart + height / 2), (int)(yStart + height * 3 / 4), ref maxArray[2], ref minArray[2], ref avg[2], ref minPts[2], ref maxPts[2], hullPtsShrinked);
                 },
                 () =>
                 {
-                    GetMaxMin((int)(yStart + height * 3 / 4), (int)yEnd, ref maxArray[0], ref minArray[0], ref avg[0], ref minPts[0], ref maxPts[0],  hullPtsShrinked);
+                    GetMaxMin((int)(yStart + height * 3 / 4), (int)yEnd, ref maxArray[3], ref minArray[3], ref avg[3], ref minPts[3], ref maxPts[3],  hullPtsShrinked);
                 });
                 float sum = 0;
                 for (int i = 0; i < 4; i++)
