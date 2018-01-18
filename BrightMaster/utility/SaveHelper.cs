@@ -59,11 +59,11 @@ namespace BrightMaster
                     File.Copy(srcFile, dstExcelFile);
                     isCopied = true;
                 }
-                else if(fileInfo.Length < 9*1000)
-                {
-                    File.Copy(srcFile, dstExcelFile,true);
-                    isCopied = true;
-                }
+                //else if(fileInfo.Length < 9*1000)
+                //{
+                //    File.Copy(srcFile, dstExcelFile,true);
+                //    isCopied = true;
+                //}
             }
             templateWorkBook = xlApp.Workbooks.Open(srcFile);
             dstWorkBook = xlApp.Workbooks.Open(dstExcelFile);
@@ -80,7 +80,8 @@ namespace BrightMaster
             wkSheet.Cells[29, 5].Value = wholePanelResult.x;
             wkSheet.Cells[29, 6].Value = wholePanelResult.y;
             wkSheet.Cells[29, 7].Value = wholePanelResult.Uniform;
-            wkSheet.Shapes.AddPicture(imagePath, MsoTriState.msoFalse, MsoTriState.msoCTrue, 0, 120, 320, 240);
+            var pseudoImage = ImageHelper.SaveImageAsPseudoColor(imagePath);
+            wkSheet.Shapes.AddPicture(pseudoImage, MsoTriState.msoFalse, MsoTriState.msoCTrue, 0, 120, 320, 240);
             templateWorkBook.Close(true);
             dstWorkBook.Close(true);
             xlApp.Quit();

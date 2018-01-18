@@ -27,6 +27,18 @@ namespace BrightMaster
             Bitmap bmp = new Bitmap(colorImgPath);
             return bmp.ToBitmapImage();
         }
+
+        static public string SaveImageAsPseudoColor(string fileName)
+        {
+            IEngine engineDll = new IEngine();
+            DirectoryInfo DirectoryInfo = new DirectoryInfo(fileName);
+            string parentDirectory = DirectoryInfo.Parent.FullName;
+            string colorImgPath = parentDirectory + "\\color.jpg";
+            engineDll.Convert2PseudoColor(fileName, colorImgPath);
+            return colorImgPath;
+        }
+
+
         public static void SaveBitmapImageIntoFile(BitmapImage bitmapImage, string filePath)
         {
             BitmapEncoder encoder = new JpegBitmapEncoder();
