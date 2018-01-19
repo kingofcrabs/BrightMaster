@@ -361,28 +361,25 @@ namespace BrightMaster
             List<PixelInfo> pixelInfos = new List<PixelInfo>();
             var circles = GlobalVars.Instance.Layout.GetCircles(pts);
             int id = 1;
-            foreach (var circle in circles)
+          
+            if(GlobalVars.Instance.AnalysisRegions)
             {
-                pixelInfos.Add(GetAvgVals(circle.x, circle.y, circle.radius, id++.ToString()));
+                foreach (var circle in circles)
+                {
+                    pixelInfos.Add(GetAvgVals(circle.x, circle.y, circle.radius, id++.ToString()));
+                }
             }
-            //if(GlobalVars.Instance.AnalysisRegions)
-            //{
-            //    foreach (var circle in circles)
-            //    {
-            //        pixelInfos.Add(GetAvgVals(circle.x, circle.y, circle.radius, id++.ToString()));
-            //    }
-            //}
-            //else
-            //{
-            var lightPixel = _allPixels[(int)MaxPosition.Y,(int)MaxPosition.X];
-            var pInfoMax = new PixelInfo("Max",lightPixel);
-            pixelInfos.Add(pInfoMax);
+            else
+            {
+                var lightPixel = _allPixels[(int)MaxPosition.Y,(int)MaxPosition.X];
+                var pInfoMax = new PixelInfo("Max",lightPixel);
+                pixelInfos.Add(pInfoMax);
                 
-            lightPixel = _allPixels[(int)MinPosition.Y, (int)MinPosition.X];
-            var pInfoMin = new PixelInfo("Min", lightPixel);
-            pixelInfos.Add(pInfoMin);
-            pixelInfos.Add(Center);
-            //}
+                lightPixel = _allPixels[(int)MinPosition.Y, (int)MinPosition.X];
+                var pInfoMin = new PixelInfo("Min", lightPixel);
+                pixelInfos.Add(pInfoMin);
+                pixelInfos.Add(Center);
+            }
             return pixelInfos;
         }
 

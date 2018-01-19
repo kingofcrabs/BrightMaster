@@ -2,11 +2,15 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:local="clr-namespace:BrightMaster"
+         xmlns:System="clr-namespace:System;assembly=mscorlib"
         xmlns:Settings="clr-namespace:BrightMaster.Settings"
         Title="RecipeDefinition" Height="750" Width="1000">
     <Window.Resources>
-            <Settings:BooleanInverter x:Key="boolInverter" />
+        <Settings:RadioButtonCheckedConverter x:Key="RadioButtonCheckedConverter" />
+        <Settings:BooleanInverter x:Key="boolInverter" />
             <local:NegateBooleanConverter x:Key="NegInverter"/>
+            <System:Boolean x:Key="True">True</System:Boolean>
+            <System:Boolean x:Key="False">False</System:Boolean>
     </Window.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
@@ -176,8 +180,9 @@
 
                         <GroupBox Header="信息显示">
                             <StackPanel Margin="0,5,0,0" Orientation="Horizontal">
-                                <RadioButton IsChecked="{Binding Path=SelectedRecipe.AnalysisRegions}" Margin="0,0,5,0">点选</RadioButton>
-                                <RadioButton IsChecked="{Binding Path=SelectedRecipe.AnalysisRegions, Converter={StaticResource boolInverter}}">全屏</RadioButton>
+
+                                <RadioButton GroupName="regionOrWholePanel" IsChecked="{Binding Path=SelectedRecipe.AnalysisRegions,Converter={StaticResource RadioButtonCheckedConverter},ConverterParameter={StaticResource True}}" Margin="0,0,5,0">点选</RadioButton>
+                                <RadioButton GroupName="regionOrWholePanel" IsChecked="{Binding Path=SelectedRecipe.AnalysisRegions, Converter={StaticResource RadioButtonCheckedConverter}, ConverterParameter={StaticResource False}}">全屏</RadioButton>
                             </StackPanel>
                         </GroupBox>
 

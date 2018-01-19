@@ -301,6 +301,8 @@ namespace BrightMaster
                 var endPt = new System.Windows.Point(Convert2XUIFromReal(hullPts[endIndex].X), Convert2UIYFromReal(hullPts[endIndex].Y));
                 drawingContext.DrawLine(pen, startPt, endPt);
             }
+
+            System.Windows.Media.Pen dashPen = new System.Windows.Media.Pen(blueBrush, 1);
             ShrinkHelper shrinkHelper = new ShrinkHelper();
             var shrinkedHullPts = shrinkHelper.ShrinkConvexHull(hullPts);
             for (int i = 0; i < shrinkedHullPts.Count; i++)
@@ -308,7 +310,54 @@ namespace BrightMaster
                 int endIndex = (i + 1) % shrinkedHullPts.Count;
                 var startPt = new System.Windows.Point(Convert2XUIFromReal(shrinkedHullPts[i].X), Convert2UIYFromReal(shrinkedHullPts[i].Y));
                 var endPt = new System.Windows.Point(Convert2XUIFromReal(shrinkedHullPts[endIndex].X), Convert2UIYFromReal(shrinkedHullPts[endIndex].Y));
-                drawingContext.DrawLine(bluePen, startPt, endPt);
+                drawingContext.DrawLine(dashPen, startPt, endPt);
+            }
+        }
+
+        private void DrawROIOrShrink(List<PointF> pts, DrawingContext drawingContext,bool isUserSelected)
+        {
+            System.Windows.Media.Brush redBrush = System.Windows.Media.Brushes.Red;
+            System.Windows.Media.Brush blueBrush = System.Windows.Media.Brushes.Blue;
+            System.Windows.Media.Pen pen = new System.Windows.Media.Pen(redBrush, 1);
+            System.Windows.Media.Pen bluePen = new System.Windows.Media.Pen(blueBrush, 1);
+            System.Windows.Media.Pen dashPen = new System.Windows.Media.Pen(blueBrush, 1);
+            if (GlobalVars.Instance.AnalysisRegions)//no shrink for regions analysis
+            {
+                //draw org select boundary
+                for (int i = 0; i < 4; i++)
+                {
+                    int endIndex = (i + 1) % 4;
+                    var startPt = new System.Windows.Point(Convert2XUIFromReal(pts[i].X), Convert2UIYFromReal(pts[i].Y));
+                    var endPt = new System.Windows.Point(Convert2XUIFromReal(pts[endIndex].X), Convert2UIYFromReal(pts[endIndex].Y));
+                    drawingContext.DrawLine(bluePen, startPt, endPt);
+                }
+                var roiPts = Layout.Convert2ROI(pts);
+                for (int i = 0; i < 4; i++)
+                {
+                    int endIndex = (i + 1) % 4;
+                    var startPt = new System.Windows.Point(Convert2XUIFromReal(roiPts[i].X), Convert2UIYFromReal(roiPts[i].Y));
+                    var endPt = new System.Windows.Point(Convert2XUIFromReal(roiPts[endIndex].X), Convert2UIYFromReal(roiPts[endIndex].Y));
+                    drawingContext.DrawLine(pen, startPt, endPt);
+                }
+            }
+            else
+            {
+                ShrinkHelper shrinkHelper = new ShrinkHelper();
+                var shrinkPts = isUserSelected ? shrinkHelper.ShrinkRect(pts) : shrinkHelper.ShrinkConvexHull(pts);
+                for (int i = 0; i < 4; i++)
+                {
+                    int endIndex = (i + 1) % 4;
+                    var startPt = new System.Windows.Point(Convert2XUIFromReal(pts[i].X), Convert2UIYFromReal(pts[i].Y));
+                    var endPt = new System.Windows.Point(Convert2XUIFromReal(pts[endIndex].X), Convert2UIYFromReal(pts[endIndex].Y));
+                    var startPtOffSet = new System.Windows.Point(Convert2XUIFromReal(shrinkPts[i].X), Convert2UIYFromReal(shrinkPts[i].Y));
+                    var endPtOffset = new System.Windows.Point(Convert2XUIFromReal(shrinkPts[endIndex].X), Convert2UIYFromReal(shrinkPts[endIndex].Y));
+                    drawingContext.DrawLine(pen, startPt, endPt);
+
+                    //draw dot line
+                    double[] dashValues = { 5, 2 };
+                    dashPen.DashStyle = new DashStyle(dashValues, 1);
+                    drawingContext.DrawLine(dashPen, startPtOffSet, endPtOffset);
+                }
             }
         }
 
