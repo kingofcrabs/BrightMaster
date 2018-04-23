@@ -7,11 +7,13 @@ using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
+using System.ComponentModel;
 using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.IO.Ports;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
@@ -31,7 +33,7 @@ namespace BrightMaster
     /// <summary>
     /// Interaction logic for MainWindow.xaml
     /// </summary>
-    public partial class MainWindow : Window
+    public partial class MainWindow : Window, INotifyPropertyChanged
     {
         Brightness brightness = null;
         ObservableCollection<PixelInfo> pixelInfos = new ObservableCollection<PixelInfo>();
@@ -40,14 +42,37 @@ namespace BrightMaster
         ProgressForm progressForm;
         PowerControl powerControl;
         Stopwatch watch = new Stopwatch();
+        Point curMousePosition;
         public MainWindow()
         {
-            InitializeComponent();
-            this.Loaded += MainWindow_Loaded;
-            this.Closing += MainWindow_Closing;
-            myCanvas.PreviewMouseLeftButtonDown += myCanvas_PreviewMouseLeftButtonDown;
-            myCanvas.PreviewMouseMove += myCanvas_PreviewMouseMove;
-            myCanvas.PreviewMouseLeftButtonUp += myCanvas_PreviewMouseLeftButtonUp;
+            try
+            {
+                InitializeComponent();
+                this.Loaded += MainWindow_Loaded;
+                this.Closing += MainWindow_Closing;
+                myCanvas.PreviewMouseLeftButtonDown += myCanvas_PreviewMouseLeftButtonDown;
+                myCanvas.PreviewMouseMove += myCanvas_PreviewMouseMove;
+                myCanvas.PreviewMouseLeftButtonUp += myCanvas_PreviewMouseLeftButtonUp;
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show(ex.Message + ex.StackTrace);
+            }
+            
+        }
+        public event PropertyChangedEventHandler PropertyChanged;
+        protected bool SetProperty<T>(ref T storage, T value, [CallerMemberName]String propertyName = null)
+        {
+            if (object.Equals(storage, value)) return false;
+            storage = value;
+            this.OnPropertyChanged(propertyName);
+            return true;
+        }
+        protected void OnPropertyChanged([CallerMemberName] string propertyName = null)
+        {
+            var eventHandler = this.PropertyChanged;
+            if (eventHandler != null)
+                eventHandler(this, new PropertyChangedEventArgs(propertyName));
         }
 
         async void Initialize()
@@ -72,10 +97,12 @@ namespace BrightMaster
         {
             regionsHistoryPanel.DataContext = GlobalVars.Instance.RegionsHistoryInfoCollection;
             wholePanelHistoryPanel.DataContext = GlobalVars.Instance.WholePanelHistoryInfoCollection;
+            CurPositionPanel.DataContext = this;
             SetInfo("初始化，请等待！", false);
             this.IsEnabled = false;
             try
             {
+                txtInfo.DataContext = this;
                 lblSelectedRecipe.DataContext = GlobalVars.Instance.RecipeCollection;
                 powerControl = new PowerControl();
                 Initialize();
@@ -148,10 +175,27 @@ namespace BrightMaster
                 return;
             }
         }
-
+        public Point CurrentMousePosition
+        {
+            get
+            {
+                return curMousePosition;
+            }
+            set
+            {
+                SetProperty(ref curMousePosition,value);
+            }
+        }
         void myCanvas_PreviewMouseMove(object sender, MouseEventArgs e)
         {
             Point posNow = e.GetPosition(myCanvas);
+
+
+            if (Keyboard.IsKeyDown(Key.LeftCtrl)) //draw position
+            {
+                CurrentMousePosition = new Point((int)posNow.X, (int)posNow.Y);
+                return;
+            }
             if ((bool)btnSetROI.IsChecked && myCanvas.IsValidMove)
             {
                 myCanvas.OnLeftButtonMove(posNow);
@@ -669,6 +713,8 @@ namespace BrightMaster
             InvalidateVisual();
 
         }
+
+        
     }
 
     public static class ExtensionMethods

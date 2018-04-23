@@ -4,12 +4,12 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Office.Core;
 using Excel = Microsoft.Office.Interop.Excel;
 using System.Runtime.InteropServices;
 using BrightMaster.data;
 using System.Drawing;
 using Microsoft.Office.Interop.Excel;
+using Microsoft.Office.Core;
 
 
 namespace BrightMaster
@@ -42,9 +42,10 @@ namespace BrightMaster
             return row == 1 && col == 1;
         }
 
-        private void SaveWholePanelInfosExcel(string dstExcelFile, TestResult wholePanelResult,string imagePath)
+        private void SaveWholePanelInfosExcel(string dstExcelFile, TestResult wholePanelResult,Brightness brightness)
         {
             var xlApp = new Excel.Application();
+            
             string srcFile = FolderHelper.GetTemplateFile();
             Worksheet wkSheet;
             Excel.Workbook dstWorkBook;
@@ -80,7 +81,7 @@ namespace BrightMaster
             wkSheet.Cells[29, 5].Value = wholePanelResult.x;
             wkSheet.Cells[29, 6].Value = wholePanelResult.y;
             wkSheet.Cells[29, 7].Value = wholePanelResult.Uniform;
-            var pseudoImage = ImageHelper.SaveImageAsPseudoColor(imagePath);
+            var pseudoImage = ImageHelper.SaveImageAsPseudoColor(brightness);
             wkSheet.Shapes.AddPicture(pseudoImage, MsoTriState.msoFalse, MsoTriState.msoCTrue, 0, 120, 320, 240);
             templateWorkBook.Close(true);
             dstWorkBook.Close(true);
@@ -140,7 +141,7 @@ namespace BrightMaster
             brightness.SaveImage();
             if (newFilePath == "")
                 throw new Exception("未设置保存路径！");
-            SaveWholePanelInfosExcel(newFilePath, wholePanelResult, brightness.ImagePath);
+            SaveWholePanelInfosExcel(newFilePath, wholePanelResult, brightness);
         }
 
         internal static void CreateNewFile(string newFile)

@@ -28,14 +28,29 @@ namespace BrightMaster
             return bmp.ToBitmapImage();
         }
 
-        static public string SaveImageAsPseudoColor(string fileName)
+        static public string SaveImageAsPseudoColor(Brightness brightness )
         {
             IEngine engineDll = new IEngine();
+            string fileName = brightness.ImagePath;
             DirectoryInfo DirectoryInfo = new DirectoryInfo(fileName);
             string parentDirectory = DirectoryInfo.Parent.FullName;
             string colorImgPath = parentDirectory + "\\color.jpg";
+            string colorImgPath2 = parentDirectory + "\\color2.jpg";
             engineDll.Convert2PseudoColor(fileName, colorImgPath);
-            return colorImgPath;
+            Bitmap bmp = new Bitmap(colorImgPath);
+            PointF MinPosition = brightness.MinPosition;
+            PointF MaxPosition = brightness.MaxPosition;
+            Graphics g = Graphics.FromImage(bmp);//从新图像获取对应的Graphics  
+
+            g.DrawLine(new Pen(Brushes.White), new PointF((int)MaxPosition.X - 5, (int)MaxPosition.Y), new PointF((int)MaxPosition.X + 5, (int)MaxPosition.Y));
+            g.DrawLine(new Pen(Brushes.White), new PointF((int)MaxPosition.X, (int)MaxPosition.Y - 5), new PointF((int)MaxPosition.X, (int)MaxPosition.Y + 5));
+          
+            g.DrawLine(new Pen(Brushes.Black), new PointF((int)MinPosition.X - 5, (int)MinPosition.Y), new PointF((int)MinPosition.X + 5, (int)MinPosition.Y));
+            g.DrawLine(new Pen(Brushes.Black), new PointF((int)MinPosition.X, (int)MinPosition.Y - 5), new PointF((int)MinPosition.X, (int)MinPosition.Y + 5));
+            
+            g.Dispose();
+            bmp.Save(colorImgPath2);
+            return colorImgPath2;
         }
 
 

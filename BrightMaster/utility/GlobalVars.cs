@@ -20,11 +20,14 @@ namespace BrightMaster
         HistoryInfoCollection regionsHistroyInfoCollection = new HistoryInfoCollection();
         HistoryInfoCollection wholePanelHistroyInfoCollection = new HistoryInfoCollection();
         private RecipeCollection recipeCollection = new RecipeCollection();
+        bool saveRefImage = false;
         bool needBarcode = false;
         bool isFirst = true;
         private GlobalVars()
         {
             needBarcode = bool.Parse(ConfigurationManager.AppSettings["InputBarcode"]);
+            if (ConfigurationManager.AppSettings.AllKeys.Contains("SaveReferenceImage"))
+                saveRefImage = bool.Parse(ConfigurationManager.AppSettings["SaveReferenceImage"]);
             string miscFolder = FolderHelper.GetMiscFolder();
             string file = miscFolder + "misc.xml";
             MiscSettings = SerializeHelper.Load<Misc>(file);
@@ -39,6 +42,14 @@ namespace BrightMaster
             set
             {
                 wholePanelHistroyInfoCollection = value;
+            }
+        }
+
+        public bool SaveRefImage
+        {
+            get
+            {
+                return saveRefImage;
             }
         }
 

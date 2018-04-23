@@ -5,6 +5,7 @@ using System;
 using System.Collections.Generic;
 using System.Drawing;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -29,10 +30,9 @@ namespace BrightMaster
         Point ptCalculateCurve = new Point(-1, -1);
         bool validMouseMove = false;
         bool userSelectROI = false;
-
         Point minPt = new Point(-1, -1);
         Point maxPt = new Point(-1, -1);
-
+        Point curMousePos = new Point(-1, -1);
         public bool IsValidMove
         {
             get
@@ -216,13 +216,18 @@ namespace BrightMaster
             
             if (IsInDesignMode())
                 return;
+           
 
             base.OnRender(drawingContext);
 
             Layout layout = GlobalVars.Instance.Layout;
             if (layout == null)
                 return;
-            
+            if (Keyboard.IsKeyDown(Key.LeftCtrl)) //draw position
+            {
+                string pos = string.Format("{0}-{1}", curMousePos.X, curMousePos.Y);
+                DrawText(pos, new System.Windows.Point(curMousePos.X, curMousePos.Y), drawingContext, 10);
+            }
             var boundingRectUICoord = GetBoundingRectInUICoordinate(pts);
             System.Windows.Media.Brush redBrush = System.Windows.Media.Brushes.Red;
             System.Windows.Media.Brush blueBrush = System.Windows.Media.Brushes.Blue;
@@ -288,8 +293,35 @@ namespace BrightMaster
             
         }
 
+        private Bitmap BitmapImage2Bitmap(System.Windows.Media.Imaging.BitmapImage bitmapImage)
+        {
+            // BitmapImage bitmapImage = new BitmapImage(new Uri("../Images/test.png", UriKind.Relative));
+
+            using (MemoryStream outStream = new MemoryStream())
+            {
+                System.Windows.Media.Imaging.BitmapEncoder enc = new System.Windows.Media.Imaging.BmpBitmapEncoder();
+                enc.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(bitmapImage));
+                enc.Save(outStream);
+                System.Drawing.Bitmap bitmap = new System.Drawing.Bitmap(outStream);
+
+                return new Bitmap(bitmap);
+            }
+        }
+       
         private void DrawConvexHull(List<PointF> hullPts, DrawingContext drawingContext)
         {
+            string sImage = FolderHelper.GetImageFolder() + "refImage.png";
+            var bmpImg = ((ImageBrush)this.Background).ImageSource as System.Windows.Media.Imaging.BitmapImage;
+            Graphics g = null;
+            Bitmap bmp = null;
+
+            if(GlobalVars.Instance.SaveRefImage)
+            {
+                bmp = BitmapImage2Bitmap(bmpImg);
+                g = Graphics.FromImage(bmp);    
+            }
+
+
             System.Windows.Media.Brush redBrush = System.Windows.Media.Brushes.Red;
             System.Windows.Media.Brush blueBrush = System.Windows.Media.Brushes.Blue;
             System.Windows.Media.Pen pen = new System.Windows.Media.Pen(redBrush, 1);
@@ -299,6 +331,10 @@ namespace BrightMaster
                 int endIndex = (i + 1) % hullPts.Count;
                 var startPt = new System.Windows.Point(Convert2XUIFromReal(hullPts[i].X), Convert2UIYFromReal(hullPts[i].Y));
                 var endPt = new System.Windows.Point(Convert2XUIFromReal(hullPts[endIndex].X), Convert2UIYFromReal(hullPts[endIndex].Y));
+                if(GlobalVars.Instance.SaveRefImage)
+                {
+                    g.DrawLine(new System.Drawing.Pen(System.Drawing.Brushes.Red, 1), hullPts[i], hullPts[endIndex]);
+                }
                 drawingContext.DrawLine(pen, startPt, endPt);
             }
 
@@ -310,7 +346,17 @@ namespace BrightMaster
                 int endIndex = (i + 1) % shrinkedHullPts.Count;
                 var startPt = new System.Windows.Point(Convert2XUIFromReal(shrinkedHullPts[i].X), Convert2UIYFromReal(shrinkedHullPts[i].Y));
                 var endPt = new System.Windows.Point(Convert2XUIFromReal(shrinkedHullPts[endIndex].X), Convert2UIYFromReal(shrinkedHullPts[endIndex].Y));
+                if (GlobalVars.Instance.SaveRefImage)
+                {
+                    g.DrawLine(new System.Drawing.Pen(System.Drawing.Brushes.Blue, 1), shrinkedHullPts[i], shrinkedHullPts[endIndex]);
+                  
+                }
                 drawingContext.DrawLine(dashPen, startPt, endPt);
+            }
+            if(GlobalVars.Instance.SaveRefImage)
+            {
+                g.Dispose();
+                bmp.Save(sImage);
             }
         }
 
@@ -465,9 +511,11 @@ namespace BrightMaster
             ptStart = new Point((int)mousePos.X, (int)mousePos.Y);
             InvalidateVisual();
         }
-
+   
         internal void OnLeftButtonMove(System.Windows.Point mousePos)
         {
+            
+            
             if (!validMouseMove)
                 return;
             ptEnd = new Point((int)mousePos.X, (int)mousePos.Y);
@@ -521,4 +569,20 @@ namespace BrightMaster
             InvalidateVisual();
         }
     }
+    
+     public static class BitmapSaveHelper
+     {
+         public static void Save(this System.Windows.Media.Imaging.BitmapImage image, string filePath)
+         {
+             System.Windows.Media.Imaging.BitmapEncoder encoder = new System.Windows.Media.Imaging.PngBitmapEncoder();
+             encoder.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(image));
+
+             using (var fileStream = new System.IO.FileStream(filePath, System.IO.FileMode.Create))
+             {
+                 encoder.Save(fileStream);
+             }
+         }
+
+     }
+     
 }

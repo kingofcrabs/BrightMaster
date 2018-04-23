@@ -462,6 +462,36 @@ namespace BrightMaster
         }
 
 
+        public string SaveImageWithMaxMin()
+        {
+
+            Bitmap bmp = new Bitmap(Width, Height);
+            LockBitmap lockBmp = new LockBitmap(bmp);
+            unsafe
+            {
+                lockBmp.LockBits();
+                for (int y = 0; y < lockBmp.Height; y++)
+                {
+                    List<double> vals = new List<double>();
+                    for (int x = 0; x < lockBmp.Width; x++)
+                    {
+                        byte grayVal = grayVals[y, x];
+                        lockBmp.SetPixel(x, y, Color.FromArgb(grayVal, grayVal, grayVal));
+                    }
+                }
+                lockBmp.UnlockBits();
+            }
+            Graphics g = Graphics.FromImage(bmp);//从新图像获取对应的Graphics  
+            g.DrawEllipse(new Pen(Brushes.Gray), new Rectangle((int)MinPosition.X, (int)MinPosition.Y, 3, 3));
+            g.DrawLine(new Pen(Brushes.Gray), new PointF((int)MaxPosition.X - 2, (int)MaxPosition.Y), new PointF((int)MaxPosition.X + 2, (int)MaxPosition.Y));
+            g.DrawLine(new Pen(Brushes.Gray), new PointF((int)MaxPosition.X, (int)MaxPosition.Y-2), new PointF((int)MaxPosition.X, (int)MaxPosition.Y+2));
+            g.Dispose();  
+            string sFile = FolderHelper.GetImageFolder() + "latestMaxMin.jpg";
+            bmp.Save(sFile);
+            return sFile;
+        }
+
+
         public byte[,] GetSparseGrayLevels(int grayLevelCnt)
         {
             return Convert2Gray(grayLevelCnt);
