@@ -102,14 +102,14 @@ namespace BrightMaster
             ShrinkHelper shrinkHelper = new ShrinkHelper();
             var hullPtsShrinked = shrinkHelper.ShrinkConvexHull(hullPts);
 
-            float xStart = hullPts.Min(pt => pt.X);
-            float xEnd = hullPts.Max(pt => pt.X);
-            float yStart = hullPts.Min(pt => pt.Y);
-            float yEnd = hullPts.Max(pt => pt.Y);
+            float xStart = hullPtsShrinked.Min(pt => pt.X);
+            float xEnd = hullPtsShrinked.Max(pt => pt.X);
+            float yStart = hullPtsShrinked.Min(pt => pt.Y);
+            float yEnd = hullPtsShrinked.Max(pt => pt.Y);
 
             double height = yEnd - yStart;
             double width = xEnd - xStart;
-            var circle = GlobalVars.Instance.Layout.GetCenterCircle(hullPts);
+            var circle = GlobalVars.Instance.Layout.GetCenterCircle(hullPtsShrinked);
             Center = GetAvgVals(circle.x, circle.y, circle.radius, "Center");
 
             for (int i = 0; i < 4; i++)
