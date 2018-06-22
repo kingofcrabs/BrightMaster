@@ -115,9 +115,14 @@
                                     </GroupBox>
                                    
                                     <GroupBox Header="其他">
-                                        <StackPanel Orientation="Horizontal">
-                                            <Label>点分布规律：</Label>
-                                            <CheckBox IsChecked="{Binding Path= SelectedRecipe.Layout.IsSquare}"  VerticalAlignment="Center">n*n</CheckBox>
+                                        <StackPanel >
+                                            <StackPanel>
+                                                <Label>点分布规律：</Label>
+                                                <CheckBox IsChecked="{Binding Path= SelectedRecipe.Layout.IsSquare}"  VerticalAlignment="Center">n*n</CheckBox>
+                                            </StackPanel>
+                                            <StackPanel>
+                                                <Button Name="btnAdjustRatios" Click="btnAdjustRatios_Click">修正系数</Button>
+                                            </StackPanel>
                                         </StackPanel>
                                     </GroupBox>
                                     

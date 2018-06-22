@@ -366,7 +366,8 @@ namespace BrightMaster
             {
                 foreach (var circle in circles)
                 {
-                    pixelInfos.Add(GetAvgVals(circle.x, circle.y, circle.radius, id++.ToString()));
+                    var avgVal = GetAvgVals(circle.x, circle.y, circle.radius, id++.ToString());
+                    //pixelInfos.Add(avgVal.x );
                 }
             }
             else
