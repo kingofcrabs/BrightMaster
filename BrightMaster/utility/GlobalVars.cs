@@ -126,6 +126,7 @@ namespace BrightMaster
             }
         }
 
+       
         public Layout Layout
         {
             get

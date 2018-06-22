@@ -1,4 +1,5 @@
-﻿using BrightMaster.utility;
+﻿using BrightMaster.Settings;
+using BrightMaster.utility;
 using EngineDll;
 using System;
 using System.Collections.Generic;
@@ -361,12 +362,21 @@ namespace BrightMaster
             List<PixelInfo> pixelInfos = new List<PixelInfo>();
             var circles = GlobalVars.Instance.Layout.GetCircles(pts);
             int id = 1;
-          
+            var adjustRatios = GlobalVars.Instance.RecipeCollection.SelectedRecipe.AdjustRatios;
             if(GlobalVars.Instance.AnalysisRegions)
             {
                 foreach (var circle in circles)
                 {
-                    var avgVal = GetAvgVals(circle.x, circle.y, circle.radius, id++.ToString());
+                    var avgVal = GetAvgVals(circle.x, circle.y, circle.radius, id.ToString());
+                    if(GlobalVars.Instance.RecipeCollection.SelectedRecipe.AdjustRatios.Count != 0) //adjust result
+                    {
+                        AdjustRatio adjustRatio = adjustRatios[id-1];
+                        avgVal.X *= adjustRatio.XRatio;
+                        avgVal.Y *= adjustRatio.YRatio;
+                        avgVal.Z *= adjustRatio.ZRatio;
+                    }
+                    pixelInfos.Add(avgVal);
+                    id++;
                     //pixelInfos.Add(avgVal.x );
                 }
             }

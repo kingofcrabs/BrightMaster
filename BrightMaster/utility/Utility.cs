@@ -137,6 +137,13 @@ namespace BrightMaster
                 throw new Exception("No Template file!");
             return file;
         }
+        internal static string GetCorrectionFactorFolder()
+        {
+            string correctionFactorFolder = GetExeParentFolder() + "CorrectionFactor\\";
+            if (!Directory.Exists(correctionFactorFolder))
+                Directory.CreateDirectory(correctionFactorFolder);
+            return correctionFactorFolder;
+        }
     }
 
 

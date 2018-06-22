@@ -22,7 +22,7 @@ namespace BrightMaster.Settings
         private float radiusRatio;
         private bool isN_N;
         private float margin;
-        private bool isWholePanel;
+
         private float centerSizePercent;
         public Layout()
         {
@@ -34,7 +34,7 @@ namespace BrightMaster.Settings
             yCount = 5;
             radiusRatio = 2;
             isN_N = true;
-            isWholePanel = false;
+  
             centerSizePercent = 10;
         }
 
@@ -64,17 +64,7 @@ namespace BrightMaster.Settings
             throw new Exception(s);
         }
 
-        public bool IsWholePanel
-        {
-            get
-            {
-                return isWholePanel;
-            }
-            set
-            {
-                SetProperty(ref isWholePanel, value);
-            }
-        }
+  
 
         public float CenterSizePercent
         {

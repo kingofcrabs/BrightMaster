@@ -17,7 +17,7 @@ namespace BrightMaster.Settings
         private AdjustRatio adjustRatio;
         private PowerSettings powerSettings = new PowerSettings();
         private string name;
-        private List<AdjustRatio> adjustRatios;
+        private List<AdjustRatio> adjustRatios = new List<AdjustRatio>();
         private bool analysisRegions;
         public Recipe()
         {

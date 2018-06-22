@@ -120,8 +120,9 @@
                                                 <Label>点分布规律：</Label>
                                                 <CheckBox IsChecked="{Binding Path= SelectedRecipe.Layout.IsSquare}"  VerticalAlignment="Center">n*n</CheckBox>
                                             </StackPanel>
-                                            <StackPanel>
-                                                <Button Name="btnAdjustRatios" Click="btnAdjustRatios_Click">修正系数</Button>
+                                            <StackPanel Orientation="Horizontal">
+                                                <Button Name="btnAdjustRatios" Click="btnAdjustRatios_Click">设置修正系数</Button>
+                                                <Button Name="btnClearRatios" Margin="10,0,0,0" Click="btnClearRatios_Click">清除修正系数</Button>
                                             </StackPanel>
                                         </StackPanel>
                                     </GroupBox>
