@@ -97,7 +97,7 @@ namespace BrightMaster
         {
             regionsHistoryPanel.DataContext = GlobalVars.Instance.RegionsHistoryInfoCollection;
             wholePanelHistoryPanel.DataContext = GlobalVars.Instance.WholePanelHistoryInfoCollection;
-            CurPositionPanel.DataContext = this;
+            //CurPositionPanel.DataContext = this;
             SetInfo("初始化，请等待！", false);
             this.IsEnabled = false;
             try

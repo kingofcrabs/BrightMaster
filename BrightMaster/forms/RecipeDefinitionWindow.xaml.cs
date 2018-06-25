@@ -136,27 +136,51 @@ namespace BrightMaster
                 AdjustRatio adjustRatio = new AdjustRatio(x,y,z);
                 adjustRatios.Add(adjustRatio);
             }
-            
-            var layout = GlobalVars.Instance.RecipeCollection.SelectedRecipe.Layout;
+            var selectedRecipe = GlobalVars.Instance.RecipeCollection.SelectedRecipe;
+
+            var layout = selectedRecipe.Layout;
             int expectedCnt = layout.XCount * layout.YCount;
             if(adjustRatios.Count != expectedCnt)
             {
                 SetInfo(string.Format("X*Y = {0},但是文件中有{1}条修正系数！", expectedCnt, adjustRatios.Count));
                 return;
             }
-            GlobalVars.Instance.RecipeCollection.SelectedRecipe.AdjustRatios = adjustRatios;
+
+            selectedRecipe.AdjustRatios = adjustRatios;
+            selectedRecipe.AdjustRatioFile = correctionFactorFile;
             SetInfo("设置修正系数成功！");
          }
 
         private void btnClearRatios_Click(object sender, RoutedEventArgs e)
         {
-            if (GlobalVars.Instance.RecipeCollection.SelectedRecipe == null)
+            var selectedRecipe = GlobalVars.Instance.RecipeCollection.SelectedRecipe;
+            if (selectedRecipe == null)
             {
                 SetInfo("当前Recipe为空！", true);
                 return;
             }
-            GlobalVars.Instance.RecipeCollection.SelectedRecipe.AdjustRatios.Clear();
+            selectedRecipe.AdjustRatios.Clear();
+            selectedRecipe.AdjustRatioFile = "";
             SetInfo("清除修正系数成功！");
+        }
+
+        private void btnOpenAjdustRatioFile_Click(object sender, RoutedEventArgs e)
+        {
+            var selectedRecipe = GlobalVars.Instance.RecipeCollection.SelectedRecipe;
+            if (selectedRecipe == null)
+            {
+                SetInfo("当前Recipe为空！", true);
+                return;
+            }
+
+            if(selectedRecipe.AdjustRatioFile != "" && File.Exists(selectedRecipe.AdjustRatioFile))
+            {
+                System.Diagnostics.Process.Start("Explorer", "/select," + selectedRecipe.AdjustRatioFile);
+            }
+            else
+            {
+                SetInfo("找不到修正系数文件！", true);
+            }
         }
     }
 

@@ -19,6 +19,7 @@ namespace BrightMaster.Settings
         private string name;
         private List<AdjustRatio> adjustRatios = new List<AdjustRatio>();
         private bool analysisRegions;
+        private string adjustRatioFile = "";
         public Recipe()
         {
 
@@ -33,7 +34,17 @@ namespace BrightMaster.Settings
             powerSettings = new PowerSettings(12f,0.1f);
             analysisRegions = true;
         }
-
+        public string AdjustRatioFile
+        {
+            get
+            {
+                return adjustRatioFile;
+            }
+            set
+            {
+                SetProperty(ref adjustRatioFile, value);
+            }
+        }
         public List<AdjustRatio> AdjustRatios
         {
             get
